@@ -14,12 +14,6 @@
 
         public string Description { get; set;
         }
-<<<<<<< HEAD
-       
-=======
-        
->>>>>>> 6b210ac9493551b5612c50cfc44c493dcca314ef
-
         public decimal EstimatedCost { get; set; 
         
         }
