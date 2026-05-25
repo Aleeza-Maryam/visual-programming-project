@@ -1,0 +1,115 @@
+﻿@{
+    ViewData["Title"] = "Register - AI Tourism Planner";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="card-header bg-gradient-primary text-white text-center py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="fas fa-user-plus fa-3x mb-2"></i>
+                    <h2 class="h4 mb-0 fw-bold">Create Account</h2>
+                    <p class="small mt-2 mb-0">Join us and start your adventure</p>
+                </div>
+                
+                <div class="card-body p-4">
+                    <form asp-action="Register" method="post">
+                        @Html.AntiForgeryToken()
+                        
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label asp-for="FullName" class="form-label fw-semibold">
+                                    <i class="fas fa-user me-2 text-primary"></i>Full Name
+                                </label>
+                                <input asp-for="FullName" class="form-control form-control-lg" placeholder="Enter your full name">
+                                <span asp-validation-for="FullName" class="text-danger small"></span>
+                            </div>
+                            
+                            <div class="col-md-12 mb-3">
+                                <label asp-for="Email" class="form-label fw-semibold">
+                                    <i class="fas fa-envelope me-2 text-primary"></i>Email Address
+                                </label>
+                                <input asp-for="Email" class="form-control form-control-lg" placeholder="Enter your email">
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Password" class="form-label fw-semibold">
+                                    <i class="fas fa-lock me-2 text-primary"></i>Password
+                                </label>
+                                <input asp-for="Password" type="password" class="form-control form-control-lg" placeholder="Create password">
+                                <span asp-validation-for="Password" class="text-danger small"></span>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ConfirmPassword" class="form-label fw-semibold">
+                                    <i class="fas fa-check-circle me-2 text-primary"></i>Confirm Password
+                                </label>
+                                <input asp-for="ConfirmPassword" type="password" class="form-control form-control-lg" placeholder="Confirm password">
+                                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Phone" class="form-label fw-semibold">
+                                    <i class="fas fa-phone me-2 text-primary"></i>Phone Number
+                                </label>
+                                <input asp-for="Phone" class="form-control form-control-lg" placeholder="Enter phone number">
+                                <span asp-validation-for="Phone" class="text-danger small"></span>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Gender" class="form-label fw-semibold">
+                                    <i class="fas fa-venus-mars me-2 text-primary"></i>Gender
+                                </label>
+                                <select asp-for="Gender" class="form-select form-select-lg">
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <span asp-validation-for="Gender" class="text-danger small"></span>
+                            </div>
+                            
+                            <div class="col-md-12 mb-3">
+                                <label asp-for="DateOfBirth" class="form-label fw-semibold">
+                                    <i class="fas fa-calendar-alt me-2 text-primary"></i>Date of Birth
+                                </label>
+                                <input asp-for="DateOfBirth" type="date" class="form-control form-control-lg">
+                                <span asp-validation-for="DateOfBirth" class="text-danger small"></span>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-gradient btn-lg w-100 mb-3">
+                            <i class="fas fa-user-plus me-2"></i> Sign Up
+                        </button>
+                        
+                        <div class="text-center">
+                            <p class="mb-0">Already have an account? 
+                                <a asp-action="Login" class="text-decoration-none fw-bold">Login Here</a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    .btn-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(102,126,234,0.4);
+        color: white;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102,126,234,0.25);
+    }
+</style>
