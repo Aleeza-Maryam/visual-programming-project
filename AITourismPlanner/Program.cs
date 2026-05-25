@@ -1,3 +1,4 @@
+
 using Microsoft.EntityFrameworkCore;
 using AITourismPlanner.Data;
 using AITourismPlanner.Services;

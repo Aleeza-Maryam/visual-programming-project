@@ -150,7 +150,11 @@ namespace AITourismPlanner.Data
             // Trip -> Destination (One to Many)
             modelBuilder.Entity<Trip>()
                 .HasOne(t => t.Destination)
+<<<<<<< HEAD
                 .WithMany(d => d.Trips)  // This requires Trips property in Destination model
+=======
+                .WithMany(d => d.Trips)
+>>>>>>> a4ac456814dc3b91b98b4801c838ede2ffe8cbc8
                 .HasForeignKey(t => t.destination_id)
                 .OnDelete(DeleteBehavior.SetNull);
 
