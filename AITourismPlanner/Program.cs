@@ -1,3 +1,4 @@
+
 using Microsoft.EntityFrameworkCore;
 using AITourismPlanner.Data;
 using AITourismPlanner.Services;
@@ -7,10 +8,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container
 builder.Services.AddControllersWithViews();
 
-// Add DbContext with MySQL
+// =========================================================
+// DATABASE CONNECTION FOR .NET 10
+// =========================================================
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// For .NET 10 - Using Official MySQL Package
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
+    options.UseMySQL(connectionString)  // UseMySQL (not UseMySql)
 );
 
 // Add session support
