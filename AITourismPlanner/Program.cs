@@ -1,5 +1,10 @@
+
+using AITourismPlanner.Data;
+using Microsoft.EntityFrameworkCore;
+
 using Microsoft.EntityFrameworkCore;
 using AITourismPlanner.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
