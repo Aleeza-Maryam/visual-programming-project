@@ -1,26 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-	<PropertyGroup>
-		<TargetFramework>net10.0</TargetFramework>
-		<Nullable>enable</Nullable>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<UserSecretsId>2504754b-a57b-406a-9e32-48ee21c5bc70</UserSecretsId>
-		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-	</PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>2504754b-a57b-406a-9e32-48ee21c5bc70</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
 
-<<<<<<< HEAD
-	<ItemGroup>
-		<PackageReference Include="LiveCharts" Version="0.9.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="10.0.8" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="10.0.8" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-		<PackageReference Include="MySqlConnector" Version="2.5.0" />
-		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
-
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.8" />
-		<PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
-	</ItemGroup>
-=======
   <ItemGroup>
     <PackageReference Include="LiveCharts" Version="0.9.7" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="10.0.8" />
@@ -40,6 +27,5 @@
     </PackageReference>
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
   </ItemGroup>
->>>>>>> fe8ab95796dd2e66b53a3f5dd7649a16041785cd
 
 </Project>
