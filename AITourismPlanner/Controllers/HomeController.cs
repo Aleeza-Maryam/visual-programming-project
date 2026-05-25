@@ -26,15 +26,15 @@ namespace AITourismPlanner.Controllers
                     .Where(d => d.rating_average >= 4)
                     .Take(6)
                     .ToListAsync(),
-
+                    
                 FeaturedHotels = await _context.hotels
                     .Include(h => h.Destination)
                     .OrderByDescending(h => h.star_rating)
                     .Take(4)
                     .ToListAsync(),
-
+                    
                 Categories = await _context.categories.ToListAsync(),
-
+                
                 Testimonials = await _context.reviews
                     .Include(r => r.User)
                     .Include(r => r.Destination)
@@ -43,7 +43,7 @@ namespace AITourismPlanner.Controllers
                     .Take(3)
                     .ToListAsync()
             };
-
+            
             return View(viewModel);
         }
 
