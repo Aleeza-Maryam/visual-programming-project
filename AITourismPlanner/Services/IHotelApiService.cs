@@ -1,4 +1,8 @@
-﻿namespace AITourismPlanner.Services
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace AITourismPlanner.Services
 {
     public interface IHotelApiService
     {
