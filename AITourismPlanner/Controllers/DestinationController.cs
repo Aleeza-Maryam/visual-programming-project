@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using AITourismPlanner.Models;
 using AITourismPlanner.Services;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 
@@ -15,7 +16,6 @@ namespace AITourismPlanner.Controllers
             _destinationService = destinationService;
         }
 
-        // GET: /Destination
         public async Task<IActionResult> Index(string category = null)
         {
             ViewBag.SelectedCategory = category;
@@ -35,7 +35,6 @@ namespace AITourismPlanner.Controllers
             return View(destinations);
         }
 
-        // GET: /Destination/Details/5
         public async Task<IActionResult> Details(string name)
         {
             if (string.IsNullOrEmpty(name))
@@ -49,7 +48,6 @@ namespace AITourismPlanner.Controllers
             return View(destination);
         }
 
-        // GET: /Destination/Search
         public async Task<IActionResult> Search(string q)
         {
             var destinations = await _destinationService.SearchDestinationsAsync(q);
@@ -57,7 +55,6 @@ namespace AITourismPlanner.Controllers
             return View(destinations);
         }
 
-        // GET: /Destination/Autocomplete
         [HttpGet]
         public async Task<IActionResult> Autocomplete(string term)
         {
