@@ -197,7 +197,7 @@ namespace AITourismPlanner.Controllers
             string city, string checkIn, string checkOut)
         {
             var hotels = new List<RealHotel>();
-            var apiKey = "";
+            var apiKey = "35f85c261fmsh0b3fdef51d3d998p1de5fajsn410ef6c10768";
             var host = "booking-com15.p.rapidapi.com";
 
             try
