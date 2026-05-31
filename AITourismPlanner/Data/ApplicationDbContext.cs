@@ -22,7 +22,7 @@ namespace AITourismPlanner.Data
         public DbSet<Hotel> hotels { get; set; }
         public DbSet<HotelRoom> hotel_rooms { get; set; }
         public DbSet<HotelBooking> hotel_bookings { get; set; }
-
+        public DbSet<Transport> transports { get; set; }
         public DbSet<Trip> trips { get; set; }
         public DbSet<Itinerary> itineraries { get; set; }
         public DbSet<AIRecommendation> ai_recommendations { get; set; }
@@ -40,6 +40,7 @@ namespace AITourismPlanner.Data
         // =========================================================
         // MODEL CONFIGURATION
         // =========================================================
+    
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

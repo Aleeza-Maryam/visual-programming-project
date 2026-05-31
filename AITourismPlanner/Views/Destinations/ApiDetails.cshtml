@@ -1,0 +1,883 @@
+﻿@model AITourismPlanner.ViewModels.ApiDestinationViewModel
+@{
+    ViewData["Title"] = Model.CityName;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var userId = Context.Session.GetInt32("UserId");
+    var userName = Context.Session.GetString("UserName");
+}
+
+<div class="container-fluid p-0">
+
+    <!-- Hero Section -->
+    <div class="hero-section position-relative"
+         style="height:400px;
+                background: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),
+                url('@(Model.DestinationInfo?.ImageUrl ??
+                    "https://images.unsplash.com/photo-1586500036706-41963de24d8b?w=1200")')
+                center/cover no-repeat;">
+        <div class="container h-100 d-flex align-items-center">
+            <div class="text-white">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a href="@Url.Action("Index","Home")"
+                               class="text-white">Home</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="@Url.Action("Index","Destinations")"
+                               class="text-white">Destinations</a>
+                        </li>
+                        <li class="breadcrumb-item active text-white-50">
+                            @Model.CityName
+                        </li>
+                    </ol>
+                </nav>
+                <h1 class="display-3 fw-bold">@Model.CityName</h1>
+                <p class="fs-5">
+                    <i class="fas fa-map-marker-alt me-2"></i>Pakistan
+                </p>
+                <!-- Average Rating -->
+                <div class="d-flex align-items-center gap-3">
+                    <div>
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <i class="fas fa-star @(i <= (int)Model.AverageRating
+                                ? "text-warning" : "text-white-50")"></i>
+                        }
+                        <span class="ms-2">
+                            @Model.AverageRating.ToString("0.0")
+                            (@Model.TotalReviews reviews)
+                        </span>
+                    </div>
+                    @if (Model.CurrentWeather != null)
+                    {
+                        <div class="bg-white bg-opacity-25 rounded-pill px-3 py-1">
+                            <img src="@Model.CurrentWeather.Icon" style="width:30px;">
+                            <span>@Model.CurrentWeather.Temperature.ToString("0")°C</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-4">
+
+        <!-- Quick Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="card border-0 shadow-sm rounded-4 text-center p-3">
+                    <i class="fas fa-hotel fa-2x text-primary mb-2"></i>
+                    <h5 class="mb-0">@Model.NearbyHotels.Count</h5>
+                    <small class="text-muted">Hotels Available</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card border-0 shadow-sm rounded-4 text-center p-3">
+                    <i class="fas fa-bus fa-2x text-success mb-2"></i>
+                    <h5 class="mb-0">@Model.Transports.Count</h5>
+                    <small class="text-muted">Transport Options</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card border-0 shadow-sm rounded-4 text-center p-3">
+                    <i class="fas fa-thermometer-half fa-2x text-warning mb-2"></i>
+                    <h5 class="mb-0">
+                        @(Model.CurrentWeather?.Temperature.ToString("0") ?? "--")°C
+                    </h5>
+                    <small class="text-muted">Current Temp</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card border-0 shadow-sm rounded-4 text-center p-3">
+                    <i class="fas fa-star fa-2x text-danger mb-2"></i>
+                    <h5 class="mb-0">@Model.AverageRating.ToString("0.0")</h5>
+                    <small class="text-muted">Average Rating</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <ul class="nav nav-pills mb-4 gap-2" id="destTabs">
+            <li class="nav-item">
+                <button class="nav-link active btn-sm px-4"
+                        data-bs-toggle="pill" data-bs-target="#hotels">
+                    <i class="fas fa-hotel me-1"></i> Hotels
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link btn-sm px-4"
+                        data-bs-toggle="pill" data-bs-target="#weather">
+                    <i class="fas fa-cloud-sun me-1"></i> Weather
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link btn-sm px-4"
+                        data-bs-toggle="pill" data-bs-target="#transport">
+                    <i class="fas fa-bus me-1"></i> Transport
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link btn-sm px-4"
+                        data-bs-toggle="pill" data-bs-target="#map">
+                    <i class="fas fa-map me-1"></i> Map
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link btn-sm px-4"
+                        data-bs-toggle="pill" data-bs-target="#reviews">
+                    <i class="fas fa-star me-1"></i> Reviews
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+
+            <!-- HOTELS TAB -->
+            <div class="tab-pane fade show active" id="hotels">
+                <h3 class="fw-bold mb-4">
+                    <i class="fas fa-hotel text-primary me-2"></i>
+                    Hotels in @Model.CityName
+                </h3>
+
+                @if (Model.NearbyHotels.Any())
+                {
+                    <!-- Hotel Filters -->
+                    <div class="card border-0 shadow-sm rounded-4 mb-4">
+                        <div class="card-body p-3">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-md-3">
+                                    <label class="form-label small fw-bold">Check In</label>
+                                    <input type="date" id="checkIn"
+                                           class="form-control form-control-sm"
+                                           value="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")"
+                                           min="@DateTime.Now.ToString("yyyy-MM-dd")">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small fw-bold">Check Out</label>
+                                    <input type="date" id="checkOut"
+                                           class="form-control form-control-sm"
+                                           value="@DateTime.Now.AddDays(3).ToString("yyyy-MM-dd")">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small fw-bold">Guests</label>
+                                    <input type="number" id="guests"
+                                           class="form-control form-control-sm"
+                                           value="1" min="1" max="10">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small fw-bold">&nbsp;</label>
+                                    <div class="fw-bold text-primary" id="nightsDisplay">
+                                        2 nights
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4" id="hotelsGrid">
+                        @foreach (var hotel in Model.NearbyHotels.Take(6))
+                        {
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card hotel-card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                                    @if (!string.IsNullOrEmpty(hotel.ImageUrl))
+                                    {
+                                        <img src="@hotel.ImageUrl"
+                                             style="height:180px; object-fit:cover;"
+                                             alt="@hotel.Name"
+                                             onerror="this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400'">
+                                    }
+                                    else
+                                    {
+                                        <div style="height:180px;
+                                             background:linear-gradient(135deg,#667eea,#764ba2);
+                                             display:flex; align-items:center;
+                                             justify-content:center;">
+                                            <i class="fas fa-hotel fa-3x text-white"></i>
+                                        </div>
+                                    }
+                                    <div class="card-body p-3">
+                                        <h6 class="fw-bold mb-1">@hotel.Name</h6>
+                                        <p class="text-muted small mb-2">
+                                            <i class="fas fa-map-marker-alt me-1"></i>
+                                            @hotel.Address
+                                        </p>
+                                        @if (hotel.Rating.HasValue)
+                                        {
+                                            <span class="badge bg-success mb-2">
+                                                <i class="fas fa-star me-1"></i>
+                                                @hotel.Rating?.ToString("0.0")
+                                                @if (hotel.ReviewCount.HasValue)
+                                                {
+                                                    <span>(@hotel.ReviewCount reviews)</span>
+                                                }
+                                            </span>
+                                        }
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            @if (hotel.PricePerNight.HasValue)
+                                            {
+                                                <div>
+                                                    <span class="text-primary fw-bold fs-5">
+                                                        PKR @hotel.PricePerNight?.ToString("N0")
+                                                    </span>
+                                                    <span class="text-muted small">/night</span>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted small">
+                                                    Price on request
+                                                </span>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="card-footer bg-transparent border-0 pb-3 px-3">
+                                        <button class="btn btn-primary w-100 btn-sm"
+                                                onclick="selectHotel(
+                                                    '@hotel.Name.Replace("'","\\'")',
+                                                    @(hotel.PricePerNight ?? 0))">
+                                            <i class="fas fa-calendar-check me-1"></i>
+                                            Book This Hotel
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="fas fa-hotel fa-4x text-muted mb-3"></i>
+                        <h4>No hotels found</h4>
+                        <p class="text-muted">
+                            Hotels data loading or not available for this city
+                        </p>
+                    </div>
+                }
+            </div>
+
+            <!-- WEATHER TAB -->
+            <div class="tab-pane fade" id="weather">
+                <h3 class="fw-bold mb-4">
+                    <i class="fas fa-cloud-sun text-primary me-2"></i>
+                    Weather in @Model.CityName
+                </h3>
+
+                @if (Model.CurrentWeather != null)
+                {
+                    <!-- Current Weather -->
+                    <div class="card border-0 rounded-4 mb-4 text-white"
+                         style="background:linear-gradient(135deg,#4facfe,#00f2fe);">
+                        <div class="card-body p-4">
+                            <div class="row align-items-center">
+                                <div class="col-md-4 text-center">
+                                    <img src="@Model.CurrentWeather.Icon"
+                                         style="width:100px;">
+                                    <h2 class="display-4 fw-bold mb-0">
+                                        @Model.CurrentWeather.Temperature.ToString("0")°C
+                                    </h2>
+                                    <p class="fs-5">@Model.CurrentWeather.Condition</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <p>
+                                        <i class="fas fa-thermometer-half me-2"></i>
+                                        Feels Like:
+                                        @Model.CurrentWeather.FeelsLike.ToString("0")°C
+                                    </p>
+                                    <p>
+                                        <i class="fas fa-tint me-2"></i>
+                                        Humidity: @Model.CurrentWeather.Humidity%
+                                    </p>
+                                    <p>
+                                        <i class="fas fa-wind me-2"></i>
+                                        Wind: @Model.CurrentWeather.WindSpeed km/h
+                                    </p>
+                                </div>
+                                <div class="col-md-4">
+                                    <p>
+                                        <i class="fas fa-arrow-up me-2"></i>
+                                        Max: @Model.CurrentWeather.TempMax.ToString("0")°C
+                                    </p>
+                                    <p>
+                                        <i class="fas fa-arrow-down me-2"></i>
+                                        Min: @Model.CurrentWeather.TempMin.ToString("0")°C
+                                    </p>
+                                    <p>
+                                        <i class="fas fa-compress-arrows-alt me-2"></i>
+                                        Pressure: @Model.CurrentWeather.Pressure hPa
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5 Day Forecast -->
+                    @if (Model.Forecast?.DailyForecasts != null &&
+                         Model.Forecast.DailyForecasts.Any())
+                    {
+                        <h4 class="fw-bold mb-3">5-Day Forecast</h4>
+                        <div class="row g-3">
+                            @foreach (var day in Model.Forecast.DailyForecasts.Take(5))
+                            {
+                                <div class="col">
+                                    <div class="card border-0 shadow-sm rounded-4 text-center p-3">
+                                        <h6 class="fw-bold">
+                                            @day.Date.ToString("ddd")
+                                        </h6>
+                                        <small class="text-muted">
+                                            @day.Date.ToString("dd MMM")
+                                        </small>
+                                        <img src="@day.Icon"
+                                             style="width:50px;" class="mx-auto my-2">
+                                        <h5 class="mb-0 text-primary">
+                                            @day.TempMax.ToString("0")°
+                                        </h5>
+                                        <small class="text-muted">
+                                            @day.TempMin.ToString("0")°
+                                        </small>
+                                        <p class="small mt-2 mb-0">@day.Condition</p>
+                                        <small class="text-muted">
+                                            <i class="fas fa-tint me-1"></i>@day.Humidity%
+                                        </small>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="alert alert-warning">
+                        Weather data not available
+                    </div>
+                }
+            </div>
+
+            <!-- TRANSPORT TAB -->
+            <div class="tab-pane fade" id="transport">
+                <h3 class="fw-bold mb-4">
+                    <i class="fas fa-bus text-primary me-2"></i>
+                    How to Reach @Model.CityName
+                </h3>
+
+                @if (Model.Transports.Any())
+                {
+                    <!-- Filter by type -->
+                    <div class="d-flex gap-2 mb-4">
+                        <button class="btn btn-primary btn-sm active"
+                                onclick="filterTransport('all')">All</button>
+                        <button class="btn btn-outline-primary btn-sm"
+                                onclick="filterTransport('Bus')">
+                            <i class="fas fa-bus me-1"></i>Bus
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm"
+                                onclick="filterTransport('Train')">
+                            <i class="fas fa-train me-1"></i>Train
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm"
+                                onclick="filterTransport('Flight')">
+                            <i class="fas fa-plane me-1"></i>Flight
+                        </button>
+                    </div>
+
+                    <div class="row g-3" id="transportList">
+                        @foreach (var t in Model.Transports)
+                        {
+                            <div class="col-md-6 transport-item"
+                                 data-type="@t.transport_type">
+                                <div class="card border-0 shadow-sm rounded-4">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex justify-content-between
+                                                    align-items-start">
+                                            <div>
+                                                <span class="badge @(t.transport_type == "Flight"
+                                                    ? "bg-info" : t.transport_type == "Train"
+                                                    ? "bg-success" : "bg-warning text-dark") mb-2">
+                                                    <i class="fas @(t.transport_type == "Flight"
+                                                        ? "fa-plane" : t.transport_type == "Train"
+                                                        ? "fa-train" : "fa-bus") me-1"></i>
+                                                    @t.transport_type
+                                                </span>
+                                                <h6 class="fw-bold mb-1">@t.company_name</h6>
+                                                <p class="text-muted small mb-1">
+                                                    <i class="fas fa-route me-1"></i>
+                                                    @t.departure_city → @t.arrival_city
+                                                </p>
+                                                <p class="text-muted small mb-1">
+                                                    <i class="fas fa-clock me-1"></i>
+                                                    Departs: @t.departure_time
+                                                </p>
+                                                <p class="text-muted small mb-0">
+                                                    <i class="fas fa-hourglass-half me-1"></i>
+                                                    Duration: @t.duration
+                                                </p>
+                                            </div>
+                                            <div class="text-end">
+                                                <h5 class="text-primary fw-bold mb-1">
+                                                    PKR @t.fare?.ToString("N0")
+                                                </h5>
+                                                <small class="text-success">
+                                                    <i class="fas fa-chair me-1"></i>
+                                                    @t.available_seats seats
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-outline-primary btn-sm w-100 mt-2"
+                                                onclick="selectTransport(
+                                                    @t.transport_id,
+                                                    '@t.company_name',
+                                                    @t.fare,
+                                                    '@t.transport_type')">
+                                            Select This Option
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No transport options found for @Model.CityName.
+                        Please check back later.
+                    </div>
+                }
+            </div>
+
+            <!-- MAP TAB -->
+            <div class="tab-pane fade" id="map">
+                <h3 class="fw-bold mb-4">
+                    <i class="fas fa-map text-primary me-2"></i>
+                    Location Map
+                </h3>
+                <div id="mainMap" style="height:450px; border-radius:16px;"></div>
+            </div>
+
+            <!-- REVIEWS TAB -->
+            <div class="tab-pane fade" id="reviews">
+                <h3 class="fw-bold mb-4">
+                    <i class="fas fa-star text-primary me-2"></i>
+                    Reviews (@Model.TotalReviews)
+                    <span class="fs-5 text-warning ms-2">
+                        @Model.AverageRating.ToString("0.0") / 5.0
+                    </span>
+                </h3>
+
+                <!-- Write Review -->
+                @if (userId.HasValue)
+                {
+                    <div class="card border-0 shadow-sm rounded-4 mb-4">
+                        <div class="card-body p-4">
+                            <h5 class="fw-bold mb-3">Write a Review</h5>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Rating</label>
+                                <div id="starRating" class="d-flex gap-2">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="fas fa-star fa-2x"
+                                           data-rating="@i"
+                                           style="cursor:pointer; color:#ddd;"
+                                           onclick="setRating(@i)"></i>
+                                    }
+                                </div>
+                                <input type="hidden" id="selectedRating" value="0">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Your Review</label>
+                                <textarea id="reviewComment" class="form-control" rows="3"
+                                          placeholder="Share your experience..."></textarea>
+                            </div>
+                            <button class="btn btn-primary"
+                                    onclick="submitReview('@Model.CityName')">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Review
+                            </button>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info mb-4">
+                        <a href="@Url.Action("Login","Account")" class="fw-bold">Login</a>
+                        to write a review
+                    </div>
+                }
+
+                <!-- Reviews List -->
+                @if (Model.Reviews.Any())
+                {
+                    foreach (var review in Model.Reviews)
+                    {
+                        <div class="card border-0 shadow-sm rounded-4 mb-3">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="bg-primary rounded-circle text-white
+                                                    d-flex align-items-center justify-content-center"
+                                             style="width:45px; height:45px; font-size:18px;">
+                                            @(review.User?.full_name?.FirstOrDefault() ?? 'U')
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 fw-bold">
+                                                @(review.User?.full_name ?? "Anonymous")
+                                            </h6>
+                                            <small class="text-muted">
+                                                @review.created_at.ToString("dd MMM yyyy")
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div>
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <i class="fas fa-star @(i <= (review.rating ?? 0)
+                                                    ? "text-warning" : "text-muted") small"></i>
+                                            }
+                                        </div>
+                                        @if (review.user_id == userId)
+                                        {
+                                            <button class="btn btn-outline-danger btn-sm mt-1"
+                                                    onclick="deleteReview(@review.review_id)">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                                <p class="mt-3 mb-0">@review.comment</p>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-center py-4">
+                        <i class="fas fa-comment-dots fa-3x text-muted mb-3"></i>
+                        <p>No reviews yet. Be the first!</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Booking Modal -->
+<div class="modal fade" id="bookingModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content rounded-4">
+            <div class="modal-header"
+                 style="background:linear-gradient(135deg,#667eea,#764ba2);">
+                <h5 class="modal-title text-white fw-bold">
+                    <i class="fas fa-calendar-check me-2"></i>
+                    Complete Your Booking
+                </h5>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+
+                <!-- Booking Summary -->
+                <div class="card bg-light border-0 rounded-4 mb-4">
+                    <div class="card-body p-3">
+                        <h6 class="fw-bold mb-3">Booking Summary</h6>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <small class="text-muted">Destination</small>
+                                <p class="fw-bold mb-0">@Model.CityName</p>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Hotel</small>
+                                <p class="fw-bold mb-0" id="summaryHotel">-</p>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Transport</small>
+                                <p class="fw-bold mb-0" id="summaryTransport">-</p>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Total Price</small>
+                                <p class="fw-bold text-primary mb-0 fs-5"
+                                   id="summaryTotal">PKR 0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hidden fields -->
+                <input type="hidden" id="bookHotelName">
+                <input type="hidden" id="bookHotelPrice">
+                <input type="hidden" id="bookTransportId">
+                <input type="hidden" id="bookTransportFare">
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Check In Date</label>
+                        <input type="date" id="bookCheckIn" class="form-control"
+                               min="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")"
+                               onchange="calculateTotal()">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Check Out Date</label>
+                        <input type="date" id="bookCheckOut" class="form-control"
+                               min="@DateTime.Now.AddDays(2).ToString("yyyy-MM-dd")"
+                               onchange="calculateTotal()">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Number of Guests</label>
+                        <input type="number" id="bookGuests" class="form-control"
+                               value="1" min="1" max="10" onchange="calculateTotal()">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Your Name</label>
+                        <input type="text" id="bookGuestName" class="form-control"
+                               value="@userName" placeholder="Full name">
+                    </div>
+                </div>
+
+                <!-- Price Breakdown -->
+                <div class="card border-primary mt-4 rounded-4">
+                    <div class="card-body p-3">
+                        <h6 class="fw-bold mb-3">Price Breakdown</h6>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span id="hotelPriceLabel">Hotel (0 nights)</span>
+                            <span id="hotelPriceValue">PKR 0</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Transport</span>
+                            <span id="transportPriceValue">PKR 0</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between fw-bold fs-5">
+                            <span>Total</span>
+                            <span class="text-primary" id="totalPriceValue">PKR 0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary px-4"
+                        onclick="confirmBooking()">
+                    <i class="fas fa-check me-2"></i>Confirm Booking
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Booking Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 text-center">
+            <div class="modal-body p-5">
+                <i class="fas fa-check-circle fa-5x text-success mb-3"></i>
+                <h3 class="fw-bold">Booking Confirmed!</h3>
+                <p class="text-muted">Your booking reference is:</p>
+                <h4 class="text-primary fw-bold" id="bookingRef"></h4>
+                <p class="small text-muted mt-2">
+                    Save this reference for your records
+                </p>
+                <a href="@Url.Action("MyBookings","Bookings")"
+                   class="btn btn-primary mt-3">
+                    View My Bookings
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leaflet Map -->
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        var map = null;
+
+        // Map tab click hone pe initialize karo
+        document.querySelector('[data-bs-target="#map"]')
+        .addEventListener('shown.bs.tab', function() {
+        if (map == null) {
+        @if (Model.DestinationInfo != null && Model.DestinationInfo.Lat != 0)
+        {
+            <text>
+                map = L.map('mainMap').setView(
+                [@Model.DestinationInfo.Lat, @Model.DestinationInfo.Lon], 12);
+                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+                }).addTo(map);
+                L.marker([@Model.DestinationInfo.Lat, @Model.DestinationInfo.Lon])
+                .addTo(map)
+                .bindPopup('<b>@Model.CityName</b>')
+                .openPopup();
+            </text>
+        }
+        else
+        {
+            <text>
+                map = L.map('mainMap').setView([30.3753, 69.3451], 6);
+                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+                }).addTo(map);
+            </text>
+        }
+        setTimeout(function() {
+        map.invalidateSize();
+        }, 100);
+        }
+        });
+
+        // Star Rating
+        function setRating(rating) {
+        document.getElementById('selectedRating').value = rating;
+        document.querySelectorAll('#starRating i').forEach(function(star) {
+        var r = parseInt(star.getAttribute('data-rating'));
+        star.style.color = r <= rating ? '#ffc107' : '#ddd';
+        });
+        }
+
+        // Submit Review
+        function submitReview(destName) {
+        var rating = document.getElementById('selectedRating').value;
+        var comment = document.getElementById('reviewComment').value;
+        if (rating == 0) { alert('Please select a rating'); return; }
+        if (!comment.trim()) { alert('Please write a review'); return; }
+        fetch('@Url.Action("AddReview", "Destinations")', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `destinationName=${encodeURIComponent(destName)}&rating=${rating}&comment=${encodeURIComponent(comment)}`
+        })
+        .then(r => r.json())
+        .then(data => {
+        if (data.success) {
+        alert(data.message);
+        location.reload();
+        } else {
+        alert(data.message);
+        }
+        });
+        }
+
+        // Delete Review
+        function deleteReview(reviewId) {
+        if (!confirm('Delete this review?')) return;
+        fetch('@Url.Action("DeleteReview", "Destinations")', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `reviewId=${reviewId}`
+        })
+        .then(r => r.json())
+        .then(data => { if (data.success) location.reload(); });
+        }
+
+        // Transport Filter
+        function filterTransport(type) {
+        document.querySelectorAll('.transport-item').forEach(function(item) {
+        if (type === 'all' || item.getAttribute('data-type') === type) {
+        item.style.display = 'block';
+        } else {
+        item.style.display = 'none';
+        }
+        });
+        }
+
+        // Hotel Selection
+        var selectedHotelName = '';
+        var selectedHotelPrice = 0;
+        var selectedTransportId = null;
+        var selectedTransportFare = 0;
+
+        function selectHotel(name, price) {
+        selectedHotelName = name;
+        selectedHotelPrice = price;
+        document.getElementById('bookHotelName').value = name;
+        document.getElementById('bookHotelPrice').value = price;
+        document.getElementById('summaryHotel').textContent = name;
+        var tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        var dayAfter = new Date();
+        dayAfter.setDate(dayAfter.getDate() + 3);
+        document.getElementById('bookCheckIn').value = tomorrow.toISOString().split('T')[0];
+        document.getElementById('bookCheckOut').value = dayAfter.toISOString().split('T')[0];
+        calculateTotal();
+        var modal = new bootstrap.Modal(document.getElementById('bookingModal'));
+        modal.show();
+        }
+
+        function selectTransport(id, name, fare, type) {
+        selectedTransportId = id;
+        selectedTransportFare = fare;
+        document.getElementById('bookTransportId').value = id;
+        document.getElementById('bookTransportFare').value = fare;
+        document.getElementById('summaryTransport').textContent = name + ' (' + type + ')';
+        document.getElementById('transportPriceValue').textContent = 'PKR ' + fare.toLocaleString();
+        calculateTotal();
+        var modal = new bootstrap.Modal(document.getElementById('bookingModal'));
+        modal.show();
+        }
+
+        function calculateTotal() {
+        var checkIn = new Date(document.getElementById('bookCheckIn').value);
+        var checkOut = new Date(document.getElementById('bookCheckOut').value);
+        var guests = parseInt(document.getElementById('bookGuests').value) || 1;
+        if (!checkIn || !checkOut || checkOut <= checkIn) return;
+        var nights = Math.ceil((checkOut - checkIn) / (1000*60*60*24));
+        var hotelTotal = selectedHotelPrice * nights * guests;
+        var transportTotal = selectedTransportFare * guests;
+        var total = hotelTotal + transportTotal;
+        document.getElementById('hotelPriceLabel').textContent = `Hotel (${nights} nights × ${guests} guests)`;
+        document.getElementById('hotelPriceValue').textContent = 'PKR ' + hotelTotal.toLocaleString();
+        document.getElementById('transportPriceValue').textContent = 'PKR ' + transportTotal.toLocaleString();
+        document.getElementById('totalPriceValue').textContent = 'PKR ' + total.toLocaleString();
+        document.getElementById('summaryTotal').textContent = 'PKR ' + total.toLocaleString();
+        }
+
+        function confirmBooking() {
+        var checkIn = document.getElementById('bookCheckIn').value;
+        var checkOut = document.getElementById('bookCheckOut').value;
+        var guests = document.getElementById('bookGuests').value;
+        var hotelName = document.getElementById('bookHotelName').value;
+        var hotelPrice = document.getElementById('bookHotelPrice').value;
+        var transportId = document.getElementById('bookTransportId').value;
+        if (!checkIn || !checkOut) { alert('Please select check in and check out dates'); return; }
+        if (!hotelName) { alert('Please select a hotel first'); return; }
+        var nights = Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000*60*60*24));
+        var total = (hotelPrice * nights * guests) + (selectedTransportFare * guests);
+        fetch('@Url.Action("CreateBooking", "Destinations")', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `destinationName=@Model.CityName&hotelName=${encodeURIComponent(hotelName)}&hotelPricePerNight=${hotelPrice}&transportId=${transportId || ''}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}&totalPrice=${total}`
+        })
+        .then(r => r.json())
+        .then(data => {
+        if (data.success) {
+        bootstrap.Modal.getInstance(document.getElementById('bookingModal')).hide();
+        document.getElementById('bookingRef').textContent = data.reference;
+        new bootstrap.Modal(document.getElementById('successModal')).show();
+        } else {
+        alert(data.message);
+        }
+        });
+        }
+
+        // Nights display update
+        var checkInEl = document.getElementById('checkIn');
+        var checkOutEl = document.getElementById('checkOut');
+        if (checkInEl) checkInEl.addEventListener('change', updateNights);
+        if (checkOutEl) checkOutEl.addEventListener('change', updateNights);
+
+        function updateNights() {
+        var ci = new Date(document.getElementById('checkIn').value);
+        var co = new Date(document.getElementById('checkOut').value);
+        if (ci && co && co > ci) {
+        var nights = Math.ceil((co - ci) / (1000*60*60*24));
+        document.getElementById('nightsDisplay').textContent = nights + ' night' + (nights > 1 ? 's' : '');
+        }
+        }
+    </script>
+}

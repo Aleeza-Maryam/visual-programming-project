@@ -1,4 +1,4 @@
-﻿namespace AITourismPlanner.Services
+namespace AITourismPlanner.Services
 {
     public class DestinationService
     {
