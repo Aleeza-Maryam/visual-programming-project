@@ -8,6 +8,7 @@ namespace AITourismPlanner.Models
         [Key]
         public int notification_id { get; set; }
 
+
         public int? user_id { get; set; }
 
         [StringLength(255)]

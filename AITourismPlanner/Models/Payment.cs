@@ -11,6 +11,7 @@ namespace AITourismPlanner.Models
         public int? user_id { get; set; }
 
         [StringLength(100)]
+
         public string booking_reference { get; set; }
 
         [StringLength(50)]

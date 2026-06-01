@@ -29,6 +29,7 @@ namespace AITourismPlanner.Controllers
         // =========================================================
         [HttpGet]
         public async Task<IActionResult> PlanTrip(int? destinationId = null)
+
         {
             var userId = HttpContext.Session.GetInt32("UserId");
 

@@ -66,7 +66,9 @@ namespace AITourismPlanner.Services
                         {
                             destId = item?.dest_id?.ToString();
                             break;
+
                         }
+
                     }
                 }
 
@@ -108,6 +110,7 @@ namespace AITourismPlanner.Services
                             if (item?.property?.priceBreakdown?.grossPrice?.value != null)
                                 price = decimal.Parse(
                                     item.property.priceBreakdown.grossPrice.value.ToString()) * 278;
+
                         }
                         catch { }
 

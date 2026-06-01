@@ -4,9 +4,11 @@ using Newtonsoft.Json;
 namespace AITourismPlanner.Controllers
 {
     public class RealHotelsController : Controller
+
     {
         private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;
+
 
         public RealHotelsController(IConfiguration configuration, IHttpClientFactory httpClientFactory)
         {

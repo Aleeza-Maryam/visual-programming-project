@@ -30,8 +30,10 @@ namespace AITourismPlanner.Services
     public class WeatherForecast
     {
         public string City { get; set; }
+
         public List<DailyForecast> DailyForecasts { get; set; } = new List<DailyForecast>();
     }
+
 
     public class DailyForecast
     {

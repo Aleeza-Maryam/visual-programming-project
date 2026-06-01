@@ -11,6 +11,7 @@ namespace AITourismPlanner.Controllers
 
         public IActionResult Details(int id)
         {
+
             ViewBag.Id = id;
             return View();
         }

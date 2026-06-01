@@ -240,6 +240,7 @@ namespace AITourismPlanner.Controllers
     }
 
     // =========================================================
+
     // VIEW MODEL
     // =========================================================
     public class HotelBookingViewModel
@@ -252,5 +253,6 @@ namespace AITourismPlanner.Controllers
         public int Nights { get; set; }
         public int Guests { get; set; }
         public decimal TotalAmount { get; set; }
+
     }
 }

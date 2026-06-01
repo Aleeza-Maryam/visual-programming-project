@@ -177,6 +177,7 @@ namespace AITourismPlanner.Services
                     TempMax = random.Next(25, 40),
                     TempMin = random.Next(10, 25),
                     Condition = new[] { "Sunny", "Partly Cloudy", "Cloudy" }[random.Next(3)],
+
                     Description = "Mock forecast data",
                     Icon = "https://openweathermap.org/img/w/01d.png",
                     Humidity = random.Next(30, 80),
