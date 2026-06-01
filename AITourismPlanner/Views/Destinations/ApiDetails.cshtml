@@ -686,34 +686,36 @@
         </div>
     </div>
 </div>
-
-<!-- Leaflet Map -->
 <link rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
+      href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 @section Scripts {
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script>
+        // Fix for missing marker icon
+        delete L.Icon.Default.prototype._getIconUrl;
+        L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+        });
+
         var map = null;
 
-        // Map tab click hone pe initialize karo
         document.querySelector('[data-bs-target="#map"]')
         .addEventListener('shown.bs.tab', function() {
         if (map == null) {
         @if (Model.DestinationInfo != null && Model.DestinationInfo.Lat != 0)
         {
             <text>
-                map = L.map('mainMap').setView(
-                [@Model.DestinationInfo.Lat, @Model.DestinationInfo.Lon], 12);
-                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                var lat = @Model.DestinationInfo.Lat.ToString("0.000000", System.Globalization.CultureInfo.InvariantCulture);
+                var lon = @Model.DestinationInfo.Lon.ToString("0.000000", System.Globalization.CultureInfo.InvariantCulture);
+                map = L.map('mainMap').setView([lat, lon], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap'
                 }).addTo(map);
-                L.marker([@Model.DestinationInfo.Lat, @Model.DestinationInfo.Lon])
+                L.marker([lat, lon])
+                .bindPopup('<b>@Model.CityName</b><br>Pakistan')
                 .addTo(map)
-                .bindPopup('<b>@Model.CityName</b>')
                 .openPopup();
             </text>
         }
@@ -721,69 +723,67 @@
         {
             <text>
                 map = L.map('mainMap').setView([30.3753, 69.3451], 6);
-                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap'
                 }).addTo(map);
             </text>
         }
-        setTimeout(function() {
-        map.invalidateSize();
-        }, 100);
         }
+        setTimeout(function() { map.invalidateSize(); }, 200);
         });
 
         // Star Rating
         function setRating(rating) {
-        document.getElementById('selectedRating').value = rating;
-        document.querySelectorAll('#starRating i').forEach(function(star) {
-        var r = parseInt(star.getAttribute('data-rating'));
-        star.style.color = r <= rating ? '#ffc107' : '#ddd';
-        });
+            document.getElementById('selectedRating').value = rating;
+            document.querySelectorAll('#starRating i').forEach(function(star) {
+                var r = parseInt(star.getAttribute('data-rating'));
+                star.style.color = r <= rating ? '#ffc107' : '#ddd';
+            });
         }
 
         // Submit Review
         function submitReview(destName) {
-        var rating = document.getElementById('selectedRating').value;
-        var comment = document.getElementById('reviewComment').value;
-        if (rating == 0) { alert('Please select a rating'); return; }
-        if (!comment.trim()) { alert('Please write a review'); return; }
-        fetch('@Url.Action("AddReview", "Destinations")', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `destinationName=${encodeURIComponent(destName)}&rating=${rating}&comment=${encodeURIComponent(comment)}`
-        })
-        .then(r => r.json())
-        .then(data => {
-        if (data.success) {
-        alert(data.message);
-        location.reload();
-        } else {
-        alert(data.message);
-        }
-        });
+            var rating = document.getElementById('selectedRating').value;
+            var comment = document.getElementById('reviewComment').value;
+            if (rating == 0) { alert('Please select a rating'); return; }
+            if (!comment.trim()) { alert('Please write a review'); return; }
+            fetch('@Url.Action("AddReview","Destinations")', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `destinationName=${encodeURIComponent(destName)}&rating=${rating}&comment=${encodeURIComponent(comment)}`
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            });
         }
 
         // Delete Review
         function deleteReview(reviewId) {
-        if (!confirm('Delete this review?')) return;
-        fetch('@Url.Action("DeleteReview", "Destinations")', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `reviewId=${reviewId}`
-        })
-        .then(r => r.json())
-        .then(data => { if (data.success) location.reload(); });
+            if (!confirm('Delete this review?')) return;
+            fetch('@Url.Action("DeleteReview","Destinations")', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `reviewId=${reviewId}`
+            })
+            .then(r => r.json())
+            .then(data => { if (data.success) location.reload(); });
         }
 
         // Transport Filter
         function filterTransport(type) {
-        document.querySelectorAll('.transport-item').forEach(function(item) {
-        if (type === 'all' || item.getAttribute('data-type') === type) {
-        item.style.display = 'block';
-        } else {
-        item.style.display = 'none';
-        }
-        });
+            document.querySelectorAll('.transport-item').forEach(function(item) {
+                if (type === 'all' || item.getAttribute('data-type') === type) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
         }
 
         // Hotel Selection
@@ -793,91 +793,103 @@
         var selectedTransportFare = 0;
 
         function selectHotel(name, price) {
-        selectedHotelName = name;
-        selectedHotelPrice = price;
-        document.getElementById('bookHotelName').value = name;
-        document.getElementById('bookHotelPrice').value = price;
-        document.getElementById('summaryHotel').textContent = name;
-        var tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        var dayAfter = new Date();
-        dayAfter.setDate(dayAfter.getDate() + 3);
-        document.getElementById('bookCheckIn').value = tomorrow.toISOString().split('T')[0];
-        document.getElementById('bookCheckOut').value = dayAfter.toISOString().split('T')[0];
-        calculateTotal();
-        var modal = new bootstrap.Modal(document.getElementById('bookingModal'));
-        modal.show();
+            selectedHotelName = name;
+            selectedHotelPrice = price;
+            document.getElementById('bookHotelName').value = name;
+            document.getElementById('bookHotelPrice').value = price;
+            document.getElementById('summaryHotel').textContent = name;
+            var tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            var dayAfter = new Date();
+            dayAfter.setDate(dayAfter.getDate() + 3);
+            document.getElementById('bookCheckIn').value = tomorrow.toISOString().split('T')[0];
+            document.getElementById('bookCheckOut').value = dayAfter.toISOString().split('T')[0];
+            calculateTotal();
+            new bootstrap.Modal(document.getElementById('bookingModal')).show();
         }
 
         function selectTransport(id, name, fare, type) {
-        selectedTransportId = id;
-        selectedTransportFare = fare;
-        document.getElementById('bookTransportId').value = id;
-        document.getElementById('bookTransportFare').value = fare;
-        document.getElementById('summaryTransport').textContent = name + ' (' + type + ')';
-        document.getElementById('transportPriceValue').textContent = 'PKR ' + fare.toLocaleString();
-        calculateTotal();
-        var modal = new bootstrap.Modal(document.getElementById('bookingModal'));
-        modal.show();
+            selectedTransportId = id;
+            selectedTransportFare = fare;
+            document.getElementById('bookTransportId').value = id;
+            document.getElementById('bookTransportFare').value = fare;
+            document.getElementById('summaryTransport').textContent = name + ' (' + type + ')';
+            document.getElementById('transportPriceValue').textContent = 'PKR ' + fare.toLocaleString();
+            calculateTotal();
+            new bootstrap.Modal(document.getElementById('bookingModal')).show();
         }
 
         function calculateTotal() {
-        var checkIn = new Date(document.getElementById('bookCheckIn').value);
-        var checkOut = new Date(document.getElementById('bookCheckOut').value);
-        var guests = parseInt(document.getElementById('bookGuests').value) || 1;
-        if (!checkIn || !checkOut || checkOut <= checkIn) return;
-        var nights = Math.ceil((checkOut - checkIn) / (1000*60*60*24));
-        var hotelTotal = selectedHotelPrice * nights * guests;
-        var transportTotal = selectedTransportFare * guests;
-        var total = hotelTotal + transportTotal;
-        document.getElementById('hotelPriceLabel').textContent = `Hotel (${nights} nights × ${guests} guests)`;
-        document.getElementById('hotelPriceValue').textContent = 'PKR ' + hotelTotal.toLocaleString();
-        document.getElementById('transportPriceValue').textContent = 'PKR ' + transportTotal.toLocaleString();
-        document.getElementById('totalPriceValue').textContent = 'PKR ' + total.toLocaleString();
-        document.getElementById('summaryTotal').textContent = 'PKR ' + total.toLocaleString();
+            var checkIn = new Date(document.getElementById('bookCheckIn').value);
+            var checkOut = new Date(document.getElementById('bookCheckOut').value);
+            var guests = parseInt(document.getElementById('bookGuests').value) || 1;
+            if (!checkIn || !checkOut || checkOut <= checkIn) return;
+            var nights = Math.ceil((checkOut - checkIn) / (1000*60*60*24));
+            var hotelTotal = selectedHotelPrice * nights * guests;
+            var transportTotal = selectedTransportFare * guests;
+            var total = hotelTotal + transportTotal;
+            document.getElementById('hotelPriceLabel').textContent = `Hotel (${nights} nights × ${guests} guests)`;
+            document.getElementById('hotelPriceValue').textContent = 'PKR ' + hotelTotal.toLocaleString();
+            document.getElementById('transportPriceValue').textContent = 'PKR ' + transportTotal.toLocaleString();
+            document.getElementById('totalPriceValue').textContent = 'PKR ' + total.toLocaleString();
+            document.getElementById('summaryTotal').textContent = 'PKR ' + total.toLocaleString();
         }
 
         function confirmBooking() {
-        var checkIn = document.getElementById('bookCheckIn').value;
-        var checkOut = document.getElementById('bookCheckOut').value;
-        var guests = document.getElementById('bookGuests').value;
-        var hotelName = document.getElementById('bookHotelName').value;
-        var hotelPrice = document.getElementById('bookHotelPrice').value;
-        var transportId = document.getElementById('bookTransportId').value;
-        if (!checkIn || !checkOut) { alert('Please select check in and check out dates'); return; }
-        if (!hotelName) { alert('Please select a hotel first'); return; }
-        var nights = Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000*60*60*24));
-        var total = (hotelPrice * nights * guests) + (selectedTransportFare * guests);
-        fetch('@Url.Action("CreateBooking", "Destinations")', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `destinationName=@Model.CityName&hotelName=${encodeURIComponent(hotelName)}&hotelPricePerNight=${hotelPrice}&transportId=${transportId || ''}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}&totalPrice=${total}`
-        })
-        .then(r => r.json())
-        .then(data => {
-        if (data.success) {
-        bootstrap.Modal.getInstance(document.getElementById('bookingModal')).hide();
-        document.getElementById('bookingRef').textContent = data.reference;
-        new bootstrap.Modal(document.getElementById('successModal')).show();
-        } else {
-        alert(data.message);
-        }
-        });
+            var checkIn = document.getElementById('bookCheckIn').value;
+            var checkOut = document.getElementById('bookCheckOut').value;
+            var guests = document.getElementById('bookGuests').value;
+            var hotelName = document.getElementById('bookHotelName').value;
+            var hotelPrice = document.getElementById('bookHotelPrice').value;
+            var transportId = document.getElementById('bookTransportId').value;
+            if (!checkIn || !checkOut) { alert('Please select dates'); return; }
+            if (!hotelName) { alert('Please select a hotel first'); return; }
+            var nights = Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000*60*60*24));
+            var total = (hotelPrice * nights * guests) + (selectedTransportFare * guests);
+            fetch('@Url.Action("CreateBooking","Destinations")', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `destinationName=@Model.CityName&hotelName=${encodeURIComponent(hotelName)}&hotelPricePerNight=${hotelPrice}&transportId=${transportId || ''}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}&totalPrice=${total}`
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('bookingModal')).hide();
+                    document.getElementById('bookingRef').textContent = data.reference;
+                    new bootstrap.Modal(document.getElementById('successModal')).show();
+                } else { alert(data.message); }
+            });
         }
 
-        // Nights display update
-        var checkInEl = document.getElementById('checkIn');
-        var checkOutEl = document.getElementById('checkOut');
-        if (checkInEl) checkInEl.addEventListener('change', updateNights);
-        if (checkOutEl) checkOutEl.addEventListener('change', updateNights);
-
+        // Nights display
+        document.getElementById('checkIn')?.addEventListener('change', updateNights);
+        document.getElementById('checkOut')?.addEventListener('change', updateNights);
         function updateNights() {
-        var ci = new Date(document.getElementById('checkIn').value);
-        var co = new Date(document.getElementById('checkOut').value);
-        if (ci && co && co > ci) {
-        var nights = Math.ceil((co - ci) / (1000*60*60*24));
-        document.getElementById('nightsDisplay').textContent = nights + ' night' + (nights > 1 ? 's' : '');
-        }
+            var ci = new Date(document.getElementById('checkIn').value);
+            var co = new Date(document.getElementById('checkOut').value);
+            if (ci && co && co > ci) {
+                var nights = Math.ceil((co - ci) / (1000*60*60*24));
+                document.getElementById('nightsDisplay').textContent = nights + ' night' + (nights > 1 ? 's' : '');
+            }
         }
     </script>
 }
+<style>
+    .hotel-card {
+        transition: transform 0.3s ease;
+    }
+    .hotel-card:hover {
+        transform: translateY(-5px);
+    }
+    .nav-pills .nav-link.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .nav-pills .nav-link {
+        color: #667eea;
+        border: 2px solid #667eea;
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+    }
+</style>

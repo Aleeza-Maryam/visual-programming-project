@@ -201,7 +201,7 @@ namespace AITourismPlanner.Controllers
                 Headers =
         {
             { "X-RapidAPI-Key", "35f85c261fmsh0b3fdef51d3d998p1g5fajsn410ef6c10768" },
-            { "X-RapidAPI-Host", "booking-com15.p.rapidapi.com" },
+            { "X-RapidAPI-Host", "booking-com15.p.rapidapi.com" }
         },
             };
 
