@@ -72,6 +72,8 @@ namespace AITourismPlanner.Controllers
                 // =========================================================
                 // Get Testimonials
                 // =========================================================
+            
+                
                 var testimonials = await _context.reviews
                     .OrderByDescending(r => r.review_date)
                     .Take(3)
@@ -97,6 +99,7 @@ namespace AITourismPlanner.Controllers
                 return View(viewModel);
             }
             catch (Exception ex)
+            
             {
                 return View(new HomeViewModel
                 {
@@ -111,11 +114,13 @@ namespace AITourismPlanner.Controllers
         public IActionResult About()
         {
             return View();
+
         }
 
         public IActionResult Contact()
         {
             return View();
+
         }
 
         public IActionResult Privacy()

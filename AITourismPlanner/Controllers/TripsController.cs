@@ -12,6 +12,7 @@ namespace AITourismPlanner.Controllers
         private readonly IAIRecommendationService _aiService;
         private readonly IItineraryGenerator _itineraryGenerator;
 
+
         public TripsController(
             ApplicationDbContext context,
             IAIRecommendationService aiService,
@@ -22,6 +23,7 @@ namespace AITourismPlanner.Controllers
             _itineraryGenerator = itineraryGenerator;
         }
 
+
         // =========================================================
         // PLAN TRIP - AI Trip Planner
         // =========================================================
@@ -30,7 +32,9 @@ namespace AITourismPlanner.Controllers
         {
             var userId = HttpContext.Session.GetInt32("UserId");
 
+
             var model = new TripPlannerViewModel
+            
             {
                 Destinations = await _context.destinations
                     .Select(d => new { d.destination_id, d.name })

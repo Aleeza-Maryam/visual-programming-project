@@ -35,5 +35,6 @@ namespace AITourismPlanner.Models
         public int? available_seats { get; set; } = 50;
 
         public DateTime created_at { get; set; } = DateTime.Now;
+
     }
 }

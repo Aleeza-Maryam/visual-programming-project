@@ -145,16 +145,18 @@ namespace AITourismPlanner.Controllers
             return Json(new { success = false });
         }
 
-        // =========================================================
+        // ===================================================================
         // BOOKING
-        // =========================================================
+        // ===================================================================
         [HttpPost]
         public async Task<IActionResult> CreateBooking(
             string destinationName, string hotelName,
             decimal hotelPricePerNight, int? transportId,
             DateTime checkIn, DateTime checkOut,
+
             int guests, decimal totalPrice)
         {
+
             var userId = HttpContext.Session.GetInt32("UserId");
             if (!userId.HasValue)
                 return Json(new { success = false, message = "Please login first" });
@@ -173,11 +175,13 @@ namespace AITourismPlanner.Controllers
                 check_out_date = checkOut,
                 number_of_guests = guests,
                 total_price = totalPrice,
+
                 booking_status = "Confirmed",
                 payment_status = "Pending",
                 booking_reference = reference,
                 created_at = DateTime.Now
             };
+
 
             _context.bookings.Add(booking);
             await _context.SaveChangesAsync();
