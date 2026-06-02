@@ -70,10 +70,8 @@ namespace AITourismPlanner.Controllers
                     .ToListAsync();
 
                 // =========================================================
-                // Get Testimonials
+                // Get Testimonials (from reviews table)
                 // =========================================================
-            
-                
                 var testimonials = await _context.reviews
                     .OrderByDescending(r => r.review_date)
                     .Take(3)
@@ -88,44 +86,88 @@ namespace AITourismPlanner.Controllers
                     })
                     .ToListAsync();
 
+                // =========================================================
+                // Get User Reviews from destination_reviews table
+                // =========================================================
+                var userReviews = await _context.destination_reviews
+                    .Include(r => r.User)
+                    .Where(r => r.comment != null && r.comment != "")
+                    .OrderByDescending(r => r.created_at)
+                    .Take(6)
+                    .Select(r => new UserReviewViewModel
+                    {
+                        ReviewId = r.review_id,
+                        UserName = r.User != null ? r.User.full_name : "Anonymous",
+                        DestinationName = r.destination_name,
+                        Rating = r.rating ?? 0,
+                        Comment = r.comment ?? "Great experience!",
+                        CreatedAt = r.created_at
+                    })
+                    .ToListAsync();
+
                 var viewModel = new HomeViewModel
                 {
                     PopularDestinations = popularDestinations,
                     FeaturedHotels = featuredHotels,
                     Categories = categories,
-                    Testimonials = testimonials
+                    Testimonials = testimonials,
+                    UserReviews = userReviews
                 };
 
                 return View(viewModel);
             }
             catch (Exception ex)
-            
             {
+                Console.WriteLine($"HomeController Error: {ex.Message}");
                 return View(new HomeViewModel
                 {
                     PopularDestinations = new List<Destination>(),
                     FeaturedHotels = new List<Hotel>(),
                     Categories = new List<Category>(),
-                    Testimonials = new List<Review>()
+                    Testimonials = new List<Review>(),
+                    UserReviews = new List<UserReviewViewModel>()
                 });
             }
+        }
+
+        [HttpPost]
+        public IActionResult SubscribeNewsletter(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+                return Json(new { success = false, message = "Email is required" });
+
+            if (!email.Contains("@") || !email.Contains("."))
+                return Json(new { success = false, message = "Please enter a valid email address" });
+
+            // Here you can save to database or send to email service
+            // For now, just return success
+            return Json(new { success = true, message = "Subscribed successfully!" });
         }
 
         public IActionResult About()
         {
             return View();
-
         }
 
         public IActionResult Contact()
         {
             return View();
-
         }
 
         public IActionResult Privacy()
         {
             return View();
         }
+    }
+
+    // User Review ViewModel
+    public class UserReviewViewModel
+    {
+        public int ReviewId { get; set; }
+        public string UserName { get; set; } = string.Empty;
+        public string DestinationName { get; set; } = string.Empty;
+        public int Rating { get; set; }
+        public string Comment { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; }
     }
 }
