@@ -2,22 +2,70 @@
 @using System.Linq
 @model HomeViewModel
 @{
-    ViewData["Title"] = "AI Tourism Planner - Smart Travel Companion";
+    ViewData["Title"] = "TravelMate - Your AI Travel Companion";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<!-- Hero Section with Parallax -->
-<section class="hero-section" style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('/images/hero-bg.jpg'); background-size: cover; background-position: center; height: 90vh; display: flex; align-items: center;">
-    <div class="container text-center text-white">
-        <h1 class="display-1 fw-bold">AI Tourism Planner</h1>
-        <p class="lead fs-3 mt-3">Plan Your Dream Trip with Artificial Intelligence</p>
-        <div class="mt-5">
-            <a href="@Url.Action("Index", "Destinations")" class="btn btn-primary btn-lg mx-2 px-4 py-3">
-                <i class="fas fa-search"></i> Explore Destinations
-            </a>
-            <a href="@Url.Action("PlanTrip", "Trips")" class="btn btn-outline-light btn-lg mx-2 px-4 py-3">
-                <i class="fas fa-robot"></i> AI Trip Planner
-            </a>
+<!-- Hero Section with Video Background -->
+<section class="hero-section position-relative" style="height: 100vh; overflow: hidden;">
+    <!-- Video Background -->
+    <video autoplay muted loop playsinline id="heroVideo" style="position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; width: auto; height: auto; transform: translate(-50%, -50%); object-fit: cover;">
+        <source src="/videos/hero-travel.mp4" type="video/mp4">
+        <!-- Fallback image if video doesn't load -->
+    </video>
+    <!-- Dark Overlay -->
+    <div class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(0,0,0,0.55);"></div>
+    
+    <!-- Content -->
+    <div class="container h-100 d-flex align-items-center position-relative" style="z-index: 1;">
+        <div class="text-center text-white w-100">
+            <h1 class="display-1 fw-bold animate__animated animate__fadeInDown">TravelMate</h1>
+            <p class="lead fs-3 mt-3 animate__animated animate__fadeInUp">Explore Pakistan Like Never Before</p>
+            <p class="fs-5 mt-2 animate__animated animate__fadeInUp animate__delay-1s">Your AI-Powered Travel Companion</p>
+            <div class="mt-5 animate__animated animate__fadeInUp animate__delay-2s">
+                <a href="@Url.Action("Index", "Destination")" class="btn btn-primary btn-lg mx-2 px-4 py-3">
+                    <i class="fas fa-search"></i> Explore Destinations
+                </a>
+                <a href="@Url.Action("PlanTrip", "Trips")" class="btn btn-outline-light btn-lg mx-2 px-4 py-3">
+                    <i class="fas fa-robot"></i> AI Trip Planner
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Counter Section -->
+<section class="stats-section py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container">
+        <div class="row text-center text-white g-4">
+            <div class="col-md-3">
+                <div class="counter-box">
+                    <i class="fas fa-map-marked-alt fa-3x mb-3"></i>
+                    <h2 class="counter fw-bold display-4" data-target="50">0</h2>
+                    <p class="fs-5">Destinations</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="counter-box">
+                    <i class="fas fa-users fa-3x mb-3"></i>
+                    <h2 class="counter fw-bold display-4" data-target="10000">0</h2>
+                    <p class="fs-5">Happy Travelers</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="counter-box">
+                    <i class="fas fa-hotel fa-3x mb-3"></i>
+                    <h2 class="counter fw-bold display-4" data-target="500">0</h2>
+                    <p class="fs-5">Hotels</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="counter-box">
+                    <i class="fas fa-star fa-3x mb-3"></i>
+                    <h2 class="counter fw-bold display-4" data-target="4.8" data-decimal="1">0.0</h2>
+                    <p class="fs-5">Average Rating</p>
+                </div>
+            </div>
         </div>
     </div>
 </section>
@@ -72,7 +120,6 @@
                     <div class="col-md-4 col-lg-4">
                         <div class="card destination-card h-100 shadow-lg border-0 rounded-4 overflow-hidden">
                             <div class="position-relative">
-                                <!-- FIXED IMAGE TAG WITH PROPER PATH HANDLING -->
                                 @{
                                     var imagePath = dest.thumbnail;
                                     if (string.IsNullOrEmpty(imagePath) || !imagePath.StartsWith("/images/"))
@@ -204,43 +251,73 @@
     </div>
 </section>
 
-<!-- Testimonials -->
-<section class="testimonials-section py-5">
+<!-- User Reviews Slider Section -->
+<section class="reviews-slider-section py-5 bg-light">
     <div class="container">
         <div class="text-center mb-5">
-            <h2 class="display-5 fw-bold">What Travelers Say</h2>
-            <p class="lead text-muted">Trusted by thousands of happy travelers</p>
+            <h2 class="display-5 fw-bold">❤️ What Our Travelers Say</h2>
+            <p class="lead text-muted">Real reviews from real travelers</p>
         </div>
-        <div class="row g-4">
-            @if (Model.Testimonials != null && Model.Testimonials.Any())
-            {
-                @foreach (var review in Model.Testimonials)
-                {
-                    <div class="col-md-4">
-                        <div class="card testimonial-card shadow-sm border-0 rounded-4 h-100">
-                            <div class="card-body p-4">
-                                <div class="mb-3">
-                                    @for (int i = 1; i <= (review.rating ?? 0); i++)
+        
+        @if (Model.UserReviews != null && Model.UserReviews.Any())
+        {
+            <div id="reviewsCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    @{
+                        var reviewGroups = Model.UserReviews.Chunk(3).ToList();
+                        for (int i = 0; i < reviewGroups.Count; i++)
+                        {
+                            <div class="carousel-item @(i == 0 ? "active" : "")">
+                                <div class="row g-4">
+                                    @foreach (var review in reviewGroups[i])
                                     {
-                                        <i class="fas fa-star text-warning"></i>
+                                        <div class="col-md-4">
+                                            <div class="card testimonial-card h-100 shadow-sm border-0 rounded-4">
+                                                <div class="card-body p-4">
+                                                    <div class="mb-3">
+                                                        @for (int s = 1; s <= review.Rating; s++)
+                                                        {
+                                                            <i class="fas fa-star text-warning"></i>
+                                                        }
+                                                        @for (int s = review.Rating + 1; s <= 5; s++)
+                                                        {
+                                                            <i class="far fa-star text-muted"></i>
+                                                        }
+                                                    </div>
+                                                    <p class="card-text">"@(review.Comment.Length > 120 ? review.Comment.Substring(0, 120) + "..." : review.Comment)"</p>
+                                                    <div class="d-flex align-items-center mt-3">
+                                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                                                            <span class="fw-bold">@(review.UserName.FirstOrDefault().ToString())</span>
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="mb-0 fw-bold">@review.UserName</h6>
+                                                            <small class="text-muted">Visited @review.DestinationName</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     }
                                 </div>
-                                <p class="card-text fs-5">"@(review.review_text?.Length > 150 ? review.review_text.Substring(0, 150) + "..." : review.review_text)"</p>
-                                <div class="d-flex align-items-center mt-3">
-                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
-                                        <span class="fw-bold">@(review.User?.full_name?.FirstOrDefault().ToString() ?? "U")</span>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0 fw-bold">@(review.User?.full_name ?? "Anonymous")</h6>
-                                        <small class="text-muted">Visited @(review.Destination?.name ?? "a destination")</small>
-                                    </div>
-                                </div>
                             </div>
-                        </div>
-                    </div>
-                }
-            }
-        </div>
+                        }
+                    }
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#reviewsCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon bg-dark rounded-circle" aria-hidden="true"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#reviewsCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon bg-dark rounded-circle" aria-hidden="true"></span>
+                </button>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-comment-dots fa-3x text-muted mb-3"></i>
+                <p>No reviews yet. Be the first to review!</p>
+            </div>
+        }
     </div>
 </section>
 
@@ -251,10 +328,13 @@
         <p class="mb-4">Get exclusive travel deals and AI planning tips</p>
         <div class="row justify-content-center">
             <div class="col-md-6">
-                <div class="input-group">
-                    <input type="email" class="form-control form-control-lg" placeholder="Your email address">
-                    <button class="btn btn-primary btn-lg" type="button">Subscribe</button>
-                </div>
+                <form id="newsletterForm" class="input-group">
+                    <input type="email" id="newsletterEmail" class="form-control form-control-lg" placeholder="Your email address" required>
+                    <button class="btn btn-primary btn-lg" type="submit">
+                        <i class="fas fa-paper-plane"></i> Subscribe
+                    </button>
+                </form>
+                <div id="newsletterMessage" class="mt-3"></div>
             </div>
         </div>
     </div>
@@ -288,7 +368,6 @@
         background: linear-gradient(135deg, #5a67d8 0%, #6b46a0 100%);
         transform: translateY(-2px);
     }
-    /* Ensure images are always visible */
     img {
         display: block !important;
         visibility: visible !important;
@@ -298,4 +377,118 @@
         min-height: 250px;
         background-color: #f0f0f0;
     }
+    .hero-section {
+        position: relative;
+    }
+    .z-1 {
+        z-index: 1;
+    }
+    #heroVideo {
+        object-fit: cover;
+    }
+    @@media (max-width: 768px) {
+    .hero-section {
+        background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('/images/hero-bg.jpg');
+        background-size: cover;
+        background-position: center;
+    }
+    #heroVideo {
+        display: none;
+    }
+}
 </style>
+
+@section Scripts {
+<script>
+    // Newsletter Subscription
+    $('#newsletterForm').on('submit', function(e) {
+        e.preventDefault();
+        var email = $('#newsletterEmail').val();
+        
+        $.ajax({
+            url: '@Url.Action("SubscribeNewsletter", "Home")',
+            type: 'POST',
+            data: { email: email },
+            success: function(response) {
+                if (response.success) {
+                    $('#newsletterMessage').html('<div class="alert alert-success">' + response.message + '</div>');
+                    $('#newsletterEmail').val('');
+                } else {
+                    $('#newsletterMessage').html('<div class="alert alert-danger">' + response.message + '</div>');
+                }
+                setTimeout(function() {
+                    $('#newsletterMessage').html('');
+                }, 3000);
+            }
+        });
+    });
+
+    // Counter Animation
+    function isElementInViewport(el) {
+        var rect = el.getBoundingClientRect();
+        var buffer = 100;
+        return rect.top <= (window.innerHeight + buffer) && rect.bottom >= 0;
+    }
+    
+    function animateCounter(element, start, end, duration, isDecimal) {
+        var startTime = null;
+        
+        function updateCounter(currentTime) {
+            if (startTime === null) startTime = currentTime;
+            var progress = Math.min(1, (currentTime - startTime) / duration);
+            var value = start + (end - start) * progress;
+            
+            if (isDecimal) {
+                element.innerText = value.toFixed(1);
+            } else {
+                element.innerText = Math.floor(value).toLocaleString();
+            }
+            
+            if (progress < 1) {
+                requestAnimationFrame(updateCounter);
+            } else {
+                element.innerText = isDecimal ? end.toFixed(1) : end.toLocaleString();
+            }
+        }
+        
+        requestAnimationFrame(updateCounter);
+    }
+    
+    var countersAnimated = false;
+    
+    $(window).on('scroll', function() {
+        var counters = $('.counter');
+        var statsSection = $('.stats-section');
+        
+        if (statsSection.length && isElementInViewport(statsSection[0]) && !countersAnimated) {
+            countersAnimated = true;
+            counters.each(function() {
+                var target = parseFloat($(this).attr('data-target'));
+                var isDecimal = $(this).attr('data-decimal') === '1';
+                var start = isDecimal ? 0 : 0;
+                var end = target;
+                animateCounter(this, start, end, 2000, isDecimal);
+            });
+        }
+    });
+    
+    // Trigger on page load if already visible
+    $(document).ready(function() {
+        var counters = $('.counter');
+        var statsSection = $('.stats-section');
+        if (statsSection.length && isElementInViewport(statsSection[0])) {
+            countersAnimated = true;
+            counters.each(function() {
+                var target = parseFloat($(this).attr('data-target'));
+                var isDecimal = $(this).attr('data-decimal') === '1';
+                var end = target;
+                if (isDecimal) {
+                    $(this).text(end.toFixed(1));
+                } else {
+                    $(this).text(end.toLocaleString());
+                }
+            });
+        }
+    });
+</script>
+}
