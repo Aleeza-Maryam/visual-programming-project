@@ -18,6 +18,9 @@ namespace AITourismPlanner.Services
         public string Currency { get; set; }
         public string ImageUrl { get; set; }
         public int? ReviewCount { get; set; }
+        public string Stars { get; set; }  
+        public double Lat { get; set; }    // 🔽 YEH LINE ADD KARO (optional)
+        public double Lon { get; set; }    // 🔽 YEH LINE ADD KARO (optional)
         public string Description { get; set; }
     }
 
