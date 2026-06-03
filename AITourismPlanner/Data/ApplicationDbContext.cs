@@ -38,6 +38,10 @@ namespace AITourismPlanner.Data
         public DbSet<DestinationReview> destination_reviews { get; set; }
         public DbSet<DestinationView> destination_views { get; set; }
         public DbSet<Wishlist> wishlists { get; set; }
+
+        public DbSet<Package> packages { get; set; }
+        public DbSet<PackageBooking> package_bookings { get; set; }
+        public DbSet<PackageReview> package_reviews { get; set; }
         // =========================================================
         // MODEL CONFIGURATION
         // =========================================================
