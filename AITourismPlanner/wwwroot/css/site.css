@@ -180,3 +180,38 @@ img {
         font-size: 0.9rem;
     }
 }
+/* Counter Plus Sign Styling */
+.counter-plus {
+    font-size: 2rem;
+    margin-left: 5px;
+    font-weight: bold;
+    display: inline-block;
+}
+
+@media (max-width: 768px) {
+    .counter-plus {
+        font-size: 1.2rem;
+    }
+}
+
+/* Stats Counter Box Styling */
+.counter-box {
+    padding: 20px;
+    border-radius: 20px;
+    transition: transform 0.3s ease;
+}
+
+    .counter-box:hover {
+        transform: translateY(-5px);
+    }
+
+/* Carousel - No Arrows Styling */
+.carousel-control-prev,
+.carousel-control-next {
+    display: none !important;
+}
+
+/* Auto-slide carousel indicators (optional) */
+.carousel-indicators {
+    display: none;
+}
