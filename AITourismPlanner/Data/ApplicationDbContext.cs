@@ -37,10 +37,11 @@ namespace AITourismPlanner.Data
         public DbSet<Booking> bookings { get; set; }
         public DbSet<DestinationReview> destination_reviews { get; set; }
         public DbSet<DestinationView> destination_views { get; set; }
+        public DbSet<Wishlist> wishlists { get; set; }
         // =========================================================
         // MODEL CONFIGURATION
         // =========================================================
-    
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

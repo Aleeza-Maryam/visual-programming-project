@@ -1,0 +1,97 @@
+﻿@model List<AITourismPlanner.Models.Wishlist>
+@{
+    ViewData["Title"] = "My Wishlist";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4">
+    <h1 class="display-5 fw-bold mb-4">
+        <i class="fas fa-heart text-danger me-2"></i>My Wishlist
+        <span class="fs-5 text-muted">(@Model.Count items)</span>
+    </h1>
+
+    @if (Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card wishlist-card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                        <img src="@(!string.IsNullOrEmpty(item.image_url) ? item.image_url : "https://images.unsplash.com/photo-1586500036706-41963de24d8b?w=400")"
+                             style="height: 180px; object-fit: cover; width: 100%;"
+                             alt="@item.destination_name">
+                        <div class="card-body p-3">
+                            <h5 class="fw-bold mb-1">@item.destination_name</h5>
+                            <p class="text-muted small mb-2">
+                                <i class="fas fa-map-marker-alt me-1"></i>
+                                @item.destination_city, @item.destination_country
+                            </p>
+                           
+                            <p class="small text-muted">
+                                <i class="fas fa-calendar-plus me-1"></i>
+                                Added on @item.added_date.ToString("dd MMM yyyy")
+                            </p>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 pb-3 px-3 d-flex gap-2">
+                            <a href="@Url.Action("ApiDetails", "Destinations", new { cityName = item.destination_city })"
+                               class="btn btn-primary btn-sm flex-grow-1">
+                                <i class="fas fa-eye me-1"></i> View Details
+                            </a>
+                            <button class="btn btn-outline-danger btn-sm" onclick="removeFromWishlist(@item.wishlist_id)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-heart-broken fa-4x text-muted mb-3"></i>
+            <h3>Your wishlist is empty</h3>
+            <p class="text-muted">Start exploring destinations and save your favorites!</p>
+            <a href="@Url.Action("Index", "Destinations")" class="btn btn-primary mt-2">
+                <i class="fas fa-search me-2"></i>Explore Destinations
+            </a>
+        </div>
+    }
+</div>
+
+<style>
+    .wishlist-card {
+        transition: transform 0.3s ease;
+    }
+
+        .wishlist-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function removeFromWishlist(wishlistId) {
+            if (confirm('Remove this destination from wishlist?')) {
+                fetch('@Url.Action("RemoveFromWishlist", "Account")', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `wishlistId=${wishlistId}`
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Failed to remove');
+                    }
+                });
+            }
+        }
+    </script>
+}

@@ -26,6 +26,15 @@
                         <span>@Model.CurrentWeather.Temperature.ToString("0")°C</span>
                     </div>
                 }
+                <!-- ========================================================= -->
+                <!-- WISHLIST BUTTON ADDED HERE -->
+                <!-- ========================================================= -->
+                @if (userId.HasValue)
+                {
+                    <button class="btn btn-outline-light mt-3" onclick="addToWishlist()" id="wishlistBtn">
+                        <i class="far fa-heart me-2"></i> Save to Wishlist
+                    </button>
+                }
             </div>
         </div>
     </div>
@@ -385,7 +394,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script>
         // =========================================================
-        // FIX 1: Fix Leaflet marker icon (GitHub issue)
+        // FIX 1: Fix Leaflet marker icon
         // =========================================================
         var LeafIcon = L.Icon.extend({
         options: {
@@ -469,6 +478,30 @@
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `destinationName=${encodeURIComponent(destName)}&rating=${rating}&comment=${encodeURIComponent(comment)}`
         }).then(r => r.json()).then(data => { if (data.success) location.reload(); else alert(data.message); });
+        }
+
+        // =========================================================
+        // WISHLIST FUNCTION
+        // =========================================================
+
+        function addToWishlist() {
+        fetch('@Url.Action("AddToWishlist", "Account")', {
+        method: 'POST',
+
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'destinationId=0&destinationName=@Model.CityName&destinationCity=@Model.CityName&estimatedCost=0&imageUrl=@(Model.DestinationInfo?.ImageUrl ?? "")'
+        })
+        .then(r => r.json())
+        .then(data => {
+        alert(data.message);
+        if (data.success) {
+        var btn = document.getElementById('wishlistBtn');
+        btn.innerHTML = '<i class="fas fa-heart me-2"></i> Saved to Wishlist';
+        btn.disabled = true;
+        btn.classList.remove('btn-outline-light');
+        btn.classList.add('btn-danger');
+        }
+        });
         }
 
         // =========================================================

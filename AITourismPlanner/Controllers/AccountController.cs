@@ -68,6 +68,7 @@ namespace AITourismPlanner.Controllers
                 _context.users.Add(user);
                 await _context.SaveChangesAsync();
 
+                // Set Sessions
                 HttpContext.Session.SetInt32("UserId", user.user_id);
                 HttpContext.Session.SetString("UserName", user.full_name);
                 HttpContext.Session.SetString("UserEmail", user.email);
@@ -117,6 +118,7 @@ namespace AITourismPlanner.Controllers
                     .Include(u => u.Role)
                     .FirstOrDefaultAsync(u => u.email == model.Email && u.password_hash == hashedPassword);
 
+                // Fallback for default Admin
                 if (user == null)
                 {
                     if (model.Email == "admin@aitourism.com" && model.Password == "admin123")
@@ -377,23 +379,8 @@ namespace AITourismPlanner.Controllers
         }
 
         // =========================================================
-        // WISHLIST / FAVORITES
+        // TOGGLE FAVORITE (Uses favorites Table)
         // =========================================================
-        [HttpGet]
-        public async Task<IActionResult> Wishlist()
-        {
-            var userId = HttpContext.Session.GetInt32("UserId");
-            if (!userId.HasValue)
-                return RedirectToAction("Login", "Account");
-
-            var wishlist = await _context.favorites
-                .Include(f => f.Destination)
-                .Where(f => f.user_id == userId)
-                .ToListAsync();
-
-            return View(wishlist);
-        }
-
         [HttpPost]
         public async Task<IActionResult> ToggleFavorite(int destinationId)
         {
@@ -422,5 +409,76 @@ namespace AITourismPlanner.Controllers
                 return Json(new { success = true, isFavorite = true, message = "Added to wishlist" });
             }
         }
+
+        // =========================================================
+        // ADD TO WISHLIST (Uses wishlists Table)
+        // =========================================================
+        [HttpPost]
+        public async Task<IActionResult> AddToWishlist(int destinationId, string destinationName, string destinationCity, decimal? estimatedCost, string imageUrl)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (!userId.HasValue)
+                return Json(new { success = false, message = "Please login first" });
+
+            var existing = await _context.wishlists
+                .FirstOrDefaultAsync(w => w.user_id == userId && w.destination_id == destinationId);
+
+            if (existing != null)
+                return Json(new { success = false, message = "Already in wishlist" });
+
+            var wishlist = new Wishlist
+            {
+                user_id = userId.Value,
+                destination_id = destinationId,
+                destination_name = destinationName,
+                destination_city = destinationCity,
+                destination_country = "Pakistan",
+                estimated_cost = estimatedCost,
+                image_url = imageUrl,
+                added_date = DateTime.Now
+            };
+
+            _context.wishlists.Add(wishlist);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Added to wishlist!" });
+        }
+
+        // =========================================================
+        // REMOVE FROM WISHLIST (Uses wishlists Table)
+        // =========================================================
+        [HttpPost]
+        public async Task<IActionResult> RemoveFromWishlist(int wishlistId)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            var wishlist = await _context.wishlists.FindAsync(wishlistId);
+
+            if (wishlist == null || wishlist.user_id != userId)
+                return Json(new { success = false });
+
+            _context.wishlists.Remove(wishlist);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true });
+        }
+
+        // =========================================================
+        // DISPLAY WISHLIST (Uses wishlists Table)
+        // =========================================================
+        [HttpGet]
+        public async Task<IActionResult> Wishlist()
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (!userId.HasValue)
+                return RedirectToAction("Login", "Account");
+
+            var wishlists = await _context.wishlists
+                .Where(w => w.user_id == userId)
+                .OrderByDescending(w => w.added_date)
+                .ToListAsync();
+
+            return View(wishlists);
+        }
+
     }
 }
