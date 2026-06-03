@@ -1,0 +1,282 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using AITourismPlanner.Data;
+using AITourismPlanner.Models;
+
+namespace AITourismPlanner.Controllers
+{
+    public class PackagesController : Controller
+    {
+        private readonly ApplicationDbContext _context;
+
+        public PackagesController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        // =========================================================
+        // PACKAGES LISTING
+        // =========================================================
+      public async Task<IActionResult> Index(string type = "all", string sort = "price_asc")
+{
+    var query = _context.packages.Where(p => p.is_active).AsQueryable();
+
+    // Filter by package type
+    if (type != "all")
+    {
+        query = query.Where(p => p.package_type != null && p.package_type == type);
+    }
+
+    // Sorting with null check
+    query = sort switch
+    {
+        "price_desc" => query.OrderByDescending(p => p.price_per_person),
+        "duration_asc" => query.OrderBy(p => p.duration_nights),
+        "rating_desc" => query.OrderByDescending(p => p.PackageReviews != null ? p.PackageReviews.Average(r => r.rating ?? 0) : 0),
+        _ => query.OrderBy(p => p.price_per_person)
+    };
+
+    var packages = await query.ToListAsync();
+
+    ViewBag.SelectedType = type;
+    ViewBag.SelectedSort = sort;
+    ViewBag.PackageTypes = new[] { "Budget", "Standard", "Premium", "Honeymoon", "Family" };
+
+    return View(packages);
+}
+        // =========================================================
+        // PACKAGE DETAILS
+        // =========================================================
+        // =========================================================
+        // PACKAGE DETAILS
+        // =========================================================
+        public async Task<IActionResult> Details(int id)
+        {
+            var package = await _context.packages
+                .Include(p => p.PackageReviews)
+                .ThenInclude(r => r.User)
+                .FirstOrDefaultAsync(p => p.package_id == id);
+
+            if (package == null)
+                return NotFound();
+
+            // Calculate average rating
+            double avgRating = 0;
+            if (package.PackageReviews != null && package.PackageReviews.Any())
+            {
+                avgRating = (double)(package.PackageReviews.Average(r => r.rating ?? 0));
+            }
+
+            ViewBag.AverageRating = avgRating;
+            ViewBag.TotalReviews = package.PackageReviews?.Count ?? 0;
+
+            return View(package);
+        }
+        // =========================================================
+        // BOOK PACKAGE - GET
+        // =========================================================
+        [HttpGet]
+        public async Task<IActionResult> Book(int id)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (!userId.HasValue)
+                return RedirectToAction("Login", "Account");
+
+            var package = await _context.packages.FindAsync(id);
+            if (package == null)
+                return NotFound();
+
+            // Calculate group discount
+            var viewModel = new PackageBookingViewModel
+            {
+                Package = package,
+                TravelDate = DateTime.Now.AddDays(7),
+                NumberOfAdults = 1,
+                NumberOfChildren = 0,
+                PricePerPerson = package.price_per_person,
+                GroupDiscountPercent = package.group_discount_percent
+            };
+
+            return View(viewModel);
+        }
+
+        // =========================================================
+        // BOOK PACKAGE - POST
+        // =========================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Book(PackageBookingViewModel model)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (!userId.HasValue)
+                return RedirectToAction("Login", "Account");
+
+            if (ModelState.IsValid)
+            {
+                var package = await _context.packages.FindAsync(model.PackageId);
+                if (package == null)
+                    return NotFound();
+
+                // Calculate total price
+                int totalPersons = model.NumberOfAdults + model.NumberOfChildren;
+                decimal baseTotal = package.price_per_person * totalPersons;
+
+                // Apply group discount (if 4+ people)
+                decimal discount = 0;
+                if (totalPersons >= 4 && package.group_discount_percent > 0)
+                {
+                    discount = baseTotal * (package.group_discount_percent / 100);
+                }
+
+                decimal finalTotal = baseTotal - discount;
+
+                // Generate booking reference
+                var reference = "PKG" + DateTime.Now.ToString("yyyyMMddHHmmss") + new Random().Next(100, 999);
+
+                var booking = new PackageBooking
+                {
+                    user_id = userId.Value,
+                    package_id = model.PackageId,
+                    booking_reference = reference,
+                    travel_date = model.TravelDate,
+                    number_of_adults = model.NumberOfAdults,
+                    number_of_children = model.NumberOfChildren,
+                    special_requests = model.SpecialRequests,
+                    dietary_needs = model.DietaryNeeds,
+                    room_preferences = model.RoomPreferences,
+                    total_price = baseTotal,
+                    discount_applied = discount,
+                    final_price = finalTotal,
+                    booking_status = "Confirmed",
+                    payment_status = "Pending",
+                    booking_date = DateTime.Now
+                };
+
+                _context.package_bookings.Add(booking);
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = $"Package booked! Reference: {reference}";
+                return RedirectToAction("MyPackageBookings");
+            }
+
+            model.Package = await _context.packages.FindAsync(model.PackageId);
+            return View(model);
+        }
+
+        // =========================================================
+        // MY PACKAGE BOOKINGS
+        // =========================================================
+
+        public async Task<IActionResult> MyPackageBookings()
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (!userId.HasValue)
+                return RedirectToAction("Login", "Account");
+
+            // Check if table exists
+            try
+            {
+                var bookings = await _context.package_bookings
+                    .Include(b => b.Package)
+                    .Where(b => b.user_id == userId)
+                    .OrderByDescending(b => b.booking_date)
+                    .ToListAsync();
+
+                return View(bookings);
+            }
+            catch (Exception ex)
+            {
+                // Table doesn't exist or has issues - return empty list
+                Console.WriteLine($"Error: {ex.Message}");
+                TempData["Error"] = "Bookings feature is being set up. Please try again later.";
+                return View(new List<PackageBooking>());
+            }
+        }
+
+        // =========================================================
+        // ADD PACKAGE REVIEW
+        // =========================================================
+        [HttpPost]
+        public async Task<IActionResult> AddReview(int packageId, int rating, string comment)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (!userId.HasValue)
+                return Json(new { success = false, message = "Please login first" });
+
+            var review = new PackageReview
+            {
+                user_id = userId.Value,
+                package_id = packageId,
+                rating = rating,
+                comment = comment,
+                created_at = DateTime.Now
+            };
+
+            _context.package_reviews.Add(review);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Review added!" });
+        }
+        // =========================================================
+        // CREATE PACKAGE BOOKING - API
+        // =========================================================
+        [HttpPost]
+        public async Task<IActionResult> CreatePackageBooking(
+            int packageId, DateTime travelDate, int numberOfAdults, int numberOfChildren,
+            string specialRequests, string dietaryNeeds, string roomPreferences,
+            string guestName, string guestPhone, string guestEmail, decimal totalPrice)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (!userId.HasValue)
+                return Json(new { success = false, message = "Please login first" });
+
+            var package = await _context.packages.FindAsync(packageId);
+            if (package == null)
+                return Json(new { success = false, message = "Package not found" });
+
+            var reference = "PKG" + DateTime.Now.ToString("yyyyMMddHHmmss") + new Random().Next(100, 999);
+
+            var booking = new PackageBooking
+            {
+                user_id = userId.Value,
+                package_id = packageId,
+                booking_reference = reference,
+                travel_date = travelDate,
+                number_of_adults = numberOfAdults,
+                number_of_children = numberOfChildren,
+                special_requests = specialRequests,
+                dietary_needs = dietaryNeeds,
+                room_preferences = roomPreferences,
+                total_price = totalPrice,
+                discount_applied = 0,
+                final_price = totalPrice,
+                booking_status = "Confirmed",
+                payment_status = "Pending",
+                booking_date = DateTime.Now
+            };
+
+            _context.package_bookings.Add(booking);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, reference = reference });
+        }
+    }
+
+    public class PackageBookingViewModel
+    {
+        public int PackageId { get; set; }
+        public Package Package { get; set; }
+        public DateTime TravelDate { get; set; }
+        public int NumberOfAdults { get; set; } = 1;
+        public int NumberOfChildren { get; set; } = 0;
+        public decimal PricePerPerson { get; set; }
+        public decimal GroupDiscountPercent { get; set; }
+        public string SpecialRequests { get; set; }
+        public string DietaryNeeds { get; set; }
+        public string RoomPreferences { get; set; }
+
+        public decimal TotalPrice => PricePerPerson * (NumberOfAdults + NumberOfChildren);
+        public decimal DiscountAmount => TotalPrice * (GroupDiscountPercent / 100);
+        public decimal FinalPrice => TotalPrice - DiscountAmount;
+    }
+}
