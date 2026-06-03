@@ -7,6 +7,7 @@
 }
 
 <!-- Hero Section with Video Background -->
+<!-- Hero Section with Typewriter Effect -->
 <section class="hero-section position-relative" style="height: 100vh; overflow: hidden;">
     <video autoplay muted loop playsinline id="heroVideo" style="position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; width: auto; height: auto; transform: translate(-50%, -50%); object-fit: cover;">
         <source src="/videos/hero-travel.mp4" type="video/mp4">
@@ -15,22 +16,69 @@
     
     <div class="container h-100 d-flex align-items-center position-relative" style="z-index: 1;">
         <div class="text-center text-white w-100">
-            <h1 class="display-1 fw-bold animate__animated animate__fadeInDown">TravelMate</h1>
-            <p class="lead fs-3 mt-3 animate__animated animate__fadeInUp">Explore Pakistan Like Never Before</p>
-            <p class="fs-5 mt-2 animate__animated animate__fadeInUp animate__delay-1s">Your AI-Powered Travel Companion</p>
-            <div class="mt-5 animate__animated animate__fadeInUp animate__delay-2s">
-                <a href="@Url.Action("Index", "Destinations")" class="btn btn-primary btn-lg mx-2 px-4 py-3">
-                    <i class="fas fa-search"></i> Explore Destinations
+            <!-- Main Title -->
+            <h1 class="display-1 fw-bold animate__animated animate__fadeInDown" style="background: linear-gradient(135deg, #FFFFFF 0%, #E0D7FF 100%); -webkit-background-clip: text; background-clip: text; color: transparent;">
+                TravelMate
+            </h1>
+            
+            <!-- Typewriter Subtitle -->
+            <div class="mt-3">
+                <p class="lead fs-2" id="typewriterText" style="font-weight: 500; min-height: 80px;"></p>
+            </div>
+            
+            <!-- Decorative Line -->
+            <div class="d-flex justify-content-center mt-3">
+                <div style="width: 60px; height: 3px; background: #FBBF24; border-radius: 3px;"></div>
+            </div>
+            
+            <!-- Buttons -->
+            <div class="mt-4">
+                <a href="@Url.Action("Index", "Destinations")" class="btn btn-primary btn-lg mx-2 px-4 py-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+                    <i class="fas fa-search me-2"></i> Explore Destinations
                 </a>
                 <a href="@Url.Action("PlanTrip", "Trips")" class="btn btn-outline-light btn-lg mx-2 px-4 py-3">
-                    <i class="fas fa-robot"></i> AI Trip Planner
+                    <i class="fas fa-robot me-2"></i> AI Trip Planner
                 </a>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Stats Counter Section -->
+<script>
+    // Typewriter Effect
+    const texts = [
+        "Explore Pakistan Like Never Before ✨",
+        "Your AI-Powered Travel Companion 🤖",
+        "Discover Hidden Gems 🌄",
+        "Plan Your Dream Trip ✈️"
+    ];
+    let count = 0;
+    let index = 0;
+    let currentText = '';
+    let letter = '';
+    
+    function typeWriter() {
+        if (count === texts.length) {
+            count = 0;
+        }
+        currentText = texts[count];
+        letter = currentText.slice(0, ++index);
+        
+        document.getElementById('typewriterText').innerHTML = letter;
+        
+        if (letter.length === currentText.length) {
+            setTimeout(() => {
+                index = 0;
+                count++;
+                typeWriter();
+            }, 2000);
+        } else {
+            setTimeout(typeWriter, 100);
+        }
+    }
+    
+    typeWriter();
+</script>r Section -->
 <section class="stats-section py-5" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
     <div class="container">
         <div class="row text-center text-white g-4">
@@ -280,7 +328,7 @@
             </div>
             <div class="col-md-3 col-sm-6">
                 <div class="card hotel-card shadow-sm border-0 rounded-4 h-100">
-                    <img src="/images/hotels/avari.jpg" class="card-img-top rounded-top-4" style="height: 180px; width: 100%; object-fit: cover;" alt="Avari Hotel">
+                   <img src="/images/hotels/avari.jpg" class="card-img-top rounded-top-4" style="height: 180px; width: 100%; object-fit: cover;" alt="Avari Hotel">
                     <div class="card-body p-3">
                         <h6 class="card-title fw-bold">Avari Hotel</h6>
                         <div class="mb-2">
