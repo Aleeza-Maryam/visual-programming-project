@@ -33,7 +33,7 @@
         .navbar {
             background: white;
             box-shadow: 0 2px 20px rgba(0,0,0,0.1);
-            padding: 1rem 0;
+            padding: 0.8rem 0;
             transition: all 0.3s ease;
         }
 
@@ -47,7 +47,9 @@
             font-weight: 500;
             color: #333 !important;
             transition: all 0.3s ease;
-            margin: 0 0.5rem;
+            margin: 0 0.3rem;
+            padding: 0.5rem 0.8rem;
+            font-size: 0.95rem;
         }
 
         .nav-link:hover {
@@ -63,8 +65,9 @@
         }
 
         .dropdown-item {
-            padding: 0.7rem 1.5rem;
+            padding: 0.5rem 1.2rem;
             transition: all 0.3s ease;
+            font-size: 0.9rem;
         }
 
         .dropdown-item:hover {
@@ -95,6 +98,8 @@
             color: white;
             border: none;
             transition: all 0.3s ease;
+            padding: 0.4rem 1rem;
+            font-size: 0.9rem;
         }
 
         .btn-gradient:hover {
@@ -124,6 +129,53 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #5a67d8;
         }
+
+        /* Fix main content margin to account for navbar */
+        main {
+            margin-top: 70px;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* Responsive fixes */
+        @@media (max-width: 991px) {
+            .navbar {
+                padding: 0.5rem 0;
+            }
+            .navbar-nav {
+                padding: 10px 0;
+            }
+            .nav-link {
+                padding: 0.5rem 1rem;
+                margin: 0;
+            }
+            .dropdown-menu {
+                border: none;
+                box-shadow: none;
+                background: transparent;
+                padding-left: 20px;
+            }
+            .dropdown-item:hover {
+                transform: none;
+            }
+            .btn-gradient {
+                margin-top: 5px;
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.3rem;
+            }
+            .nav-link {
+                font-size: 0.85rem;
+                padding: 0.4rem 0.8rem;
+            }
+            main {
+                margin-top: 65px;
+            }
+        }
     </style>
 
     @await RenderSectionAsync("Styles", required: false)
@@ -132,8 +184,14 @@
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
         <div class="container">
+<<<<<<< HEAD
             <a class="navbar-brand fw-bold fs-3" href="@Url.Action("Index", "Home")">
                 <i class="fas fa-map-marked-alt text-primary"></i> TravelMate
+=======
+            <a class="navbar-brand fw-bold fs-3" href="@Url.Action("Index", "Home")" style="text-decoration: none;">
+                <i class="fas fa-map-marked-alt me-2" style="color: #667eea; transition: transform 0.3s ease;"></i>
+                <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; background-clip: text; color: transparent;">TravelMate</span>
+>>>>>>> 68fefe83ef2abfe436d543caf2d003efc45b25bf
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -146,7 +204,11 @@
                         </a>
                     </li>
                     <li class="nav-item">
+<<<<<<< HEAD
                         <a class="nav-link" href="@Url.Action("Index", "Destination")">
+=======
+                        <a class="nav-link" href="@Url.Action("Index", "Destinations")">
+>>>>>>> 68fefe83ef2abfe436d543caf2d003efc45b25bf
                             <i class="fas fa-map-marked-alt"></i> Destinations
                         </a>
                     </li>
@@ -182,8 +244,12 @@
                             <i class="fas fa-briefcase"></i> Services
                         </a>
                         <ul class="dropdown-menu">
+<<<<<<< HEAD
                             <li><a class="dropdown-item" href="@Url.Action("Index", "Hotels")"><i class="fas fa-hotel"></i> Hotels</a></li>
                             <li><a class="dropdown-item" href="@Url.Action("Search", "RealHotels")"><i class="fas fa-globe"></i> Real Hotels (API)</a></li>
+=======
+                            <li><a class="dropdown-item" href="@Url.Action("Search", "RealHotels")"><i class="fas fa-globe"></i> Hotels</a></li>
+>>>>>>> 68fefe83ef2abfe436d543caf2d003efc45b25bf
                             <li><a class="dropdown-item" href="@Url.Action("Search", "Transport")"><i class="fas fa-bus"></i> Transport</a></li>
                             <li><a class="dropdown-item" href="@Url.Action("Index", "Chatbot")"><i class="fas fa-comment-dots"></i> AI Chatbot</a></li>
                         </ul>
@@ -210,6 +276,8 @@
                                 <li><a class="dropdown-item" href="@Url.Action("Dashboard", "Account")"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                                 <li><a class="dropdown-item" href="@Url.Action("MyTrips", "Trips")"><i class="fas fa-plane"></i> My Trips</a></li>
                                 <li><a class="dropdown-item" href="@Url.Action("MyBookings", "HotelBooking")"><i class="fas fa-ticket-alt"></i> My Bookings</a></li>
+
+                                <li><a class="dropdown-item" href="@Url.Action("MyBookings", "Bookings")"><i class="fas fa-ticket-alt"></i> My Bookings</a></li>
                                 <li><a class="dropdown-item" href="@Url.Action("Wishlist", "Account")"><i class="fas fa-heart"></i> Favorites</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="@Url.Action("Logout", "Account")"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
@@ -235,7 +303,7 @@
     </nav>
 
     <!-- Main Content -->
-    <main style="margin-top: 76px;">
+    <main>
         @RenderBody()
     </main>
 
@@ -303,6 +371,17 @@
                 document.getElementById('mainNav').classList.remove('navbar-scrolled');
             }
         });
+
+        // Add hover animation for icon
+        var brandLink = document.querySelector('.navbar-brand');
+        if (brandLink) {
+            brandLink.addEventListener('mouseenter', function() {
+                this.querySelector('i').style.transform = 'rotate(-5deg) scale(1.1)';
+            });
+            brandLink.addEventListener('mouseleave', function() {
+                this.querySelector('i').style.transform = 'rotate(0deg) scale(1)';
+            });
+        }
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)
