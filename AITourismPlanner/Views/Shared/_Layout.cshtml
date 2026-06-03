@@ -146,9 +146,10 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Index", "Destination")">
-                            <i class="fas fa-map-marked-alt"></i> Destinations
-                        </a>
+                       <a class="nav-link" href="@Url.Action("Index", "Destinations")" 
+                         <i class="fas fa-map-marked-alt"></i> Destinations
+                       </>
+                    </li>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="@Url.Action("PlanTrip", "Trips")">
@@ -182,8 +183,8 @@
                             <i class="fas fa-briefcase"></i> Services
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="@Url.Action("Index", "Hotels")"><i class="fas fa-hotel"></i> Hotels</a></li>
-                            <li><a class="dropdown-item" href="@Url.Action("Search", "RealHotels")"><i class="fas fa-globe"></i> Real Hotels (API)</a></li>
+                            @* <li><a class="dropdown-item" href="@Url.Action("Index", "Hotels")"><i class="fas fa-hotel"></i> Hotels</a></li> *@
+                            <li><a class="dropdown-item" href="@Url.Action("Search", "RealHotels")"><i class="fas fa-globe"></i> Hotels </a></li>
                             <li><a class="dropdown-item" href="@Url.Action("Search", "Transport")"><i class="fas fa-bus"></i> Transport</a></li>
                             <li><a class="dropdown-item" href="@Url.Action("Index", "Chatbot")"><i class="fas fa-comment-dots"></i> AI Chatbot</a></li>
                         </ul>
@@ -257,11 +258,11 @@
                     <h5>Quick Links</h5>
                     <ul class="list-unstyled">
                         <li><a href="@Url.Action("Index", "Home")">Home</a></li>
-                        <li><a href="@Url.Action("Index", "Destination")">Destinations</a></li>
+                        <li><a href="@Url.Action("Index", "Destinations")">Destinations</a></li>
                         <li><a href="@Url.Action("PlanTrip", "Trips")">AI Planner</a></li>
                         <li><a href="@Url.Action("Index", "Weather")">Weather</a></li>
                         <li><a href="@Url.Action("Search", "Transport")">Transport</a></li>
-                        <li><a href="@Url.Action("Search", "RealHotels")">Real Hotels</a></li>
+                        <li><a href="@Url.Action("Search", "RealHotels")">Hotels</a></li>
                         <li><a href="@Url.Action("About", "Home")">About Us</a></li>
                     </ul>
                 </div>

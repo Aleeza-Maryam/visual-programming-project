@@ -31,4 +31,9 @@
 		</PackageReference>
 	</ItemGroup>
 
+
+	<ItemGroup>
+	  <Folder Include="wwwroot\images\images\" />
+	</ItemGroup>
+
 </Project>
