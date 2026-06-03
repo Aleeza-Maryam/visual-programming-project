@@ -132,10 +132,9 @@
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
         <div class="container">
-            <a class="navbar-brand fw-bold fs-3" href="@Url.Action("Index", "Home")" style="text-decoration: none;">
-    <i class="fas fa-map-marked-alt me-2" style="color: #667eea; transition: transform 0.3s ease;"></i>
-    <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; background-clip: text; color: transparent;">TravelMate</span>
-</a>
+            <a class="navbar-brand fw-bold fs-3" href="@Url.Action("Index", "Home")">
+                <i class="fas fa-map-marked-alt text-primary"></i> TravelMate
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -147,10 +146,9 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                       <a class="nav-link" href="@Url.Action("Index", "Destinations")" 
-                         <i class="fas fa-map-marked-alt"></i> Destinations
-                       </>
-                    </li>
+                        <a class="nav-link" href="@Url.Action("Index", "Destination")">
+                            <i class="fas fa-map-marked-alt"></i> Destinations
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="@Url.Action("PlanTrip", "Trips")">
@@ -178,18 +176,14 @@
                             <i class="fas fa-globe"></i> Real Hotels
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Index", "Packages")">
-                            <i class="fas fa-box"></i> Packages
-                        </a>
-                    </li>
+                    
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="fas fa-briefcase"></i> Services
                         </a>
                         <ul class="dropdown-menu">
-                            @* <li><a class="dropdown-item" href="@Url.Action("Index", "Hotels")"><i class="fas fa-hotel"></i> Hotels</a></li> *@
-                            <li><a class="dropdown-item" href="@Url.Action("Search", "RealHotels")"><i class="fas fa-globe"></i> Hotels </a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("Index", "Hotels")"><i class="fas fa-hotel"></i> Hotels</a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("Search", "RealHotels")"><i class="fas fa-globe"></i> Real Hotels (API)</a></li>
                             <li><a class="dropdown-item" href="@Url.Action("Search", "Transport")"><i class="fas fa-bus"></i> Transport</a></li>
                             <li><a class="dropdown-item" href="@Url.Action("Index", "Chatbot")"><i class="fas fa-comment-dots"></i> AI Chatbot</a></li>
                         </ul>
@@ -215,7 +209,7 @@
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" href="@Url.Action("Dashboard", "Account")"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                                 <li><a class="dropdown-item" href="@Url.Action("MyTrips", "Trips")"><i class="fas fa-plane"></i> My Trips</a></li>
-                                <li><a class="dropdown-item" href="@Url.Action("MyBookings", "Bookings")">><i class="fas fa-ticket-alt"></i> My Bookings</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("MyBookings", "HotelBooking")"><i class="fas fa-ticket-alt"></i> My Bookings</a></li>
                                 <li><a class="dropdown-item" href="@Url.Action("Wishlist", "Account")"><i class="fas fa-heart"></i> Favorites</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="@Url.Action("Logout", "Account")"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
@@ -263,11 +257,11 @@
                     <h5>Quick Links</h5>
                     <ul class="list-unstyled">
                         <li><a href="@Url.Action("Index", "Home")">Home</a></li>
-                        <li><a href="@Url.Action("Index", "Destinations")">Destinations</a></li>
+                        <li><a href="@Url.Action("Index", "Destination")">Destinations</a></li>
                         <li><a href="@Url.Action("PlanTrip", "Trips")">AI Planner</a></li>
                         <li><a href="@Url.Action("Index", "Weather")">Weather</a></li>
                         <li><a href="@Url.Action("Search", "Transport")">Transport</a></li>
-                        <li><a href="@Url.Action("Search", "RealHotels")">Hotels</a></li>
+                        <li><a href="@Url.Action("Search", "RealHotels")">Real Hotels</a></li>
                         <li><a href="@Url.Action("About", "Home")">About Us</a></li>
                     </ul>
                 </div>
@@ -310,13 +304,6 @@
             }
         });
     </script>
-     // Add hover animation for icon
-    document.querySelector('.navbar-brand').addEventListener('mouseenter', function() {
-        this.querySelector('i').style.transform = 'rotate(-5deg) scale(1.1)';
-    });
-    document.querySelector('.navbar-brand').addEventListener('mouseleave', function() {
-        this.querySelector('i').style.transform = 'rotate(0deg) scale(1)';
-    });
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

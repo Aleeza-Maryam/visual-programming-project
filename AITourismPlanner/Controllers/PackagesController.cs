@@ -260,6 +260,123 @@ namespace AITourismPlanner.Controllers
 
             return Json(new { success = true, reference = reference });
         }
+        // =========================================================
+        // DOWNLOAD VOUCHER
+        // =========================================================
+        [HttpPost]
+        public async Task<IActionResult> CancelPackageBooking(int id)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            var booking = await _context.package_bookings.FindAsync(id);
+
+            if (booking == null || booking.user_id != userId)
+                return Json(new { success = false, message = "Booking not found" });
+
+            if (booking.travel_date <= DateTime.Now.AddDays(1))
+                return Json(new { success = false, message = "Cannot cancel booking within 24 hours of travel date" });
+
+            booking.booking_status = "Cancelled";
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Booking cancelled successfully!" });
+        }
+        [HttpGet]
+        public async Task<IActionResult> DownloadVoucher(string reference)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (!userId.HasValue)
+                return RedirectToAction("Login", "Account");
+
+            var booking = await _context.package_bookings
+                .Include(b => b.Package)
+                .FirstOrDefaultAsync(b => b.booking_reference == reference && b.user_id == userId);
+
+            if (booking == null)
+                return NotFound();
+
+            // Create HTML voucher
+            var html = $@"
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset='utf-8'>
+        <title>Tour Package Voucher</title>
+        <style>
+            body {{ font-family: Arial, sans-serif; padding: 40px; }}
+            .voucher {{ border: 2px solid #4CAF50; border-radius: 10px; padding: 20px; max-width: 800px; margin: 0 auto; }}
+            .header {{ text-align: center; border-bottom: 1px solid #ddd; padding-bottom: 15px; }}
+            .company-name {{ color: #4CAF50; font-size: 28px; font-weight: bold; }}
+            .title {{ font-size: 24px; font-weight: bold; text-align: center; margin: 20px 0; }}
+            .details {{ margin: 20px 0; }}
+            .row {{ display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }}
+            .label {{ font-weight: bold; width: 40%; }}
+            .value {{ width: 60%; }}
+            .footer {{ text-align: center; margin-top: 30px; font-size: 12px; color: #666; }}
+            .status-confirmed {{ color: green; font-weight: bold; }}
+            button {{ background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 20px; }}
+            button:hover {{ background: #45a049; }}
+        </style>
+    </head>
+    <body>
+        <div class='voucher' id='voucher'>
+            <div class='header'>
+                <div class='company-name'>AI Tourism Planner</div>
+                <p>Tour Confirmation Voucher</p>
+            </div>
+            <div class='title'>✨ Booking Confirmed ✨</div>
+            <div class='details'>
+                <div class='row'><div class='label'>Booking Reference:</div><div class='value'><strong>{booking.booking_reference}</strong></div></div>
+                <div class='row'><div class='label'>Status:</div><div class='value'><span class='status-confirmed'>Confirmed</span></div></div>
+                <div class='row'><div class='label'>Package Name:</div><div class='value'>{booking.Package?.package_name}</div></div>
+                <div class='row'><div class='label'>Destination:</div><div class='value'>{booking.Package?.destination_name}</div></div>
+                <div class='row'><div class='label'>Travel Date:</div><div class='value'>{booking.travel_date.ToString("dd MMM yyyy")}</div></div>
+                <div class='row'><div class='label'>Duration:</div><div class='value'>{booking.Package?.duration_days} Days / {booking.Package?.duration_nights} Nights</div></div>
+                <div class='row'><div class='label'>Number of Adults:</div><div class='value'>{booking.number_of_adults}</div></div>
+                <div class='row'><div class='label'>Number of Children:</div><div class='value'>{booking.number_of_children}</div></div>
+                <div class='row'><div class='label'>Hotel:</div><div class='value'>{booking.Package?.hotel_name} ({booking.Package?.hotel_stars}⭐)</div></div>
+                <div class='row'><div class='label'>Transport:</div><div class='value'>{booking.Package?.transport_type}</div></div>
+                <div class='row'><div class='label'>Meals Included:</div><div class='value'>{booking.Package?.meals_included}</div></div>
+                <div class='row'><div class='label'>Total Price:</div><div class='value'><strong style='color:#4CAF50; font-size:18px;'>PKR {booking.final_price:N0}</strong></div></div>
+            </div>
+            <div class='footer'>
+                <p>Thank you for booking with AI Tourism Planner!</p>
+                <p>For any queries, contact us at support@aitourism.com | +92 300 1234567</p>
+            </div>
+        </div>
+        <div style='text-align:center;'>
+            <button onclick='window.print();'>🖨️ Print / Save as PDF</button>
+        </div>
+        <script>
+            // Auto trigger print
+            setTimeout(function() {{ window.print(); }}, 500);
+        </script>
+    </body>
+    </html>";
+
+            return Content(html, "text/html");
+        }
+
+        // =========================================================
+        // CANCEL BOOKING
+        // =========================================================
+        [HttpPost]
+        public async Task<IActionResult> CancelBooking(int bookingId)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            var booking = await _context.package_bookings.FindAsync(bookingId);
+
+            if (booking == null || booking.user_id != userId)
+                return Json(new { success = false, message = "Booking not found" });
+
+            // Check if travel date is in future (at least 2 days ahead for cancellation)
+            if (booking.travel_date <= DateTime.Now.AddDays(1))
+                return Json(new { success = false, message = "Cannot cancel booking within 24 hours of travel date" });
+
+            booking.booking_status = "Cancelled";
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Booking cancelled successfully!" });
+        }
     }
 
     public class PackageBookingViewModel
