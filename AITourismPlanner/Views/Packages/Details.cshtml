@@ -1,0 +1,299 @@
+﻿@model AITourismPlanner.Models.Package
+@{
+    ViewData["Title"] = Model.package_name;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Home</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Packages")">Packages</a></li>
+            <li class="breadcrumb-item active">@Model.package_name</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                <img src="@Model.cover_image" class="img-fluid" style="height:400px; width:100%; object-fit:cover;" alt="@Model.package_name">
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h1 class="fw-bold">@Model.package_name</h1>
+                            <p class="text-muted">
+                                <i class="fas fa-map-marker-alt me-1"></i> @Model.destination_name
+                            </p>
+                        </div>
+                        <span class="badge @(Model.package_type == "Budget" ? "bg-success" : Model.package_type == "Premium" ? "bg-danger" : "bg-primary") fs-6 px-3 py-2">
+                            @Model.package_type Package
+                        </span>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3 text-center">
+                            <i class="fas fa-clock fa-2x text-primary mb-2"></i>
+                            <p class="fw-bold mb-0">@Model.duration_days Days</p>
+                            <small class="text-muted">@Model.duration_nights Nights</small>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <i class="fas fa-hotel fa-2x text-primary mb-2"></i>
+                            <p class="fw-bold mb-0">@(Model.hotel_stars) Star</p>
+                            <small class="text-muted">@Model.hotel_name</small>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <i class="fas fa-bus fa-2x text-primary mb-2"></i>
+                            <p class="fw-bold mb-0">@Model.transport_type</p>
+                            <small class="text-muted">Transport</small>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <i class="fas fa-utensils fa-2x text-primary mb-2"></i>
+                            <p class="fw-bold mb-0">@Model.meals_included</p>
+                            <small class="text-muted">Meals</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold"><i class="fas fa-check-circle text-success me-2"></i>Inclusions</h5>
+                        <p>@Model.inclusions</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold"><i class="fas fa-times-circle text-danger me-2"></i>Exclusions</h5>
+                        <p>@Model.exclusions</p>
+                    </div>
+
+                    <div class="card border-0 shadow-sm rounded-4 mb-4">
+                        <div class="card-body p-4">
+                            <h5 class="fw-bold mb-3"><i class="fas fa-cloud-sun text-primary me-2"></i>5-Day Weather Forecast for @Model.destination_name</h5>
+                            <div id="weatherInfo" class="py-2">
+                                <div class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading weather...</span>
+                                    </div>
+                                    <p class="text-muted small mt-2">Fetching real-time updates...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm rounded-4 mb-4">
+                        <div class="card-body p-4">
+                            <h5 class="fw-bold mb-3"><i class="fas fa-map text-primary me-2"></i>Location Map</h5>
+                            <div id="packageMap" style="height: 350px; border-radius: 12px; z-index: 1;"></div>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.daily_itinerary))
+                    {
+                        <div class="mb-4">
+                            <h5 class="fw-bold"><i class="fas fa-calendar-alt text-primary me-2"></i>Day-by-Day Itinerary</h5>
+                            <div class="bg-light rounded-4 p-3">
+                                @foreach (var line in Model.daily_itinerary.Split('\n'))
+                                {
+                                    if (!string.IsNullOrWhiteSpace(line))
+                                    {
+                                        <p class="mb-2"><i class="fas fa-arrow-right text-primary me-2 small"></i>@line</p>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.special_features))
+                    {
+                        <div class="mb-4">
+                            <h5 class="fw-bold"><i class="fas fa-star text-warning me-2"></i>Special Features</h5>
+                            <div class="bg-light rounded-4 p-3">
+                                @foreach (var feature in Model.special_features.Split('\n'))
+                                {
+                                    if (!string.IsNullOrWhiteSpace(feature))
+                                    {
+                                        <p class="mb-1">✨ @feature</p>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-lg rounded-4 position-sticky" style="top: 20px;">
+                <div class="card-body p-4">
+                    <h3 class="text-primary fw-bold mb-2">PKR @Model.price_per_person.ToString("N0")</h3>
+                    <p class="text-muted mb-3">per person</p>
+
+                    @if (Model.group_discount_percent > 0)
+                    {
+                        <div class="alert alert-info mb-3">
+                            <i class="fas fa-users me-2"></i>
+                            Group discount: @Model.group_discount_percent% off for 4+ people
+                        </div>
+                    }
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <i class="fas fa-check-circle text-success me-2"></i> Free cancellation
+                    </div>
+                    <div class="mb-3">
+                        <i class="fas fa-check-circle text-success me-2"></i> Best price guarantee
+                    </div>
+                    <div class="mb-3">
+                        <i class="fas fa-check-circle text-success me-2"></i> 24/7 customer support
+                    </div>
+
+                    <hr>
+
+                    <a href="@Url.Action("Book", new { id = Model.package_id })" class="btn btn-primary w-100 py-2 fw-bold">
+                        <i class="fas fa-calendar-check me-2"></i>Book Now
+                    </a>
+
+                    <p class="text-muted small text-center mt-3 mb-0">
+                        No prepayment needed. Pay at the hotel.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .position-sticky {
+        position: sticky;
+        top: 20px;
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+
+<script>
+    var map = null;
+    var destinationName = decodeHtml('@Html.Raw(System.Web.HttpUtility.JavaScriptStringEncode(Model.destination_name))');
+    var apiKey = '657011025db3afd05c1605cbdaf7bd54';
+
+    function decodeHtml(html) {
+    var txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
+    }
+
+    async function initWeatherAndMap() {
+    try {
+    var geocodeResponse = await fetch('https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(destinationName) + ',Pakistan&format=json&limit=1');
+    var geocodeData = await geocodeResponse.json();
+
+    if (geocodeData && geocodeData.length > 0) {
+    var lat = parseFloat(geocodeData[0].lat);
+    var lon = parseFloat(geocodeData[0].lon);
+
+    loadMap(lat, lon);
+    await load5DayForecast(lat, lon);
+    } else {
+    handleErrorState();
+    }
+    } catch (error) {
+    console.error("Initialization failed:", error);
+    handleErrorState();
+    }
+    }
+
+    async function load5DayForecast(lat, lon) {
+    try {
+    var response = await fetch('https://api.openweathermap.org/data/2.5/forecast?lat=' + lat + '&lon=' + lon + '&units=metric&appid=' + apiKey);
+    var data = await response.json();
+
+    if (data && data.list) {
+    var forecastHtml = '<div class="row g-2 justify-content-center">';
+    var uniqueDays = [];
+    var trackDates = [];
+
+    // Strict filter to isolate exact separate dates
+    data.list.forEach(function(item) {
+    var itemDate = item.dt_txt.split(' ')[0]; // Gets only 'YYYY-MM-DD'
+
+    if (!trackDates.includes(itemDate) && item.dt_txt.includes("12:00:00")) {
+    trackDates.push(itemDate);
+    uniqueDays.push(item);
+    }
+    });
+
+    // Fallback loop if data bracket missing
+    if (uniqueDays.length < 5) {
+    data.list.forEach(function(item) {
+    var itemDate = item.dt_txt.split(' ')[0];
+    if (!trackDates.includes(itemDate)) {
+    trackDates.push(itemDate);
+    uniqueDays.push(item);
+    }
+    });
+    }
+
+    // Strictly bound list to max 5 components
+    uniqueDays = uniqueDays.slice(0, 5);
+
+    uniqueDays.forEach(function(day) {
+    var dateObj = new Date(day.dt * 1000);
+    var dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+    var dateStr = dateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+
+    var temp = Math.round(day.main.temp);
+    var iconCode = day.weather[0].icon;
+    var description = day.weather[0].description;
+
+    forecastHtml += '<div class="col-md-2 col-sm-4 col-6 text-center mx-md-1 mb-2">' +
+    '<div class="p-3 bg-light rounded-4 border-0 shadow-sm h-100">' +
+    '<p class="fw-bold text-primary mb-0">' + dayName + '</p>' +
+    '<small class="text-muted d-block mb-1">' + dateStr + '</small>' +
+    '<img src="https://openweathermap.org/img/wn/' + iconCode + '@@2x.png" alt="' + description + '" style="width: 45px; height: 45px;" />' +
+    '<p class="fw-bold fs-5 mb-0">' + temp + '°C</p>' +
+    '<small class="text-muted text-capitalize small d-block" style="font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="' + description + '">' + description + '</small>' +
+    '</div>' +
+    '</div>';
+    });
+
+    forecastHtml += '</div>';
+    document.getElementById('weatherInfo').innerHTML = forecastHtml;
+    } else {
+    document.getElementById('weatherInfo').innerHTML = '<p class="text-muted p-2 text-center">Forecast currently unavailable.</p>';
+    }
+    } catch (error) {
+    console.error("Weather parser exception:", error);
+    document.getElementById('weatherInfo').innerHTML = '<p class="text-muted p-2 text-center">Failed to load weather forecast.</p>';
+    }
+    }
+
+    function loadMap(lat, lon) {
+    try {
+    if (map !== null) {
+    map.remove();
+    }
+    map = L.map('packageMap').setView([lat, lon], 10);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    L.marker([lat, lon]).addTo(map).bindPopup(destinationName).openPopup();
+
+    setTimeout(function() {
+    map.invalidateSize();
+    }, 200);
+    } catch (error) {
+    console.error("Leaflet logic error:", error);
+    document.getElementById('packageMap').innerHTML = '<div class="alert alert-warning">Map could not be rendered.</div>';
+    }
+    }
+
+    function handleErrorState() {
+    document.getElementById('weatherInfo').innerHTML = '<p class="text-muted p-2 text-center">Weather info not available for this region.</p>';
+    document.getElementById('packageMap').innerHTML = '<div class="alert alert-warning">Location map not available</div>';
+    }
+
+    initWeatherAndMap();
+</script>

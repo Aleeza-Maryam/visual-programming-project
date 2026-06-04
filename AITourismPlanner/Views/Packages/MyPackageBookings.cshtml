@@ -1,0 +1,107 @@
+﻿@model List<AITourismPlanner.Models.PackageBooking>
+@{
+    ViewData["Title"] = "My Package Bookings";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4">
+    <h1 class="display-5 fw-bold mb-4">
+        <i class="fas fa-box text-primary me-2"></i>My Package Bookings
+    </h1>
+
+    @if (Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var booking in Model)
+            {
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm rounded-4 @(booking.booking_status == "Cancelled" ? "opacity-75" : "")">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="fw-bold">@booking.Package?.package_name</h5>
+                                    <p class="text-muted small mb-0">
+                                        <i class="fas fa-map-marker-alt me-1"></i> @booking.Package?.destination_name
+                                    </p>
+                                </div>
+                                <span class="badge @(booking.booking_status == "Confirmed" ? "bg-success" : booking.booking_status == "Cancelled" ? "bg-danger" : "bg-warning") fs-6 px-3 py-2">
+                                    @booking.booking_status
+                                </span>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Travel Date</small>
+                                    <strong>@booking.travel_date.ToString("dd MMM yyyy")</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Duration</small>
+                                    <strong>@booking.Package?.duration_days Days / @booking.Package?.duration_nights Nights</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Travelers</small>
+                                    <strong>@booking.number_of_adults Adults, @booking.number_of_children Children</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Total Price</small>
+                                    <strong class="text-primary fs-5">PKR @booking.final_price.ToString("N0")</strong>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <a href="@Url.Action("Details", "Packages", new { id = booking.package_id })" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-eye me-1"></i> View Package
+                                </a>
+                                <a href="@Url.Action("DownloadVoucher", "Packages", new { reference = booking.booking_reference })" class="btn btn-outline-success btn-sm" target="_blank">
+                                    <i class="fas fa-download me-1"></i> Download Voucher
+                                </a>
+                                @if (booking.booking_status == "Confirmed" && booking.travel_date > DateTime.Now.AddDays(1))
+                                {
+                                    <button class="btn btn-outline-danger btn-sm" onclick="cancelBooking(@booking.booking_id)">
+                                        <i class="fas fa-times me-1"></i> Cancel
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-box fa-4x text-muted mb-3"></i>
+            <h3>No Package Bookings Yet</h3>
+            <p class="text-muted">Book your first tour package!</p>
+            <a href="@Url.Action("Index", "Packages")" class="btn btn-primary mt-2">Explore Packages</a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function cancelBooking(bookingId) {
+            if (confirm('Are you sure you want to cancel this booking? This action cannot be undone.')) {
+                fetch('@Url.Action("CancelBooking", "Packages")', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `bookingId=${bookingId}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert(data.message || 'Failed to cancel booking');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                });
+            }
+        }
+    </script>
+}
