@@ -262,7 +262,7 @@ namespace AITourismPlanner.Controllers
 
                 // 2. Email Setup (MailKit)
                 var emailMessage = new MimeMessage();
-                emailMessage.From.Add(new MailboxAddress("TravelMate AI", "yourmail@gmail.com")); // Apni verified Gmail ID lagayein
+                emailMessage.From.Add(new MailboxAddress("TravelMate AI", "naveedshanza005@gmail.com")); // Apni verified Gmail ID lagayein
                 emailMessage.To.Add(new MailboxAddress(customerName, customerEmail));
                 emailMessage.Subject = $"✈️ Booking Confirmed: Itinerary for {packageName}";
 
@@ -294,7 +294,7 @@ namespace AITourismPlanner.Controllers
                 using (var smtpClient = new SmtpClient())
                 {
                     smtpClient.Connect("smtp.gmail.com", 587, false);
-                    smtpClient.Authenticate("yourmail@gmail.com", "app password"); // Apna 16-digits ka secure app password lagayein
+                    smtpClient.Authenticate("naveedshanza005@gmail.com", "zvyp yiui rsiq ssst"); // Apna 16-digits ka secure app password lagayein
 
                     smtpClient.Send(emailMessage);
                     smtpClient.Disconnect(true);

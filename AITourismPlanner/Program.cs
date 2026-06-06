@@ -9,6 +9,9 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IRealHotelService, RealHotelService>();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<IWeatherService, WeatherService>();
+builder.Services.AddScoped<IAITourismService, AITourismService>();
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient();
 // =========================================================
 // DATABASE CONNECTION FOR .NET 10
 // =========================================================a

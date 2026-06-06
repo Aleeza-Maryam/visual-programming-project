@@ -4,6 +4,7 @@
 @{
     ViewData["Title"] = "TravelMate - Your AI Travel Companion";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var userId = Context.Session.GetInt32("UserId");
 }
 
 <!-- Hero Section with Video Background -->
@@ -78,7 +79,9 @@
     }
     
     typeWriter();
-</script>r Section -->
+</script>
+
+<!-- Stats Section -->
 <section class="stats-section py-5" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
     <div class="container">
         <div class="row text-center text-white g-4">
@@ -125,7 +128,7 @@
             <div class="col-md-10">
                 <form asp-action="Search" asp-controller="Destinations" method="get" class="row g-2">
                     <div class="col-md-4">
-                        <input type="text" name="searchTerm" class="form-control form-control-lg" placeholder="Where to?">
+                        <input type="text" id="searchInput" name="searchTerm" class="form-control form-control-lg" placeholder="Where to?" autocomplete="off">
                     </div>
                     <div class="col-md-3">
                         <select name="category" class="form-select form-select-lg">
@@ -148,10 +151,36 @@
                         </button>
                     </div>
                 </form>
+                <!-- Autocomplete Dropdown -->
+                <div id="autocompleteResults" class="autocomplete-dropdown" style="display: none;"></div>
             </div>
         </div>
     </div>
 </section>
+
+<!-- ========================================================= -->
+<!-- AI PERSONALIZED RECOMMENDATIONS (Only for logged-in users) -->
+<!-- ========================================================= -->
+@if (userId.HasValue)
+{
+    <section class="ai-recommendations-section py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-4">
+                <h2 class="display-5 fw-bold">
+                    <i class="fas fa-robot text-primary"></i> Recommended For You
+                </h2>
+                <p class="lead text-muted">Based on your travel preferences</p>
+            </div>
+            <div id="aiRecommendations" class="row g-4">
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading recommendations...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+}
 
 <!-- Popular Destinations -->
 <section class="destinations-section py-5">
@@ -219,7 +248,7 @@
             <div class="col-md-4">
                 <div class="card destination-card h-100 shadow-lg border-0 rounded-4 overflow-hidden">
                     <div class="position-relative">
-                       <img src="/images/destinations/skardu.jpg" class="card-img-top" style="height: 250px; width: 100%; object-fit: cover;" alt="Skardu">
+                        <img src="/images/destinations/skardu.jpg" class="card-img-top" style="height: 250px; width: 100%; object-fit: cover;" alt="Skardu">
                         <div class="position-absolute top-0 end-0 m-3">
                             <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">
                                 <i class="fas fa-star text-warning"></i> 4.9
@@ -279,7 +308,8 @@
         <div class="row g-4">
             <div class="col-md-3 col-sm-6">
                 <div class="card hotel-card shadow-sm border-0 rounded-4 h-100">
-                   <img src="/images/hotels/serena.jpg" class="card-img-top rounded-top-4" style="height: 180px; width: 100%; object-fit: cover;" alt="Serena Hotel">                    <div class="card-body p-3">
+                    <img src="/images/hotels/serena.jpg" class="card-img-top rounded-top-4" style="height: 180px; width: 100%; object-fit: cover;" alt="Serena Hotel">
+                    <div class="card-body p-3">
                         <h6 class="card-title fw-bold">Serena Hotel</h6>
                         <div class="mb-2">
                             <i class="fas fa-star text-warning small"></i>
@@ -295,7 +325,8 @@
             </div>
             <div class="col-md-3 col-sm-6">
                 <div class="card hotel-card shadow-sm border-0 rounded-4 h-100">
-                    <img src="/images/hotels/pearl-continental.jpg" class="card-img-top rounded-top-4" style="height: 180px; width: 100%; object-fit: cover;" alt="Pearl Continental">                    <div class="card-body p-3">
+                    <img src="/images/hotels/pearl-continental.jpg" class="card-img-top rounded-top-4" style="height: 180px; width: 100%; object-fit: cover;" alt="Pearl Continental">
+                    <div class="card-body p-3">
                         <h6 class="card-title fw-bold">Pearl Continental</h6>
                         <div class="mb-2">
                             <i class="fas fa-star text-warning small"></i>
@@ -328,7 +359,7 @@
             </div>
             <div class="col-md-3 col-sm-6">
                 <div class="card hotel-card shadow-sm border-0 rounded-4 h-100">
-                   <img src="/images/hotels/avari.jpg" class="card-img-top rounded-top-4" style="height: 180px; width: 100%; object-fit: cover;" alt="Avari Hotel">
+                    <img src="/images/hotels/avari.jpg" class="card-img-top rounded-top-4" style="height: 180px; width: 100%; object-fit: cover;" alt="Avari Hotel">
                     <div class="card-body p-3">
                         <h6 class="card-title fw-bold">Avari Hotel</h6>
                         <div class="mb-2">
@@ -456,6 +487,32 @@
         font-size: 2rem;
         margin-left: 5px;
     }
+    .autocomplete-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        z-index: 1000;
+        max-height: 300px;
+        overflow-y: auto;
+        margin-top: 5px;
+    }
+    .autocomplete-header {
+        font-weight: bold;
+        border-bottom: 1px solid #eee;
+    }
+    .autocomplete-item {
+        padding: 12px 15px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+        transition: background 0.2s;
+    }
+    .autocomplete-item:hover {
+        background: #f8f9fa;
+    }
     @@media (max-width: 768px) {
         .display-1 {
             font-size: 2.5rem;
@@ -541,5 +598,105 @@
                 });
             }
         });
+
+        // =========================================================
+        // AI SMART SEARCH SUGGESTIONS
+        // =========================================================
+        function showAISuggestions(packages) {
+            var dropdown = document.getElementById('autocompleteResults');
+            if (!dropdown) return;
+            dropdown.innerHTML = '';
+            dropdown.style.display = 'block';
+            
+            var header = document.createElement('div');
+            header.className = 'autocomplete-header bg-primary text-white p-2';
+            header.innerHTML = '<i class="fas fa-robot me-2"></i> AI Recommended Packages';
+            dropdown.appendChild(header);
+            
+            packages.forEach(function(pkg) {
+                var item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                item.innerHTML = '<strong>' + pkg.package_name + '</strong><br>' +
+                    '<small class="text-muted">' + pkg.destination_name + ' | PKR ' + pkg.price_per_person.toLocaleString() + '</small>';
+                item.onclick = function() { selectPackage(pkg.package_id); };
+                dropdown.appendChild(item);
+            });
+        }
+
+        function selectPackage(id) {
+            window.location.href = '/Packages/Details/' + id;
+        }
+
+        // Hide dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            var dropdown = document.getElementById('autocompleteResults');
+            var searchInput = document.getElementById('searchInput');
+            if (dropdown && searchInput && !dropdown.contains(e.target) && e.target !== searchInput) {
+                dropdown.style.display = 'none';
+            }
+        });
+
+        // AI Smart Search on Input
+        var searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', async function() {
+                var term = this.value;
+                if (term.length > 2) {
+                    try {
+                        var response = await fetch('/api/ai/smart-search?q=' + encodeURIComponent(term));
+                        var data = await response.json();
+                        if (data.results && data.results.length > 0) {
+                            showAISuggestions(data.results);
+                        } else {
+                            var dropdown = document.getElementById('autocompleteResults');
+                            if (dropdown) dropdown.style.display = 'none';
+                        }
+                    } catch (error) {
+                        console.log('AI Search error:', error);
+                        var dropdown = document.getElementById('autocompleteResults');
+                        if (dropdown) dropdown.style.display = 'none';
+                    }
+                } else {
+                    var dropdown = document.getElementById('autocompleteResults');
+                    if (dropdown) dropdown.style.display = 'none';
+                }
+            });
+        }
+
+        // =========================================================
+        // AI PERSONALIZED RECOMMENDATIONS
+        // =========================================================
+        @if (userId.HasValue)
+        {
+            <text>
+            async function loadRecommendations() {
+                try {
+                    var response = await fetch('/api/ai/recommendations');
+                    var data = await response.json();
+                    var container = document.getElementById('aiRecommendations');
+                    if (container && data.recommendations && data.recommendations.length > 0) {
+                        container.innerHTML = '';
+                        data.recommendations.forEach(function(pkg) {
+                            container.innerHTML += `
+                                <div class="col-md-3">
+                                    <div class="card h-100 shadow-sm border-0 rounded-4">
+                                        <img src="${pkg.cover_image}" class="card-img-top" style="height: 150px; object-fit: cover;">
+                                        <div class="card-body">
+                                            <h6 class="fw-bold">${pkg.package_name}</h6>
+                                            <p class="text-primary fw-bold">PKR ${pkg.price_per_person.toLocaleString()}</p>
+                                            <a href="/Packages/Details/${pkg.package_id}" class="btn btn-sm btn-outline-primary w-100">View Package</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                } catch (error) {
+                    console.log('Recommendations error:', error);
+                }
+            }
+            loadRecommendations();
+            </text>
+        }
     </script>
 }
