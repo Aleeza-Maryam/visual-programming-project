@@ -2,9 +2,9 @@
 using AITourismPlanner.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,13 +17,18 @@ namespace AITourismPlanner.Services
         private readonly IMemoryCache _cache;
         private readonly ModelTrainingService _searchModel;
         private readonly Random _random;
+        private readonly HttpClient _httpClient;
+        private readonly string _groqApiKey;
+        private readonly string _groqModel = "meta-llama/llama-4-scout-17b-16e-instruct";
 
-        public AITourismService(ApplicationDbContext context, IMemoryCache memoryCache)
+        public AITourismService(ApplicationDbContext context, IMemoryCache memoryCache, IConfiguration configuration)
         {
             _context = context;
             _cache = memoryCache;
             _searchModel = new ModelTrainingService();
             _random = new Random();
+            _httpClient = new HttpClient();
+            _groqApiKey = configuration["Groq:ApiKey"];
 
             var dataPath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "training_data.csv");
             if (File.Exists(dataPath))
@@ -217,28 +222,72 @@ namespace AITourismPlanner.Services
         }
 
         // =========================================================
-        // FEATURE 6: AI CHATBOT
+        // FEATURE 6: AI CHATBOT - GROQ + LLAMA 4
         // =========================================================
         public async Task<string> ChatbotResponse(string userQuestion)
         {
             if (string.IsNullOrEmpty(userQuestion))
                 return "Please ask me something about travel!";
 
+            try
+            {
+                // First check FAQs for instant response
+                var faqAnswer = GetFaqAnswer(userQuestion);
+                if (!string.IsNullOrEmpty(faqAnswer))
+                    return faqAnswer;
+
+                // If no FAQ match, use Groq Llama 4
+                if (!string.IsNullOrEmpty(_groqApiKey) && _groqApiKey != "gsk_YOUR_API_KEY_HERE")
+                {
+                    var requestBody = new
+                    {
+                        model = _groqModel,
+                        messages = new[]
+                        {
+                            new {
+                                role = "system",
+                                content = "You are a helpful Pakistan travel assistant. Answer questions about destinations (Hunza, Murree, Skardu, Naran, Swat, Lahore, Islamabad), hotels, transport, best time to visit, tour packages, and travel tips in Pakistan. Keep responses concise (2-3 sentences), friendly, and helpful."
+                            },
+                            new { role = "user", content = userQuestion }
+                        },
+                        temperature = 0.7,
+                        max_tokens = 300
+                    };
+
+                    var request = new HttpRequestMessage
+                    {
+                        Method = HttpMethod.Post,
+                        RequestUri = new Uri("https://api.groq.com/openai/v1/chat/completions"),
+                        Content = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json")
+                    };
+                    request.Headers.Add("Authorization", $"Bearer {_groqApiKey}");
+
+                    var response = await _httpClient.SendAsync(request);
+                    var json = await response.Content.ReadAsStringAsync();
+
+                    dynamic data = JsonConvert.DeserializeObject(json);
+                    var answer = data?.choices?[0]?.message?.content?.ToString();
+
+                    if (!string.IsNullOrEmpty(answer))
+                        return answer;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Groq API Error: {ex.Message}");
+            }
+
+            // Fallback responses
             var question = userQuestion.ToLower();
 
-            var faqAnswer = GetFaqAnswer(question);
-            if (!string.IsNullOrEmpty(faqAnswer))
-                return faqAnswer;
-
-            if (question.Contains("hello") || question.Contains("hi") || question.Contains("assalam"))
-            {
-                return "Assalam-o-Alaikum! I'm your AI travel assistant. How can I help plan your trip?";
-            }
+            if (question.Contains("hello") || question.Contains("hi"))
+                return "Hello! I'm your AI travel assistant. How can I help plan your trip to Pakistan?";
 
             if (question.Contains("help"))
-            {
-                return "I can help you with:\n- Finding best destinations\n- Budget planning\n- Hotel recommendations\n- Transport options\n- Weather information\n- Package deals\n\nJust ask me anything about travel!";
-            }
+                return "I can help you with:\n- Finding best destinations\n- Budget planning\n- Hotel recommendations\n- Transport options\n- Weather information\n- Tour packages\n\nJust ask me anything about travel in Pakistan!";
+
+            if (question.Contains("thank"))
+                return "You're welcome! Happy travels! Feel free to ask if you need anything else.";
 
             if (question.Contains("budget"))
             {
@@ -267,16 +316,6 @@ namespace AITourismPlanner.Services
                 return "Please tell me your budget amount (e.g., 'budget 50000')";
             }
 
-            if (question.Contains("weather"))
-            {
-                return "To check weather, please visit the Weather page or go to any destination details page for current forecast!";
-            }
-
-            if (question.Contains("hotel"))
-            {
-                return "You can find hotels on our Real Hotels page! We have partnerships with Serena, Pearl Continental, Marriott, and more.";
-            }
-
             if (question.Contains("package") || question.Contains("tour"))
             {
                 var packages = await _context.packages.Where(p => p.is_active).Take(3).ToListAsync();
@@ -288,16 +327,13 @@ namespace AITourismPlanner.Services
                 return response;
             }
 
-            if (question.Contains("thank"))
-            {
-                return "You're welcome! Happy travels! If you need anything else, just ask.";
-            }
-
-            return "Thanks for your message! I can help you with destination recommendations, budget planning, hotel bookings, or transport options. What would you like to know?";
+            return "I'm your AI travel assistant! I can help you with destination recommendations, budget planning, hotel bookings, and transport options. What would you like to know about traveling in Pakistan?";
         }
 
         private string GetFaqAnswer(string question)
         {
+            var lowerQuestion = question.ToLower();
+
             var faqs = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 { "best time to visit hunza", "Best time to visit Hunza is May to October when the weather is pleasant and fruits are in season." },
@@ -314,7 +350,7 @@ namespace AITourismPlanner.Services
 
             foreach (var faq in faqs)
             {
-                if (question.Contains(faq.Key))
+                if (lowerQuestion.Contains(faq.Key))
                     return faq.Value;
             }
 
@@ -362,5 +398,15 @@ namespace AITourismPlanner.Services
                 };
             }
         }
+    }
+
+    public class BudgetComparison
+    {
+        public string Destination1 { get; set; } = string.Empty;
+        public string Destination2 { get; set; } = string.Empty;
+        public decimal Cost1 { get; set; }
+        public decimal Cost2 { get; set; }
+        public string Recommendation { get; set; } = string.Empty;
+        public decimal Savings { get; set; }
     }
 }
