@@ -14,24 +14,24 @@
         <source src="/videos/hero-travel.mp4" type="video/mp4">
     </video>
     <div class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(0,0,0,0.55);"></div>
-    
+
     <div class="container h-100 d-flex align-items-center position-relative" style="z-index: 1;">
         <div class="text-center text-white w-100">
             <!-- Main Title -->
             <h1 class="display-1 fw-bold animate__animated animate__fadeInDown" style="background: linear-gradient(135deg, #FFFFFF 0%, #E0D7FF 100%); -webkit-background-clip: text; background-clip: text; color: transparent;">
                 TravelMate
             </h1>
-            
+
             <!-- Typewriter Subtitle -->
             <div class="mt-3">
                 <p class="lead fs-2" id="typewriterText" style="font-weight: 500; min-height: 80px;"></p>
             </div>
-            
+
             <!-- Decorative Line -->
             <div class="d-flex justify-content-center mt-3">
                 <div style="width: 60px; height: 3px; background: #FBBF24; border-radius: 3px;"></div>
             </div>
-            
+
             <!-- Buttons -->
             <div class="mt-4">
                 <a href="@Url.Action("Index", "Destinations")" class="btn btn-primary btn-lg mx-2 px-4 py-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
@@ -57,16 +57,16 @@
     let index = 0;
     let currentText = '';
     let letter = '';
-    
+
     function typeWriter() {
         if (count === texts.length) {
             count = 0;
         }
         currentText = texts[count];
         letter = currentText.slice(0, ++index);
-        
+
         document.getElementById('typewriterText').innerHTML = letter;
-        
+
         if (letter.length === currentText.length) {
             setTimeout(() => {
                 index = 0;
@@ -77,7 +77,7 @@
             setTimeout(typeWriter, 100);
         }
     }
-    
+
     typeWriter();
 </script>
 
@@ -216,7 +216,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Murree -->
             <div class="col-md-4">
                 <div class="card destination-card h-100 shadow-lg border-0 rounded-4 overflow-hidden">
@@ -243,7 +243,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Skardu -->
             <div class="col-md-4">
                 <div class="card destination-card h-100 shadow-lg border-0 rounded-4 overflow-hidden">
@@ -385,7 +385,7 @@
             <h2 class="display-5 fw-bold">❤️ What Our Travelers Say</h2>
             <p class="lead text-muted">Real reviews from real travelers</p>
         </div>
-        
+
         @if (Model.UserReviews != null && Model.UserReviews.Any())
         {
             <div id="reviewsCarousel" class="carousel slide" data-bs-ride="carousel">
@@ -447,46 +447,57 @@
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         cursor: pointer;
     }
-    .destination-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
-    }
+
+        .destination-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
+        }
+
     .testimonial-card {
         transition: all 0.3s ease;
         cursor: pointer;
     }
-    .testimonial-card:hover {
-        transform: scale(1.02);
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    }
+
+        .testimonial-card:hover {
+            transform: scale(1.02);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
     .hotel-card {
         transition: transform 0.3s ease;
         cursor: pointer;
     }
-    .hotel-card:hover {
-        transform: translateY(-5px);
-    }
+
+        .hotel-card:hover {
+            transform: translateY(-5px);
+        }
+
     .search-section {
         margin-top: -30px;
         position: relative;
         z-index: 1000;
     }
+
     .btn-primary {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         border: none;
     }
-    .btn-primary:hover {
-        background: linear-gradient(135deg, #5a67d8 0%, #6b46a0 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(102,126,234,0.4);
-    }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46a0 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102,126,234,0.4);
+        }
+
     .hero-section {
         position: relative;
     }
+
     .counter-plus {
         font-size: 2rem;
         margin-left: 5px;
     }
+
     .autocomplete-dropdown {
         position: absolute;
         top: 100%;
@@ -500,35 +511,44 @@
         overflow-y: auto;
         margin-top: 5px;
     }
+
     .autocomplete-header {
         font-weight: bold;
         border-bottom: 1px solid #eee;
     }
+
     .autocomplete-item {
         padding: 12px 15px;
         cursor: pointer;
         border-bottom: 1px solid #eee;
         transition: background 0.2s;
     }
-    .autocomplete-item:hover {
-        background: #f8f9fa;
-    }
+
+        .autocomplete-item:hover {
+            background: #f8f9fa;
+        }
+
     @@media (max-width: 768px) {
         .display-1 {
             font-size: 2.5rem;
         }
+
         .display-4 {
             font-size: 2rem;
         }
+
         .display-5 {
             font-size: 1.8rem;
         }
+
         .counter-plus {
             font-size: 1.2rem;
         }
+
         #heroVideo {
             display: none;
         }
+
         .hero-section {
             background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1587925358603-c2eea5305bbc?w=1200');
             background-size: cover;
@@ -545,18 +565,18 @@
             var buffer = 100;
             return rect.top <= (window.innerHeight + buffer) && rect.bottom >= 0;
         }
-        
+
         function animateCounter(element, start, end, duration, isDecimal) {
             var startTime = null;
-            
+
             function updateCounter(currentTime) {
                 if (startTime === null) startTime = currentTime;
                 var progress = Math.min(1, (currentTime - startTime) / duration);
                 var value = start + (end - start) * progress;
-                
+
                 var numberText = isDecimal ? value.toFixed(1) : Math.floor(value).toLocaleString();
                 element.childNodes[0].nodeValue = numberText;
-                
+
                 if (progress < 1) {
                     requestAnimationFrame(updateCounter);
                 } else {
@@ -565,13 +585,13 @@
             }
             requestAnimationFrame(updateCounter);
         }
-        
+
         var countersAnimated = false;
-        
+
         window.addEventListener('scroll', function() {
             var counters = document.querySelectorAll('.counter');
             var statsSection = document.querySelector('.stats-section');
-            
+
             if (statsSection && isElementInViewport(statsSection) && !countersAnimated) {
                 countersAnimated = true;
                 counters.forEach(function(counter) {
@@ -581,7 +601,7 @@
                 });
             }
         });
-        
+
         document.addEventListener('DOMContentLoaded', function() {
             var counters = document.querySelectorAll('.counter');
             var statsSection = document.querySelector('.stats-section');
@@ -607,12 +627,12 @@
             if (!dropdown) return;
             dropdown.innerHTML = '';
             dropdown.style.display = 'block';
-            
+
             var header = document.createElement('div');
             header.className = 'autocomplete-header bg-primary text-white p-2';
             header.innerHTML = '<i class="fas fa-robot me-2"></i> AI Recommended Packages';
             dropdown.appendChild(header);
-            
+
             packages.forEach(function(pkg) {
                 var item = document.createElement('div');
                 item.className = 'autocomplete-item';
@@ -668,35 +688,35 @@
         // =========================================================
         @if (userId.HasValue)
         {
-            <text>
-            async function loadRecommendations() {
-                try {
-                    var response = await fetch('/api/ai/recommendations');
-                    var data = await response.json();
-                    var container = document.getElementById('aiRecommendations');
-                    if (container && data.recommendations && data.recommendations.length > 0) {
-                        container.innerHTML = '';
-                        data.recommendations.forEach(function(pkg) {
-                            container.innerHTML += `
-                                <div class="col-md-3">
-                                    <div class="card h-100 shadow-sm border-0 rounded-4">
-                                        <img src="${pkg.cover_image}" class="card-img-top" style="height: 150px; object-fit: cover;">
-                                        <div class="card-body">
-                                            <h6 class="fw-bold">${pkg.package_name}</h6>
-                                            <p class="text-primary fw-bold">PKR ${pkg.price_per_person.toLocaleString()}</p>
-                                            <a href="/Packages/Details/${pkg.package_id}" class="btn btn-sm btn-outline-primary w-100">View Package</a>
+                <text>
+                    async function loadRecommendations() {
+                        try {
+                            var response = await fetch('/api/ai/recommendations');
+                            var data = await response.json();
+                            var container = document.getElementById('aiRecommendations');
+                            if (container && data.recommendations && data.recommendations.length > 0) {
+                                container.innerHTML = '';
+                                data.recommendations.forEach(function(pkg) {
+                                    container.innerHTML += `
+                                        <div class="col-md-3">
+                                                <div class="card h-100 shadow-sm border-0 rounded-4">
+                                                        <img src="${pkg.cover_image}" class="card-img-top" style="height: 150px; object-fit: cover;">
+                                                        <div class="card-body">
+                                                                <h6 class="fw-bold">${pkg.package_name}</h6>
+                                                                <p class="text-primary fw-bold">PKR ${pkg.price_per_person.toLocaleString()}</p>
+                                                                <a href="/Packages/Details/${pkg.package_id}" class="btn btn-sm btn-outline-primary w-100">View Package</a>
+                                                        </div>
+                                                </div>
                                         </div>
-                                    </div>
-                                </div>
-                            `;
-                        });
+                                    `;
+                                });
+                            }
+                        } catch (error) {
+                            console.log('Recommendations error:', error);
+                        }
                     }
-                } catch (error) {
-                    console.log('Recommendations error:', error);
-                }
-            }
-            loadRecommendations();
-            </text>
+                    loadRecommendations();
+                </text>
         }
     </script>
 }

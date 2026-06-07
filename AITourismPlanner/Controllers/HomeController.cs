@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using AITourismPlanner.Data;
 using AITourismPlanner.Models;
 using AITourismPlanner.ViewModels;
-
+using Microsoft.AspNetCore.Http;
 namespace AITourismPlanner.Controllers
 {
     public class HomeController : Controller
@@ -118,7 +118,7 @@ namespace AITourismPlanner.Controllers
                     Testimonials = testimonials,
                     UserReviews = userReviews
                 };
-
+                ViewBag.UserId = HttpContext.Session.GetInt32("UserId");
                 return View(viewModel);
             }
             catch (Exception ex)

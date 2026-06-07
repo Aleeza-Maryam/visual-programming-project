@@ -56,7 +56,7 @@ namespace AITourismPlanner.Services
                         else
                             hotel.Address = city;
 
-                        // FIXED: Explicit type declaration instead of out var
+                  
                         if (item?.property?.reviewScore != null)
                         {
                             string ratingStr = item.property.reviewScore.ToString();
