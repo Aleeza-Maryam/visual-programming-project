@@ -14,13 +14,5 @@ namespace AITourismPlanner.Services
         Task<string> ChatbotResponse(string userQuestion);       // Feature 6
     }
 
-    public class BudgetComparison
-    {
-        public string Destination1 { get; set; } = string.Empty;
-        public string Destination2 { get; set; } = string.Empty;
-        public decimal Cost1 { get; set; }
-        public decimal Cost2 { get; set; }
-        public string Recommendation { get; set; } = string.Empty;
-        public decimal Savings { get; set; }
-    }
+   
 }
