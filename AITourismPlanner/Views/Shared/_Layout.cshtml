@@ -570,8 +570,6 @@
         body: JSON.stringify(message)
         });
         var data = await response.json();
-
-        // Remove typing indicator
         var typingIndicator = document.getElementById('typingIndicator');
         if (typingIndicator) typingIndicator.remove();
 
