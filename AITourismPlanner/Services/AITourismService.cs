@@ -5,6 +5,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,7 +39,7 @@ namespace AITourismPlanner.Services
         }
 
         // =========================================================
-        // FEATURE 1: SMART SEARCH
+        // SMART SEARCH
         // =========================================================
         public async Task<List<Package>> SmartSearch(string query)
         {
@@ -75,7 +76,7 @@ namespace AITourismPlanner.Services
         }
 
         // =========================================================
-        // FEATURE 2: SENTIMENT ANALYSIS
+        // SENTIMENT ANALYSIS
         // =========================================================
         public async Task<string> AnalyzeReviewSentiment(string reviewText)
         {
@@ -101,7 +102,7 @@ namespace AITourismPlanner.Services
         }
 
         // =========================================================
-        // FEATURE 3: BUDGET COMPARISON
+        // BUDGET COMPARISON
         // =========================================================
         public async Task<BudgetComparison> CompareBudget(string dest1, string dest2, int days)
         {
@@ -139,7 +140,7 @@ namespace AITourismPlanner.Services
         }
 
         // =========================================================
-        // FEATURE 4: PERSONALIZED RECOMMENDATIONS
+        // PERSONALIZED RECOMMENDATIONS
         // =========================================================
         public async Task<List<Package>> PersonalizedRecommendations(int userId)
         {
@@ -188,7 +189,7 @@ namespace AITourismPlanner.Services
         }
 
         // =========================================================
-        // FEATURE 5: ITINERARY GENERATOR
+        // ITINERARY GENERATOR
         // =========================================================
         public async Task<string> GenerateItinerary(string destination, int days, string budget)
         {
@@ -222,23 +223,235 @@ namespace AITourismPlanner.Services
         }
 
         // =========================================================
-        // FEATURE 6: AI CHATBOT - GROQ + LLAMA 4
+        // FULLY PERSONALIZED AI CHATBOT
         // =========================================================
-        public async Task<string> ChatbotResponse(string userQuestion)
+        public async Task<string> ChatbotResponse(string userQuestion, int? userId = null)
         {
             if (string.IsNullOrEmpty(userQuestion))
                 return "Please ask me something about travel!";
 
-            try
-            {
-                // First check FAQs for instant response
-                var faqAnswer = GetFaqAnswer(userQuestion);
-                if (!string.IsNullOrEmpty(faqAnswer))
-                    return faqAnswer;
+            var question = userQuestion.ToLower();
 
-                // If no FAQ match, use Groq Llama 4
-                if (!string.IsNullOrEmpty(_groqApiKey) && _groqApiKey != "gsk_YOUR_API_KEY_HERE")
+            // Get user data if logged in
+            User? currentUser = null;
+            List<PackageBooking> userBookings = new List<PackageBooking>();
+            List<Wishlist> userWishlist = new List<Wishlist>();
+
+            if (userId.HasValue)
+            {
+                currentUser = await _context.users.FirstOrDefaultAsync(u => u.user_id == userId);
+                userBookings = await _context.package_bookings
+                    .Where(b => b.user_id == userId)
+                    .Include(b => b.Package)
+                    .OrderByDescending(b => b.booking_date)
+                    .ToListAsync();
+
+                userWishlist = await _context.wishlists
+                    .Where(w => w.user_id == userId)
+                    .ToListAsync();
+            }
+
+            // =========================================================
+            // PERSONALIZED RESPONSES
+            // =========================================================
+
+            // 1. Greeting with user's name
+            if (question.Contains("hello") || question.Contains("hi") || question.Contains("assalam"))
+            {
+                if (currentUser != null)
                 {
+                    return $"Assalam-o-Alaikum, {currentUser.full_name}! 👋\n\nI'm your personal AI travel assistant. I see you've been exploring our packages. How can I help you plan your next adventure today?";
+                }
+                return "Assalam-o-Alaikum! 👋 I'm your AI travel assistant. Please login to get personalized recommendations!";
+            }
+
+            // 2. My Bookings / My Trips
+            if (question.Contains("my booking") || question.Contains("my trip") || question.Contains("my travels"))
+            {
+                if (userBookings.Any())
+                {
+                    var response = $"📋 **Your Bookings** ({userBookings.Count} total)\n\n";
+                    foreach (var booking in userBookings.Take(5))
+                    {
+                        response += $"✈️ **{booking.Package?.package_name}**\n";
+                        response += $"   📍 {booking.Package?.destination_name}\n";
+                        response += $"   📅 {booking.travel_date:dd MMM yyyy}\n";
+                        response += $"   💰 PKR {booking.final_price:N0}\n";
+                        response += $"   Status: {booking.booking_status}\n\n";
+                    }
+                    if (userBookings.Count > 5)
+                        response += $"And {userBookings.Count - 5} more bookings...\n";
+                    response += "\nWant to book another trip? Just say 'book a package'!";
+                    return response;
+                }
+                return "You don't have any bookings yet. 📭\n\nWould you like me to recommend some amazing packages for you? Just say 'recommend me something'!";
+            }
+
+            // 3. My Wishlist / Favorites
+            if (question.Contains("wishlist") || question.Contains("favorite") || question.Contains("saved"))
+            {
+                if (userWishlist.Any())
+                {
+                    var response = $"❤️ **Your Wishlist** ({userWishlist.Count} destinations)\n\n";
+                    foreach (var item in userWishlist.Take(5))
+                    {
+                        response += $"📍 {item.destination_name}\n";
+                    }
+                    response += "\nWant to book any of these? Just say 'book [destination name]'!";
+                    return response;
+                }
+                return "Your wishlist is empty. 😢\n\nStart exploring destinations and click the heart icon to save your favorites!";
+            }
+
+            // 4. Recommendations based on past bookings
+            if (question.Contains("recommend") || question.Contains("suggest") || question.Contains("what should i book"))
+            {
+                if (userBookings.Any())
+                {
+                    var lastPackage = userBookings.First().Package;
+                    var preferredDest = lastPackage?.destination_name ?? "Hunza";
+                    var preferredType = lastPackage?.package_type ?? "Standard";
+
+                    var recommendations = await _context.packages
+                        .Where(p => p.destination_name != preferredDest && p.package_type == preferredType && p.is_active)
+                        .Take(3)
+                        .ToListAsync();
+
+                    if (recommendations.Any())
+                    {
+                        var response = $"🎯 **Based on your previous trip to {preferredDest}**\n\n";
+                        response += $"I recommend these {preferredType} packages:\n";
+                        foreach (var rec in recommendations)
+                        {
+                            response += $"• **{rec.package_name}** - PKR {rec.price_per_person:N0} ({rec.duration_days} days)\n";
+                        }
+                        response += "\nWould you like details about any of these?";
+                        return response;
+                    }
+                }
+
+                // Generic recommendation
+                var topPackages = await _context.packages
+                    .Where(p => p.is_active)
+                    .OrderByDescending(p => p.price_per_person)
+                    .Take(3)
+                    .ToListAsync();
+
+                var genResponse = "🌟 **Top Recommended Packages** 🌟\n\n";
+                foreach (var pkg in topPackages)
+                {
+                    genResponse += $"✨ {pkg.package_name}\n";
+                    genResponse += $"   📍 {pkg.destination_name} | 🏨 {pkg.hotel_stars}⭐\n";
+                    genResponse += $"   💰 PKR {pkg.price_per_person:N0} | 📅 {pkg.duration_days} days\n\n";
+                }
+                genResponse += "Which one interests you? I can tell you more!";
+                return genResponse;
+            }
+
+            // 5. Budget-based with personal spending history
+            if (question.Contains("budget"))
+            {
+                var words = question.Split(' ');
+                foreach (var word in words)
+                {
+                    if (int.TryParse(word, out int budget))
+                    {
+                        // Get user's average spending if exists
+                        decimal avgSpending = 0;
+                        if (userBookings.Any())
+                        {
+                            avgSpending = userBookings.Average(b => b.final_price);
+                        }
+
+                        var packages = await _context.packages
+                            .Where(p => p.price_per_person <= budget && p.is_active)
+                            .Take(3)
+                            .ToListAsync();
+
+                        if (packages.Any())
+                        {
+                            var response = $"💰 With PKR {budget:N0} budget";
+                            if (avgSpending > 0)
+                            {
+                                response += $" (similar to your previous trips averaging PKR {avgSpending:N0})";
+                            }
+                            response += ", you can consider:\n\n";
+                            foreach (var pkg in packages)
+                            {
+                                response += $"• **{pkg.package_name}** - PKR {pkg.price_per_person:N0}\n";
+                                response += $"  📍 {pkg.destination_name} | {pkg.duration_days} days\n\n";
+                            }
+                            return response;
+                        }
+                        return $"No packages found under PKR {budget:N0}. Try increasing your budget to PKR {budget + 10000:N0}!";
+                    }
+                }
+                return "Please tell me your budget amount (e.g., 'budget 50000') and I'll find packages for you!";
+            }
+
+            // 6. Destination details with personal connection
+            var destinations = new[] { "hunza", "murree", "skardu", "naran", "swat", "lahore", "islamabad", "gilgit" };
+            foreach (var dest in destinations)
+            {
+                if (question.Contains(dest))
+                {
+                    var hasVisited = userBookings.Any(b => b.Package != null && b.Package.destination_name.ToLower().Contains(dest));
+
+                    var destInfo = GetDestinationInfo(dest);
+                    if (hasVisited)
+                    {
+                        return $"📍 **{dest.TitleCase()}** - You've been here before! 🎉\n\n{destInfo}\n\nWant to explore a new destination this time? Try {GetAlternativeDestination(dest)}!";
+                    }
+                    return $"📍 **{dest.TitleCase()}**\n\n{destInfo}\n\nWould you like me to show you available packages for {dest.TitleCase()}?";
+                }
+            }
+
+            // 7. Check if user asked about their profile
+            if (question.Contains("my name") || question.Contains("who am i"))
+            {
+                if (currentUser != null)
+                {
+                    return $"Your name is {currentUser.full_name}. You registered with email {currentUser.email} on {currentUser.created_at:dd MMM yyyy}.";
+                }
+                return "You are not logged in. Please login first!";
+            }
+
+            // 8. Check packages status
+            if (question.Contains("how many packages") || question.Contains("total packages"))
+            {
+                var totalPackages = await _context.packages.CountAsync(p => p.is_active);
+                var packagesByType = await _context.packages
+                    .Where(p => p.is_active)
+                    .GroupBy(p => p.package_type)
+                    .Select(g => new { Type = g.Key, Count = g.Count() })
+                    .ToListAsync();
+
+                var response = $"📦 We have **{totalPackages}** tour packages available!\n\n";
+                foreach (var pt in packagesByType)
+                {
+                    response += $"• {pt.Type}: {pt.Count} packages\n";
+                }
+                return response;
+            }
+
+            // 9. Fallback to Groq AI (if API key exists)
+            if (!string.IsNullOrEmpty(_groqApiKey) && _groqApiKey != "gsk_YOUR_API_KEY_HERE")
+            {
+                try
+                {
+                    var userContext = "";
+                    if (currentUser != null)
+                    {
+                        userContext = $"The user's name is {currentUser.full_name}. ";
+                        if (userBookings.Any())
+                        {
+                            userContext += $"They have booked {userBookings.Count} trips before. ";
+                            var lastDest = userBookings.First().Package?.destination_name;
+                            if (lastDest != null)
+                                userContext += $"Their last trip was to {lastDest}. ";
+                        }
+                    }
+
                     var requestBody = new
                     {
                         model = _groqModel,
@@ -246,7 +459,7 @@ namespace AITourismPlanner.Services
                         {
                             new {
                                 role = "system",
-                                content = "You are a helpful Pakistan travel assistant. Answer questions about destinations (Hunza, Murree, Skardu, Naran, Swat, Lahore, Islamabad), hotels, transport, best time to visit, tour packages, and travel tips in Pakistan. Keep responses concise (2-3 sentences), friendly, and helpful."
+                                content = $"You are a friendly Pakistan travel assistant. {userContext}Keep responses concise (2-3 sentences), helpful, and personalized. Recommend packages from Hunza, Murree, Skardu, Naran, Swat, Gilgit."
                             },
                             new { role = "user", content = userQuestion }
                         },
@@ -271,90 +484,42 @@ namespace AITourismPlanner.Services
                     if (!string.IsNullOrEmpty(answer))
                         return answer;
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Groq API Error: {ex.Message}");
-            }
-
-            // Fallback responses
-            var question = userQuestion.ToLower();
-
-            if (question.Contains("hello") || question.Contains("hi"))
-                return "Hello! I'm your AI travel assistant. How can I help plan your trip to Pakistan?";
-
-            if (question.Contains("help"))
-                return "I can help you with:\n- Finding best destinations\n- Budget planning\n- Hotel recommendations\n- Transport options\n- Weather information\n- Tour packages\n\nJust ask me anything about travel in Pakistan!";
-
-            if (question.Contains("thank"))
-                return "You're welcome! Happy travels! Feel free to ask if you need anything else.";
-
-            if (question.Contains("budget"))
-            {
-                var words = question.Split(' ');
-                foreach (var word in words)
+                catch (Exception ex)
                 {
-                    if (int.TryParse(word, out int budget))
-                    {
-                        var packages = await _context.packages
-                            .Where(p => p.price_per_person <= budget && p.is_active)
-                            .Take(3)
-                            .ToListAsync();
-
-                        if (packages.Any())
-                        {
-                            var response = $"With PKR {budget:N0} budget, you can consider:\n";
-                            foreach (var pkg in packages)
-                            {
-                                response += $"• {pkg.package_name} (PKR {pkg.price_per_person:N0})\n";
-                            }
-                            return response;
-                        }
-                        return $"No packages found under PKR {budget:N0}. Try increasing your budget!";
-                    }
+                    Console.WriteLine($"Groq API Error: {ex.Message}");
                 }
-                return "Please tell me your budget amount (e.g., 'budget 50000')";
             }
 
-            if (question.Contains("package") || question.Contains("tour"))
-            {
-                var packages = await _context.packages.Where(p => p.is_active).Take(3).ToListAsync();
-                var response = "Here are our top packages:\n";
-                foreach (var pkg in packages)
-                {
-                    response += $"• {pkg.package_name} - PKR {pkg.price_per_person:N0} ({pkg.duration_days} days)\n";
-                }
-                return response;
-            }
-
-            return "I'm your AI travel assistant! I can help you with destination recommendations, budget planning, hotel bookings, and transport options. What would you like to know about traveling in Pakistan?";
+            // 10. Default response
+            return "I'm your personal travel assistant! 🤖\n\nI can help you with:\n• Finding destinations\n• Budget planning\n• Checking your bookings\n• Recommending packages\n• Answering travel questions\n\nWhat would you like to know?";
         }
 
-        private string GetFaqAnswer(string question)
+        // Helper methods
+        private string GetDestinationInfo(string dest)
         {
-            var lowerQuestion = question.ToLower();
-
-            var faqs = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            var info = new Dictionary<string, string>
             {
-                { "best time to visit hunza", "Best time to visit Hunza is May to October when the weather is pleasant and fruits are in season." },
-                { "best time to visit murree", "Best time to visit Murree is March to October. December to February for snow lovers!" },
-                { "best time to visit skardu", "Best time to visit Skardu is June to September for trekking and lake visits." },
-                { "how to reach hunza", "You can reach Hunza by air (flight to Gilgit then drive) or by road via Karakoram Highway from Islamabad (about 14-16 hours)." },
-                { "how to reach skardu", "Take a flight from Islamabad to Skardu (1 hour) or drive via KKH (24 hours) with beautiful scenery." },
-                { "cheapest destination", "Murree is the most budget-friendly option, followed by Naran and Swat." },
-                { "luxury destination", "Skardu and Hunza offer luxury resorts with premium packages." },
-                { "family friendly", "Murree and Naran are great for family trips with easy activities and good hotels." },
-                { "honeymoon", "Swat, Hunza, and Skardu are perfect for honeymoon with romantic settings and luxury stays." },
-                { "adventure", "Skardu, Fairy Meadows, and Hunza are best for adventure lovers with trekking and jeep safaris." }
+                { "hunza", "Hunza Valley is famous for its stunning mountain views, ancient forts (Baltit & Altit), and friendly locals. Best time: May-October. Estimated cost: PKR 50,000-85,000 for 4-6 days." },
+                { "murree", "Murree is a popular hill station with pine forests and colonial architecture. Best time: March-October (Dec-Feb for snow). Estimated cost: PKR 8,000-25,000 for 2-3 days." },
+                { "skardu", "Skardu is the gateway to K2, featuring Shangrila Lake, Cold Desert, and Deosai Plains. Best time: June-September. Estimated cost: PKR 45,000-120,000 for 5-6 days." },
+                { "naran", "Naran Kaghan is known for Lake Saif-ul-Mulook and beautiful valleys. Best time: May-September. Estimated cost: PKR 10,000-18,000 for 3-4 days." },
+                { "swat", "Swat Valley is called Switzerland of the East, with Malam Jabba and Buddhist heritage. Best time: April-October. Estimated cost: PKR 25,000-45,000 for 4-5 days." }
             };
 
-            foreach (var faq in faqs)
-            {
-                if (lowerQuestion.Contains(faq.Key))
-                    return faq.Value;
-            }
+            return info.ContainsKey(dest) ? info[dest] : $"{dest.TitleCase()} is a beautiful destination in Pakistan with rich culture and stunning landscapes.";
+        }
 
-            return null;
+        private string GetAlternativeDestination(string current)
+        {
+            var alternatives = new Dictionary<string, string>
+            {
+                { "hunza", "Skardu or Gilgit" },
+                { "murree", "Naran or Swat" },
+                { "skardu", "Hunza or Gilgit" },
+                { "naran", "Murree or Swat" },
+                { "swat", "Naran or Murree" }
+            };
+            return alternatives.ContainsKey(current) ? alternatives[current] : "Hunza or Skardu";
         }
 
         private List<(string Morning, string Afternoon, string Evening)> GetActivitiesForDestination(string destination)
@@ -399,14 +564,15 @@ namespace AITourismPlanner.Services
             }
         }
     }
+}
 
-    public class BudgetComparison
+// Extension method for title case
+public static class StringExtensions
+{
+    public static string TitleCase(this string str)
     {
-        public string Destination1 { get; set; } = string.Empty;
-        public string Destination2 { get; set; } = string.Empty;
-        public decimal Cost1 { get; set; }
-        public decimal Cost2 { get; set; }
-        public string Recommendation { get; set; } = string.Empty;
-        public decimal Savings { get; set; }
+        if (string.IsNullOrEmpty(str))
+            return str;
+        return char.ToUpper(str[0]) + str.Substring(1);
     }
 }

@@ -54,10 +54,17 @@ namespace AITourismPlanner.Controllers
             return Ok(new { itinerary });
         }
 
+        // =========================================================
+        // PERSONALIZED CHATBOT - Passes userId to service
+        // =========================================================
         [HttpPost("chat")]
         public async Task<IActionResult> Chat([FromBody] string question)
         {
-            var answer = await _aiService.ChatbotResponse(question);
+            if (string.IsNullOrEmpty(question))
+                return BadRequest(new { error = "Question is required" });
+
+            var userId = HttpContext.Session.GetInt32("UserId");
+            var answer = await _aiService.ChatbotResponse(question, userId);
             return Ok(new { question, answer });
         }
     }
