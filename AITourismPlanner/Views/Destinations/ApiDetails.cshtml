@@ -13,7 +13,7 @@
          style="height:300px;
         background: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),
         url('@(Model.DestinationInfo?.ImageUrl ??
-                                      "https://images.unsplash.com/photo-1586500036706-41963de24d8b?w=1200")')
+                             "https://images.unsplash.com/photo-1586500036706-41963de24d8b?w=1200")')
         center/cover no-repeat;">
         <div class="container h-100 d-flex align-items-center">
             <div class="text-white">
@@ -26,37 +26,9 @@
                         <span>@Model.CurrentWeather.Temperature.ToString("0")°C</span>
                     </div>
                 }
-
-                <!-- Quick Info Sidebar with AI Button -->
-                <div class="mt-3">
-                    <!-- Weather Info Card -->
-                    <div class="bg-white bg-opacity-25 rounded-4 p-3 mb-2 d-inline-block">
-                        <div class="d-flex align-items-center gap-3">
-                            @if (Model.CurrentWeather != null)
-                            {
-                                <div>
-                                    <i class="fas fa-cloud-sun me-1"></i>
-                                    <span>@Model.CurrentWeather.Condition</span>
-                                </div>
-                                <div>
-                                    <i class="fas fa-tint me-1"></i>
-                                    <span>@Model.CurrentWeather.Humidity%</span>
-                                </div>
-                                <div>
-                                    <i class="fas fa-wind me-1"></i>
-                                    <span>@Model.CurrentWeather.WindSpeed km/h</span>
-                                </div>
-                            }
-                        </div>
-                    </div>
-
-                    <!-- AI Itinerary Generator Button -->
-                    <button class="btn btn-info w-100 mt-2" onclick="generateAIItinerary('@Model.CityName')" style="max-width: 250px;">
-                        <i class="fas fa-magic me-2"></i> Generate AI Itinerary
-                    </button>
-                </div>
-
-                <!-- Wishlist Button -->
+                <!-- ========================================================= -->
+                <!-- WISHLIST BUTTON ADDED HERE -->
+                <!-- ========================================================= -->
                 @if (userId.HasValue)
                 {
                     <button class="btn btn-outline-light mt-3" onclick="addToWishlist()" id="wishlistBtn">
@@ -80,7 +52,9 @@
 
         <div class="tab-content">
 
-            <!-- Hotels Tab -->
+            <!-- ========================================================= -->
+            <!-- STEP 1: HOTELS TAB -->
+            <!-- ========================================================= -->
             <div class="tab-pane fade show active" id="hotels">
                 <h3 class="fw-bold mb-4"><i class="fas fa-hotel text-primary me-2"></i>Step 1: Select Hotel (Optional)</h3>
 
@@ -128,7 +102,9 @@
                 </div>
             </div>
 
-            <!-- Weather Tab -->
+            <!-- ========================================================= -->
+            <!-- WEATHER TAB -->
+            <!-- ========================================================= -->
             <div class="tab-pane fade" id="weather">
                 <h3 class="fw-bold mb-4"><i class="fas fa-cloud-sun text-primary me-2"></i>Weather in @Model.CityName</h3>
 
@@ -183,7 +159,9 @@
                 }
             </div>
 
-            <!-- Transport Tab -->
+            <!-- ========================================================= -->
+            <!-- STEP 2: TRANSPORT TAB -->
+            <!-- ========================================================= -->
             <div class="tab-pane fade" id="transport">
                 <h3 class="fw-bold mb-4"><i class="fas fa-bus text-primary me-2"></i>Step 2: Select Transport (Required)</h3>
 
@@ -224,13 +202,17 @@
                 }
             </div>
 
-            <!-- Map Tab -->
+            <!-- ========================================================= -->
+            <!-- MAP TAB -->
+            <!-- ========================================================= -->
             <div class="tab-pane fade" id="map">
                 <h3 class="fw-bold mb-4"><i class="fas fa-map text-primary me-2"></i>Location Map</h3>
                 <div id="mainMap" style="height:400px; border-radius:16px;"></div>
             </div>
 
-            <!-- Reviews Tab -->
+            <!-- ========================================================= -->
+            <!-- REVIEWS TAB -->
+            <!-- ========================================================= -->
             <div class="tab-pane fade" id="reviews">
                 <h3 class="fw-bold mb-4"><i class="fas fa-star text-primary me-2"></i>Reviews (@Model.TotalReviews)</h3>
                 @if (userId.HasValue)
@@ -285,7 +267,44 @@
     </div>
 </div>
 
-<!-- Booking Modal -->
+<!-- ========================================================= -->
+<!-- AI ITINERARY GENERATOR BUTTON & MODAL -->
+<!-- ========================================================= -->
+
+<!-- AI Itinerary Generator Button -->
+<button class="btn btn-info w-100 mt-3" onclick="generateAIItinerary('@Model.CityName')">
+    <i class="fas fa-magic me-2"></i> Generate AI Itinerary
+</button>
+
+<!-- AI Itinerary Modal -->
+<div class="modal fade" id="itineraryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content rounded-4">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h5 class="modal-title text-white fw-bold">
+                    <i class="fas fa-robot me-2"></i>AI Generated Itinerary
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" id="itineraryContent">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-3">AI is planning your perfect trip...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="downloadItinerary()">
+                    <i class="fas fa-download me-2"></i>Download Itinerary
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================= -->
+<!-- STEP 3: DETAILED BOOKING MODAL -->
+<!-- ========================================================= -->
 <div class="modal fade" id="bookingModal" tabindex="-1" data-bs-backdrop="static">
     <div class="modal-dialog modal-lg">
         <div class="modal-content rounded-4">
@@ -406,32 +425,6 @@
     </div>
 </div>
 
-<!-- AI Itinerary Modal -->
-<div class="modal fade" id="itineraryModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content rounded-4">
-            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                <h5 class="modal-title text-white fw-bold">
-                    <i class="fas fa-robot me-2"></i>AI Generated Itinerary
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-4" id="itineraryContent">
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status"></div>
-                    <p class="mt-3">AI is planning your perfect trip...</p>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="downloadItinerary()">
-                    <i class="fas fa-download me-2"></i>Download Itinerary
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 
 @section Scripts {
@@ -441,15 +434,15 @@
         // FIX 1: Fix Leaflet marker icon
         // =========================================================
         var LeafIcon = L.Icon.extend({
-        options: {
-        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-        }
+            options: {
+                iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+                iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            }
         });
         var redIcon = new LeafIcon();
 
@@ -460,177 +453,161 @@
         var marker = null;
 
         function initMap() {
-        if (map == null) {
-        @if (Model.DestinationInfo != null && Model.DestinationInfo.Lat != 0)
-        {
-            <text>
-                var lat = @Model.DestinationInfo.Lat.ToString("0.000000", System.Globalization.CultureInfo.InvariantCulture);
-                var lon = @Model.DestinationInfo.Lon.ToString("0.000000", System.Globalization.CultureInfo.InvariantCulture);
+            if (map == null) {
+                @if (Model.DestinationInfo != null && Model.DestinationInfo.Lat != 0)
+                {
+                    <text>
+                        var lat = @Model.DestinationInfo.Lat.ToString("0.000000", System.Globalization.CultureInfo.InvariantCulture);
+                        var lon = @Model.DestinationInfo.Lon.ToString("0.000000", System.Globalization.CultureInfo.InvariantCulture);
 
-                map = L.map('mainMap').setView([lat, lon], 12);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap'
-                }).addTo(map);
+                        map = L.map('mainMap').setView([lat, lon], 12);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '© OpenStreetMap'
+                        }).addTo(map);
 
-                marker = L.marker([lat, lon], { icon: redIcon })
-                .addTo(map)
-                .bindPopup('<b>@Model.CityName</b><br>Pakistan')
-                .openPopup();
-            </text>
-        }
-        else
-        {
-            <text>
-                var lat = 30.3753;
-                var lon = 69.3451;
-                map = L.map('mainMap').setView([lat, lon], 6);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap'
-                }).addTo(map);
-                marker = L.marker([lat, lon], { icon: redIcon })
-                .addTo(map)
-                .bindPopup('Pakistan')
-                .openPopup();
-            </text>
-        }
-        setTimeout(function() { map.invalidateSize(); }, 200);
-        }
+                        marker = L.marker([lat, lon], { icon: redIcon })
+                            .addTo(map)
+                            .bindPopup('<b>@Model.CityName</b><br>Pakistan')
+                            .openPopup();
+                    </text>
+                }
+                else
+                {
+                    <text>
+                        var lat = 30.3753;
+                        var lon = 69.3451;
+                        map = L.map('mainMap').setView([lat, lon], 6);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '© OpenStreetMap'
+                        }).addTo(map);
+                        marker = L.marker([lat, lon], { icon: redIcon })
+                            .addTo(map)
+                            .bindPopup('Pakistan')
+                            .openPopup();
+                    </text>
+                }
+                setTimeout(function() { map.invalidateSize(); }, 200);
+            }
         }
 
         // Map tab click pe initialize karo
         document.querySelector('[data-bs-target="#map"]').addEventListener('shown.bs.tab', function() {
-        initMap();
+            initMap();
         });
 
         // =========================================================
         // Star Rating
         // =========================================================
         function setRating(rating) {
-        document.getElementById('selectedRating').value = rating;
-        document.querySelectorAll('#starRating i').forEach(function(star, idx) {
-        star.style.color = idx < rating ? '#ffc107' : '#ddd';
-        });
+            document.getElementById('selectedRating').value = rating;
+            document.querySelectorAll('#starRating i').forEach(function(star, idx) {
+                star.style.color = idx < rating ? '#ffc107' : '#ddd';
+            });
         }
 
         // =========================================================
-        // SUBMIT REVIEW WITH SENTIMENT ANALYSIS (UPDATED)
+        // SUBMIT REVIEW WITH AI SENTIMENT ANALYSIS
         // =========================================================
         async function submitReview(destName) {
-        var rating = document.getElementById('selectedRating').value;
-        var comment = document.getElementById('reviewComment').value;
-
-        if (rating == 0) {
-        alert('Please select a rating');
-        return;
-        }
-        if (!comment.trim()) {
-        alert('Please write a review');
-        return;
-        }
-
-        // Show loading state on button
-        var submitBtn = document.querySelector('.btn-primary[onclick*="submitReview"]');
-        var originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Analyzing sentiment...';
-        submitBtn.disabled = true;
-
-        // Analyze sentiment first
-        var sentiment = 'Neutral';
-        var sentimentConfidence = 0;
-        try {
-        var sentimentResponse = await fetch('/api/ai/analyze-sentiment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: comment })
-        });
-        var sentimentData = await sentimentResponse.json();
-        sentiment = sentimentData.sentiment || 'Neutral';
-        sentimentConfidence = sentimentData.confidence || 0;
-        } catch (error) {
-        console.log('Sentiment analysis error:', error);
-        }
-
-        // Show sentiment notification
-        var sentimentEmoji = sentiment === 'Positive' ? '😊' : sentiment === 'Negative' ? '😞' : '😐';
-        var sentimentColor = sentiment === 'Positive' ? '#28a745' : sentiment === 'Negative' ? '#dc3545' : '#ffc107';
-
-        // Create temporary toast notification
-        var toastHtml = `
-        <div style="position: fixed; top: 20px; right: 20px; z-index: 9999; background: white; border-left: 4px solid ${sentimentColor}; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-        <strong>🧠 AI Sentiment Analysis</strong><br>
-        Your review was detected as <strong style="color: ${sentimentColor}">${sentiment}</strong> ${sentimentEmoji}
-        ${sentimentConfidence > 0 ? `<br><small>Confidence: ${Math.round(sentimentConfidence * 100)}%</small>` : ''}
-        </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', toastHtml);
-        setTimeout(() => {
-        var toast = document.querySelector('div[style*="position: fixed; top: 20px;"]');
-        if (toast) toast.remove();
-        }, 4000);
-
-        // Update button text
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting review...';
-
-        // Submit review with sentiment data
-        try {
-        var response = await fetch('@Url.Action("AddReview", "Destinations")', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `destinationName=${encodeURIComponent(destName)}&rating=${rating}&comment=${encodeURIComponent(comment)}&sentiment=${encodeURIComponent(sentiment)}`
-        });
-        var data = await response.json();
-
-        if (data.success) {
-        // Show success message with sentiment badge
-        var successHtml = `
-        <div style="position: fixed; top: 20px; right: 20px; z-index: 9999; background: #d4edda; border-left: 4px solid #28a745; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-        ✅ Review submitted successfully!<br>
-        <small>Sentiment: ${sentiment} ${sentimentEmoji}</small>
-        </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', successHtml);
-        setTimeout(() => {
-        var msg = document.querySelector('div[style*="position: fixed; top: 20px;"]');
-        if (msg) msg.remove();
-        }, 3000);
-
-        // Reload after short delay
-        setTimeout(() => location.reload(), 1500);
-        } else {
-        alert(data.message || 'Failed to submit review');
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-        }
-        } catch (error) {
-        console.error('Submit error:', error);
-        alert('An error occurred. Please try again.');
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-        }
+            var rating = document.getElementById('selectedRating').value;
+            var comment = document.getElementById('reviewComment').value;
+            
+            if (rating == 0) { alert('Please select a rating'); return; }
+            if (!comment.trim()) { alert('Please write a review'); return; }
+            
+            // Analyze sentiment first
+            var sentiment = 'Neutral';
+            try {
+                var sentimentResponse = await fetch('/api/ai/analyze-sentiment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(comment)
+                });
+                var sentimentData = await sentimentResponse.json();
+                sentiment = sentimentData.sentiment;
+            } catch (error) {
+                console.log('Sentiment analysis error:', error);
+            }
+            
+            // Show sentiment badge
+            var sentimentEmoji = sentiment === 'Positive' ? '😊' : sentiment === 'Negative' ? '😞' : '😐';
+            alert(`Review submitted! Our AI detected your review as ${sentiment} ${sentimentEmoji}`);
+            
+            // Submit review
+            fetch('@Url.Action("AddReview", "Destinations")', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `destinationName=${encodeURIComponent(destName)}&rating=${rating}&comment=${encodeURIComponent(comment)}`
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            });
         }
 
         // =========================================================
         // WISHLIST FUNCTION
         // =========================================================
-
         function addToWishlist() {
-        fetch('@Url.Action("AddToWishlist", "Account")', {
-        method: 'POST',
-
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'destinationId=0&destinationName=@Model.CityName&destinationCity=@Model.CityName&estimatedCost=0&imageUrl=@(Model.DestinationInfo?.ImageUrl ?? "")'
-        })
-        .then(r => r.json())
-        .then(data => {
-        alert(data.message);
-        if (data.success) {
-        var btn = document.getElementById('wishlistBtn');
-        btn.innerHTML = '<i class="fas fa-heart me-2"></i> Saved to Wishlist';
-        btn.disabled = true;
-        btn.classList.remove('btn-outline-light');
-        btn.classList.add('btn-danger');
+            fetch('@Url.Action("AddToWishlist", "Account")', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'destinationId=0&destinationName=@Model.CityName&destinationCity=@Model.CityName&estimatedCost=0&imageUrl=@(Model.DestinationInfo?.ImageUrl ?? "")'
+            })
+            .then(r => r.json())
+            .then(data => {
+                alert(data.message);
+                if (data.success) {
+                    var btn = document.getElementById('wishlistBtn');
+                    btn.innerHTML = '<i class="fas fa-heart me-2"></i> Saved to Wishlist';
+                    btn.disabled = true;
+                    btn.classList.remove('btn-outline-light');
+                    btn.classList.add('btn-danger');
+                }
+            });
         }
-        });
+
+        // =========================================================
+        // AI ITINERARY GENERATOR
+        // =========================================================
+        async function generateAIItinerary(destination) {
+            var modal = new bootstrap.Modal(document.getElementById('itineraryModal'));
+            modal.show();
+            
+            var contentDiv = document.getElementById('itineraryContent');
+            contentDiv.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-3">AI is planning your perfect trip...</p></div>';
+            
+            try {
+                var response = await fetch('/api/ai/generate-itinerary', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ destination: destination, days: 3, budget: 'Medium' })
+                });
+                var data = await response.json();
+                contentDiv.innerHTML = '<pre style="white-space: pre-wrap; font-family: inherit;">' + escapeHtml(data.itinerary) + '</pre>';
+            } catch (error) {
+                contentDiv.innerHTML = '<div class="alert alert-danger">Failed to generate itinerary. Please try again.</div>';
+            }
+        }
+        
+        function downloadItinerary() {
+            var content = document.getElementById('itineraryContent').innerText;
+            var blob = new Blob([content], { type: 'text/plain' });
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'itinerary.txt';
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+        
+        function escapeHtml(text) {
+            var div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         // =========================================================
@@ -641,219 +618,176 @@
         var isHotelSkipped = false;
 
         function selectHotel(name, pricePerNight) {
-        selectedHotel.name = name;
-        selectedHotel.pricePerNight = pricePerNight;
-        isHotelSkipped = false;
-        document.getElementById('selectedHotelName').value = name;
-        document.getElementById('selectedHotelPrice').value = pricePerNight;
-        document.getElementById('isHotelSkipped').value = 'false';
+            selectedHotel.name = name;
+            selectedHotel.pricePerNight = pricePerNight;
+            isHotelSkipped = false;
+            document.getElementById('selectedHotelName').value = name;
+            document.getElementById('selectedHotelPrice').value = pricePerNight;
+            document.getElementById('isHotelSkipped').value = 'false';
 
-        document.getElementById('hotelDetailsSection').innerHTML = `<p class="fw-bold mb-0">${name}</p><small class="text-muted">PKR ${pricePerNight.toLocaleString()} / night</small>`;
-        document.getElementById('hotelDatesSection').style.display = 'block';
+            document.getElementById('hotelDetailsSection').innerHTML = `<p class="fw-bold mb-0">${name}</p><small class="text-muted">PKR ${pricePerNight.toLocaleString()} / night</small>`;
+            document.getElementById('hotelDatesSection').style.display = 'block';
 
-        var tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        var dayAfter = new Date();
-        dayAfter.setDate(dayAfter.getDate() + 2);
-        document.getElementById('hotelCheckIn').value = tomorrow.toISOString().split('T')[0];
-        document.getElementById('hotelCheckOut').value = dayAfter.toISOString().split('T')[0];
-        updateHotelNights();
-        switchToTransportTab();
+            var tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            var dayAfter = new Date();
+            dayAfter.setDate(dayAfter.getDate() + 2);
+            document.getElementById('hotelCheckIn').value = tomorrow.toISOString().split('T')[0];
+            document.getElementById('hotelCheckOut').value = dayAfter.toISOString().split('T')[0];
+            updateHotelNights();
+            switchToTransportTab();
         }
 
         function skipHotels() {
-        selectedHotel.name = 'No Hotel';
-        selectedHotel.pricePerNight = 0;
-        selectedHotel.nights = 0;
-        isHotelSkipped = true;
-        document.getElementById('selectedHotelName').value = '';
-        document.getElementById('selectedHotelPrice').value = '0';
-        document.getElementById('isHotelSkipped').value = 'true';
-        document.getElementById('hotelDetailsSection').innerHTML = `<p class="text-muted mb-0">No hotel selected (skipped)</p>`;
-        document.getElementById('hotelDatesSection').style.display = 'none';
-        updateHotelCost();
-        switchToTransportTab();
+            selectedHotel.name = 'No Hotel';
+            selectedHotel.pricePerNight = 0;
+            selectedHotel.nights = 0;
+            isHotelSkipped = true;
+            document.getElementById('selectedHotelName').value = '';
+            document.getElementById('selectedHotelPrice').value = '0';
+            document.getElementById('isHotelSkipped').value = 'true';
+            document.getElementById('hotelDetailsSection').innerHTML = `<p class="text-muted mb-0">No hotel selected (skipped)</p>`;
+            document.getElementById('hotelDatesSection').style.display = 'none';
+            updateHotelCost();
+            switchToTransportTab();
         }
 
         function updateHotelNights() {
-        var checkIn = new Date(document.getElementById('hotelCheckIn').value);
-        var checkOut = new Date(document.getElementById('hotelCheckOut').value);
-        if (checkIn && checkOut && checkOut > checkIn) {
-        var nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
-        selectedHotel.nights = nights;
-        selectedHotel.checkIn = document.getElementById('hotelCheckIn').value;
-        selectedHotel.checkOut = document.getElementById('hotelCheckOut').value;
-        document.getElementById('hotelNights').value = nights;
-        updateHotelCost();
-        }
+            var checkIn = new Date(document.getElementById('hotelCheckIn').value);
+            var checkOut = new Date(document.getElementById('hotelCheckOut').value);
+            if (checkIn && checkOut && checkOut > checkIn) {
+                var nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+                selectedHotel.nights = nights;
+                selectedHotel.checkIn = document.getElementById('hotelCheckIn').value;
+                selectedHotel.checkOut = document.getElementById('hotelCheckOut').value;
+                document.getElementById('hotelNights').value = nights;
+                updateHotelCost();
+            }
         }
 
         function updateHotelCost() {
-        var hotelTotal = selectedHotel.pricePerNight * selectedHotel.nights;
-        document.getElementById('hotelCostLabel').innerHTML = `Hotel (${selectedHotel.nights} nights)`;
-        document.getElementById('hotelCostValue').innerHTML = `PKR ${hotelTotal.toLocaleString()}`;
-        updateGrandTotal();
+            var hotelTotal = selectedHotel.pricePerNight * selectedHotel.nights;
+            document.getElementById('hotelCostLabel').innerHTML = `Hotel (${selectedHotel.nights} nights)`;
+            document.getElementById('hotelCostValue').innerHTML = `PKR ${hotelTotal.toLocaleString()}`;
+            updateGrandTotal();
         }
 
         function switchToTransportTab() {
-        var transportTab = document.querySelector('[data-bs-target="#transport"]');
-        var transportTabPane = document.getElementById('transport');
-        document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('show', 'active'));
-        transportTab.classList.add('active');
-        transportTabPane.classList.add('show', 'active');
-        transportTabPane.scrollIntoView({ behavior: 'smooth' });
+            var transportTab = document.querySelector('[data-bs-target="#transport"]');
+            var transportTabPane = document.getElementById('transport');
+            document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('show', 'active'));
+            transportTab.classList.add('active');
+            transportTabPane.classList.add('show', 'active');
+            transportTabPane.scrollIntoView({ behavior: 'smooth' });
         }
 
         // =========================================================
         // STEP 2: TRANSPORT SELECTION
         // =========================================================
         function selectTransport(id, name, farePerSeat, type, availableSeats) {
-        selectedTransport.id = id;
-        selectedTransport.name = `${name} (${type})`;
-        selectedTransport.farePerSeat = farePerSeat;
-        document.getElementById('selectedTransportId').value = id;
-        document.getElementById('selectedTransportFare').value = farePerSeat;
-        document.getElementById('selectedTransportName').value = name;
+            selectedTransport.id = id;
+            selectedTransport.name = `${name} (${type})`;
+            selectedTransport.farePerSeat = farePerSeat;
+            document.getElementById('selectedTransportId').value = id;
+            document.getElementById('selectedTransportFare').value = farePerSeat;
+            document.getElementById('selectedTransportName').value = name;
 
-        document.getElementById('transportDetailsSection').innerHTML = `<p class="fw-bold mb-0">${selectedTransport.name}</p><small class="text-muted">PKR ${farePerSeat.toLocaleString()} / seat</small>`;
-        document.getElementById('transportSeatsSection').style.display = 'block';
+            document.getElementById('transportDetailsSection').innerHTML = `<p class="fw-bold mb-0">${selectedTransport.name}</p><small class="text-muted">PKR ${farePerSeat.toLocaleString()} / seat</small>`;
+            document.getElementById('transportSeatsSection').style.display = 'block';
 
-        var tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        document.getElementById('travelDate').value = tomorrow.toISOString().split('T')[0];
-        document.getElementById('transportSeats').max = availableSeats;
-        updateTransportTotal();
+            var tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('travelDate').value = tomorrow.toISOString().split('T')[0];
+            document.getElementById('transportSeats').max = availableSeats;
+            updateTransportTotal();
 
-        var bookingModal = new bootstrap.Modal(document.getElementById('bookingModal'));
-        bookingModal.show();
+            var bookingModal = new bootstrap.Modal(document.getElementById('bookingModal'));
+            bookingModal.show();
         }
 
         function updateTransportTotal() {
-        var seats = parseInt(document.getElementById('transportSeats').value) || 1;
-        var travelDate = document.getElementById('travelDate').value;
-        selectedTransport.seats = seats;
-        selectedTransport.travelDate = travelDate;
-        var transportTotal = selectedTransport.farePerSeat * seats;
-        document.getElementById('transportCostLabel').innerHTML = `Transport (${seats} seat${seats > 1 ? 's' : ''})`;
-        document.getElementById('transportCostValue').innerHTML = `PKR ${transportTotal.toLocaleString()}`;
-        updateGrandTotal();
+            var seats = parseInt(document.getElementById('transportSeats').value) || 1;
+            var travelDate = document.getElementById('travelDate').value;
+            selectedTransport.seats = seats;
+            selectedTransport.travelDate = travelDate;
+            var transportTotal = selectedTransport.farePerSeat * seats;
+            document.getElementById('transportCostLabel').innerHTML = `Transport (${seats} seat${seats > 1 ? 's' : ''})`;
+            document.getElementById('transportCostValue').innerHTML = `PKR ${transportTotal.toLocaleString()}`;
+            updateGrandTotal();
         }
 
         function updateGrandTotal() {
-        var hotelTotal = selectedHotel.pricePerNight * selectedHotel.nights;
-        var transportTotal = selectedTransport.farePerSeat * selectedTransport.seats;
-        var grandTotal = hotelTotal + transportTotal;
-        document.getElementById('grandTotalValue').innerHTML = `PKR ${grandTotal.toLocaleString()}`;
+            var hotelTotal = selectedHotel.pricePerNight * selectedHotel.nights;
+            var transportTotal = selectedTransport.farePerSeat * selectedTransport.seats;
+            var grandTotal = hotelTotal + transportTotal;
+            document.getElementById('grandTotalValue').innerHTML = `PKR ${grandTotal.toLocaleString()}`;
         }
 
         // =========================================================
         // STEP 3: FINAL CONFIRMATION
         // =========================================================
         function finalConfirmBooking() {
-        var guestName = document.getElementById('guestName').value;
-        var guestPhone = document.getElementById('guestPhone').value;
+            var guestName = document.getElementById('guestName').value;
+            var guestPhone = document.getElementById('guestPhone').value;
 
-        if (!guestName) { alert('Please enter guest name'); return; }
-        if (!guestPhone) { alert('Please enter contact number'); return; }
-        if (!selectedTransport.id) { alert('Please select transport first'); return; }
-        if (selectedTransport.seats < 1) { alert('Please select at least 1 seat'); return; }
+            if (!guestName) { alert('Please enter guest name'); return; }
+            if (!guestPhone) { alert('Please enter contact number'); return; }
+            if (!selectedTransport.id) { alert('Please select transport first'); return; }
+            if (selectedTransport.seats < 1) { alert('Please select at least 1 seat'); return; }
 
-        var hotelTotal = selectedHotel.pricePerNight * selectedHotel.nights;
-        var transportTotal = selectedTransport.farePerSeat * selectedTransport.seats;
-        var grandTotal = hotelTotal + transportTotal;
+            var hotelTotal = selectedHotel.pricePerNight * selectedHotel.nights;
+            var transportTotal = selectedTransport.farePerSeat * selectedTransport.seats;
+            var grandTotal = hotelTotal + transportTotal;
 
-        var requestBody = `destinationName=@Model.CityName` +
-        `&hotelName=${encodeURIComponent(isHotelSkipped ? '' : selectedHotel.name)}` +
-        `&hotelPricePerNight=${selectedHotel.pricePerNight}` +
-        `&transportId=${selectedTransport.id}` +
-        `&checkIn=${selectedHotel.checkIn || ''}` +
-        `&checkOut=${selectedHotel.checkOut || ''}` +
-        `&guests=${selectedTransport.seats}` +
-        `&totalPrice=${grandTotal}`;
+            var requestBody = `destinationName=@Model.CityName` +
+                `&hotelName=${encodeURIComponent(isHotelSkipped ? '' : selectedHotel.name)}` +
+                `&hotelPricePerNight=${selectedHotel.pricePerNight}` +
+                `&transportId=${selectedTransport.id}` +
+                `&checkIn=${selectedHotel.checkIn || ''}` +
+                `&checkOut=${selectedHotel.checkOut || ''}` +
+                `&guests=${selectedTransport.seats}` +
+                `&totalPrice=${grandTotal}`;
 
-        fetch('@Url.Action("CreateBooking", "Destinations")', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: requestBody
-        })
-        .then(r => r.json())
-        .then(data => {
-        if (data.success) {
-        bootstrap.Modal.getInstance(document.getElementById('bookingModal')).hide();
-        document.getElementById('bookingRef').textContent = data.reference;
-        new bootstrap.Modal(document.getElementById('successModal')).show();
-        } else {
-        alert(data.message || 'Booking failed');
-        }
-        })
-        .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred. Please try again.');
-        });
-        }
-
-        // =========================================================
-        // AI ITINERARY FUNCTIONS
-        // =========================================================
-        async function generateAIItinerary(destination) {
-        var modal = new bootstrap.Modal(document.getElementById('itineraryModal'));
-        modal.show();
-
-        var contentDiv = document.getElementById('itineraryContent');
-        contentDiv.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-3">AI is planning your perfect trip...</p></div>';
-
-        try {
-        var response = await fetch('/api/ai/generate-itinerary', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ destination: destination, days: 3, budget: 'Medium' })
-        });
-        var data = await response.json();
-        contentDiv.innerHTML = '<pre style="white-space: pre-wrap; font-family: inherit;">' + escapeHtml(data.itinerary) + '</pre>';
-        } catch (error) {
-        contentDiv.innerHTML = '<div class="alert alert-danger">Failed to generate itinerary. Please try again.</div>';
-        }
-        }
-
-        function downloadItinerary() {
-        var content = document.getElementById('itineraryContent').innerText;
-        var blob = new Blob([content], { type: 'text/plain' });
-        var link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'itinerary.txt';
-        link.click();
-        URL.revokeObjectURL(link.href);
-        }
-
-        function escapeHtml(text) {
-        var div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+            fetch('@Url.Action("CreateBooking", "Destinations")', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: requestBody
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('bookingModal')).hide();
+                    document.getElementById('bookingRef').textContent = data.reference;
+                    new bootstrap.Modal(document.getElementById('successModal')).show();
+                } else {
+                    alert(data.message || 'Booking failed');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
         }
     </script>
 }
 
 <style>
     .hotel-card {
-    transition: transform 0.3s ease;
+        transition: transform 0.3s ease;
     }
-
     .hotel-card:hover {
-    transform: translateY(-5px);
+        transform: translateY(-5px);
     }
-
     .nav-pills .nav-link.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
-
     .nav-pills .nav-link {
-    color: #667eea;
-    border: 2px solid #667eea;
+        color: #667eea;
+        border: 2px solid #667eea;
     }
-
     .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: none;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
     }
 </style>

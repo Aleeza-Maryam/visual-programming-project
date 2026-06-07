@@ -20,6 +20,11 @@ namespace AITourismPlanner.Controllers
             try
             {
                 // =========================================================
+                // Get UserId for View (for personalized recommendations)
+                // =========================================================
+                ViewBag.UserId = HttpContext.Session.GetInt32("UserId");
+
+                // =========================================================
                 // Get Popular Destinations
                 // =========================================================
                 var popularDestinations = await _context.destinations

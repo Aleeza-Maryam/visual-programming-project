@@ -17,40 +17,43 @@ namespace AITourismPlanner.Controllers
         // =========================================================
         // PACKAGES LISTING
         // =========================================================
-      public async Task<IActionResult> Index(string type = "all", string sort = "price_asc")
-{
-    var query = _context.packages.Where(p => p.is_active).AsQueryable();
+        public async Task<IActionResult> Index(string type = "all", string sort = "price_asc")
+        {
+            var query = _context.packages.Where(p => p.is_active).AsQueryable();
 
-    // Filter by package type
-    if (type != "all")
-    {
-        query = query.Where(p => p.package_type != null && p.package_type == type);
-    }
+            // Filter by package type
+            if (type != "all")
+            {
+                query = query.Where(p => p.package_type != null && p.package_type == type);
+            }
 
-    // Sorting with null check
-    query = sort switch
-    {
-        "price_desc" => query.OrderByDescending(p => p.price_per_person),
-        "duration_asc" => query.OrderBy(p => p.duration_nights),
-        "rating_desc" => query.OrderByDescending(p => p.PackageReviews != null ? p.PackageReviews.Average(r => r.rating ?? 0) : 0),
-        _ => query.OrderBy(p => p.price_per_person)
-    };
+            // Sorting with null check
+            query = sort switch
+            {
+                "price_desc" => query.OrderByDescending(p => p.price_per_person),
+                "duration_asc" => query.OrderBy(p => p.duration_nights),
+                "rating_desc" => query.OrderByDescending(p => p.PackageReviews != null ? p.PackageReviews.Average(r => r.rating ?? 0) : 0),
+                _ => query.OrderBy(p => p.price_per_person)
+            };
 
-    var packages = await query.ToListAsync();
+            var packages = await query.ToListAsync();
 
-    ViewBag.SelectedType = type;
-    ViewBag.SelectedSort = sort;
-    ViewBag.PackageTypes = new[] { "Budget", "Standard", "Premium", "Honeymoon", "Family" };
+            // =========================================================
+            // ✅ ADD THIS LINE - Get destinations list for dropdown (AI Budget Comparison)
+            // =========================================================
             ViewBag.DestinationsList = await _context.packages
-            .Where(p => p.is_active)
-            .Select(p => p.destination_name)
-            .Distinct()
-            .ToListAsync();
+                .Where(p => p.is_active)
+                .Select(p => p.destination_name)
+                .Distinct()
+                .ToListAsync();
+
+            ViewBag.SelectedType = type;
+            ViewBag.SelectedSort = sort;
+            ViewBag.PackageTypes = new[] { "Budget", "Standard", "Premium", "Honeymoon", "Family" };
+
             return View(packages);
-}
-        // =========================================================
-        // PACKAGE DETAILS
-        // =========================================================
+        }
+
         // =========================================================
         // PACKAGE DETAILS
         // =========================================================
@@ -76,6 +79,7 @@ namespace AITourismPlanner.Controllers
 
             return View(package);
         }
+
         // =========================================================
         // BOOK PACKAGE - GET
         // =========================================================
@@ -170,7 +174,6 @@ namespace AITourismPlanner.Controllers
         // =========================================================
         // MY PACKAGE BOOKINGS
         // =========================================================
-
         public async Task<IActionResult> MyPackageBookings()
         {
             var userId = HttpContext.Session.GetInt32("UserId");
@@ -221,6 +224,7 @@ namespace AITourismPlanner.Controllers
 
             return Json(new { success = true, message = "Review added!" });
         }
+
         // =========================================================
         // CREATE PACKAGE BOOKING - API
         // =========================================================
@@ -264,26 +268,10 @@ namespace AITourismPlanner.Controllers
 
             return Json(new { success = true, reference = reference });
         }
+
         // =========================================================
         // DOWNLOAD VOUCHER
         // =========================================================
-        [HttpPost]
-        public async Task<IActionResult> CancelPackageBooking(int id)
-        {
-            var userId = HttpContext.Session.GetInt32("UserId");
-            var booking = await _context.package_bookings.FindAsync(id);
-
-            if (booking == null || booking.user_id != userId)
-                return Json(new { success = false, message = "Booking not found" });
-
-            if (booking.travel_date <= DateTime.Now.AddDays(1))
-                return Json(new { success = false, message = "Cannot cancel booking within 24 hours of travel date" });
-
-            booking.booking_status = "Cancelled";
-            await _context.SaveChangesAsync();
-
-            return Json(new { success = true, message = "Booking cancelled successfully!" });
-        }
         [HttpGet]
         public async Task<IActionResult> DownloadVoucher(string reference)
         {
@@ -361,7 +349,28 @@ namespace AITourismPlanner.Controllers
         }
 
         // =========================================================
-        // CANCEL BOOKING
+        // CANCEL PACKAGE BOOKING
+        // =========================================================
+        [HttpPost]
+        public async Task<IActionResult> CancelPackageBooking(int id)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            var booking = await _context.package_bookings.FindAsync(id);
+
+            if (booking == null || booking.user_id != userId)
+                return Json(new { success = false, message = "Booking not found" });
+
+            if (booking.travel_date <= DateTime.Now.AddDays(1))
+                return Json(new { success = false, message = "Cannot cancel booking within 24 hours of travel date" });
+
+            booking.booking_status = "Cancelled";
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Booking cancelled successfully!" });
+        }
+
+        // =========================================================
+        // CANCEL BOOKING (Alias)
         // =========================================================
         [HttpPost]
         public async Task<IActionResult> CancelBooking(int bookingId)
@@ -372,7 +381,6 @@ namespace AITourismPlanner.Controllers
             if (booking == null || booking.user_id != userId)
                 return Json(new { success = false, message = "Booking not found" });
 
-            // Check if travel date is in future (at least 2 days ahead for cancellation)
             if (booking.travel_date <= DateTime.Now.AddDays(1))
                 return Json(new { success = false, message = "Cannot cancel booking within 24 hours of travel date" });
 

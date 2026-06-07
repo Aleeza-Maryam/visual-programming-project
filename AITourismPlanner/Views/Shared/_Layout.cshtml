@@ -16,167 +16,178 @@
 
     <!-- Animate.css -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    
+
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 
     <!-- Custom CSS -->
     <style>
-        * {
-            font-family: 'Poppins', sans-serif;
-        }
+            * {
+                font-family: 'Poppins', sans-serif;
+            }
 
-        body {
-            overflow-x: hidden;
-        }
+            body {
+                overflow-x: hidden;
+            }
 
-        .navbar {
-            background: white;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
-            padding: 0.8rem 0;
-            transition: all 0.3s ease;
-        }
-
-        .navbar-scrolled {
-            background: rgba(255,255,255,0.95) !important;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 5px 30px rgba(0,0,0,0.1);
-        }
-
-        .nav-link {
-            font-weight: 500;
-            color: #333 !important;
-            transition: all 0.3s ease;
-            margin: 0 0.3rem;
-            padding: 0.5rem 0.8rem;
-            font-size: 0.95rem;
-        }
-
-        .nav-link:hover {
-            color: #667eea !important;
-            transform: translateY(-2px);
-        }
-
-        .dropdown-menu {
-            border: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border-radius: 15px;
-            padding: 0.5rem 0;
-        }
-
-        .dropdown-item {
-            padding: 0.5rem 1.2rem;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-        }
-
-        .dropdown-item:hover {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            transform: translateX(5px);
-        }
-
-        .footer {
-            background: #0a192f;
-            color: white;
-            padding: 4rem 0 2rem;
-        }
-
-        .footer a {
-            color: #aaa;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .footer a:hover {
-            color: #667eea;
-            transform: translateX(5px);
-        }
-
-        .btn-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            transition: all 0.3s ease;
-            padding: 0.4rem 1rem;
-            font-size: 0.9rem;
-        }
-
-        .btn-gradient:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102,126,234,0.4);
-            color: white;
-        }
-
-        .toast-notification {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 9999;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #5a67d8;
-        }
-
-        /* Fix main content margin to account for navbar */
-        main {
-            margin-top: 70px;
-            min-height: calc(100vh - 70px);
-        }
-
-        /* Responsive fixes */
-        @@media (max-width: 991px) {
             .navbar {
-                padding: 0.5rem 0;
+                background: white;
+                box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+                padding: 0.8rem 0;
+                transition: all 0.3s ease;
             }
-            .navbar-nav {
-                padding: 10px 0;
+
+            .navbar-scrolled {
+                background: rgba(255,255,255,0.95) !important;
+                backdrop-filter: blur(10px);
+                box-shadow: 0 5px 30px rgba(0,0,0,0.1);
             }
+
             .nav-link {
-                padding: 0.5rem 1rem;
-                margin: 0;
+                font-weight: 500;
+                color: #333 !important;
+                transition: all 0.3s ease;
+                margin: 0 0.3rem;
+                padding: 0.5rem 0.8rem;
+                font-size: 0.95rem;
             }
+
+                .nav-link:hover {
+                    color: #667eea !important;
+                    transform: translateY(-2px);
+                }
+
             .dropdown-menu {
                 border: none;
-                box-shadow: none;
-                background: transparent;
-                padding-left: 20px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                border-radius: 15px;
+                padding: 0.5rem 0;
             }
-            .dropdown-item:hover {
-                transform: none;
+
+            .dropdown-item {
+                padding: 0.5rem 1.2rem;
+                transition: all 0.3s ease;
+                font-size: 0.9rem;
             }
+
+                .dropdown-item:hover {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    transform: translateX(5px);
+                }
+
+            .footer {
+                background: #0a192f;
+                color: white;
+                padding: 4rem 0 2rem;
+            }
+
+                .footer a {
+                    color: #aaa;
+                    text-decoration: none;
+                    transition: all 0.3s ease;
+                }
+
+                    .footer a:hover {
+                        color: #667eea;
+                        transform: translateX(5px);
+                    }
+
             .btn-gradient {
-                margin-top: 5px;
-                width: 100%;
-                text-align: center;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                transition: all 0.3s ease;
+                padding: 0.4rem 1rem;
+                font-size: 0.9rem;
             }
-        }
 
-        @@media (max-width: 768px) {
-            .navbar-brand {
-                font-size: 1.3rem;
+                .btn-gradient:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 5px 20px rgba(102,126,234,0.4);
+                    color: white;
+                }
+
+            .toast-notification {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                z-index: 9999;
             }
-            .nav-link {
-                font-size: 0.85rem;
-                padding: 0.4rem 0.8rem;
+
+            /* Custom Scrollbar */
+            ::-webkit-scrollbar {
+                width: 10px;
             }
+
+            ::-webkit-scrollbar-track {
+                background: #f1f1f1;
+            }
+
+            ::-webkit-scrollbar-thumb {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 10px;
+            }
+
+                ::-webkit-scrollbar-thumb:hover {
+                    background: #5a67d8;
+                }
+
+            /* Fix main content margin to account for navbar */
             main {
-                margin-top: 65px;
+                margin-top: 70px;
+                min-height: calc(100vh - 70px);
             }
-        }
 
+            /* Responsive fixes */
+            @@media (max-width: 991px) {
+                .navbar {
+                    padding: 0.5rem 0;
+                }
+
+                .navbar-nav {
+                    padding: 10px 0;
+                }
+
+                .nav-link {
+                    padding: 0.5rem 1rem;
+                    margin: 0;
+                }
+
+                .dropdown-menu {
+                    border: none;
+                    box-shadow: none;
+                    background: transparent;
+                    padding-left: 20px;
+                }
+
+                .dropdown-item:hover {
+                    transform: none;
+                }
+
+                .btn-gradient {
+                    margin-top: 5px;
+                    width: 100%;
+                    text-align: center;
+                }
+            }
+
+            @@media (max-width: 768px) {
+                .navbar-brand {
+                    font-size: 1.3rem;
+                }
+
+                .nav-link {
+                    font-size: 0.85rem;
+                    padding: 0.4rem 0.8rem;
+                }
+
+                main {
+                    margin-top: 65px;
+                }
+            }
+
+            /* AI Chatbot Styles */
             .chatbot-button {
                 position: fixed;
                 bottom: 30px;
@@ -307,13 +318,9 @@
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
         <div class="container">
-            <a class="navbar-brand fw-bold fs-3" href="@Url.Action("Index", "Home")">
-                <i class="fas fa-map-marked-alt text-primary"></i> TravelMate
-
             <a class="navbar-brand fw-bold fs-3" href="@Url.Action("Index", "Home")" style="text-decoration: none;">
                 <i class="fas fa-map-marked-alt me-2" style="color: #667eea; transition: transform 0.3s ease;"></i>
                 <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; background-clip: text; color: transparent;">TravelMate</span>
-
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -326,11 +333,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-
-                        <a class="nav-link" href="@Url.Action("Index", "Destination")">
-
                         <a class="nav-link" href="@Url.Action("Index", "Destinations")">
-
                             <i class="fas fa-map-marked-alt"></i> Destinations
                         </a>
                     </li>
@@ -339,43 +342,39 @@
                             <i class="fas fa-robot"></i> AI Trip Planner
                         </a>
                     </li>
-                    
+
                     <!-- Weather Link -->
                     <li class="nav-item">
                         <a class="nav-link" href="@Url.Action("Index", "Weather")">
                             <i class="fas fa-cloud-sun"></i> Weather
                         </a>
                     </li>
-                    
+
                     <!-- Transport Link -->
                     <li class="nav-item">
                         <a class="nav-link" href="@Url.Action("Search", "Transport")">
                             <i class="fas fa-bus"></i> Transport
                         </a>
                     </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="@Url.Action("Index", "Packages")">
-                                    <i class="fas fa-box"></i> Packages
-                                </a>
-                            </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Index", "Packages")">
+                            <i class="fas fa-box"></i> Packages
+                        </a>
+                    </li>
+
                     <!-- Real Hotels Link -->
                     <li class="nav-item">
                         <a class="nav-link" href="@Url.Action("Search", "RealHotels")">
                             <i class="fas fa-globe"></i> Real Hotels
                         </a>
                     </li>
-                    
+
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="fas fa-briefcase"></i> Services
                         </a>
                         <ul class="dropdown-menu">
-
-                            <li><a class="dropdown-item" href="@Url.Action("Index", "Hotels")"><i class="fas fa-hotel"></i> Hotels</a></li>
-                            <li><a class="dropdown-item" href="@Url.Action("Search", "RealHotels")"><i class="fas fa-globe"></i> Real Hotels (API)</a></li>
-
                             <li><a class="dropdown-item" href="@Url.Action("Search", "RealHotels")"><i class="fas fa-globe"></i> Hotels</a></li>
-
                             <li><a class="dropdown-item" href="@Url.Action("Search", "Transport")"><i class="fas fa-bus"></i> Transport</a></li>
                             <li><a class="dropdown-item" href="@Url.Action("Index", "Chatbot")"><i class="fas fa-comment-dots"></i> AI Chatbot</a></li>
                         </ul>
@@ -401,8 +400,6 @@
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" href="@Url.Action("Dashboard", "Account")"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                                 <li><a class="dropdown-item" href="@Url.Action("MyTrips", "Trips")"><i class="fas fa-plane"></i> My Trips</a></li>
-                                <li><a class="dropdown-item" href="@Url.Action("MyBookings", "HotelBooking")"><i class="fas fa-ticket-alt"></i> My Bookings</a></li>
-
                                 <li><a class="dropdown-item" href="@Url.Action("MyBookings", "Bookings")"><i class="fas fa-ticket-alt"></i> My Bookings</a></li>
                                 <li><a class="dropdown-item" href="@Url.Action("Wishlist", "Account")"><i class="fas fa-heart"></i> Favorites</a></li>
                                 <li><hr class="dropdown-divider"></li>
@@ -451,7 +448,7 @@
                     <h5>Quick Links</h5>
                     <ul class="list-unstyled">
                         <li><a href="@Url.Action("Index", "Home")">Home</a></li>
-                        <li><a href="@Url.Action("Index", "Destination")">Destinations</a></li>
+                        <li><a href="@Url.Action("Index", "Destinations")">Destinations</a></li>
                         <li><a href="@Url.Action("PlanTrip", "Trips")">AI Planner</a></li>
                         <li><a href="@Url.Action("Index", "Weather")">Weather</a></li>
                         <li><a href="@Url.Action("Search", "Transport")">Transport</a></li>
@@ -482,30 +479,35 @@
                 <p class="mb-0">&copy; 2025 TravelMate. All rights reserved. Powered by Artificial Intelligence.</p>
             </div>
         </div>
-                <div id="chatbotBtn" class="chatbot-button" onclick="toggleChatbot()">
-                    <i class="fas fa-robot fa-2x"></i>
-                </div>
-
-                <!-- AI Chatbot Modal -->
-                <div id="chatbotModal" class="chatbot-modal">
-                    <div class="chatbot-header">
-                        <div>
-                            <i class="fas fa-robot me-2"></i>
-                            <span>AI Travel Assistant</span>
-                        </div>
-                        <button class="chatbot-close" onclick="toggleChatbot()">&times;</button>
-                    </div>
-                    <div class="chatbot-messages" id="chatMessages">
-                        <div class="bot-message">
-                            <div class="message-bubble">Hello! I'm your AI travel assistant. Ask me anything about Pakistan travel! 🇵🇰</div>
-                        </div>
-                    </div>
-                    <div class="chatbot-input">
-                        <input type="text" id="chatInput" placeholder="Ask me something..." onkeypress="if(event.keyCode==13) sendMessage()">
-                        <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
-                    </div>
-                </div>
     </footer>
+
+    <!-- ========================================================= -->
+    <!-- AI CHATBOT FLOATING BUTTON & MODAL -->
+    <!-- ========================================================= -->
+    <!-- Chatbot Button -->
+    <div id="chatbotBtn" class="chatbot-button" onclick="toggleChatbot()">
+        <i class="fas fa-robot fa-2x"></i>
+    </div>
+
+    <!-- Chatbot Modal -->
+    <div id="chatbotModal" class="chatbot-modal">
+        <div class="chatbot-header">
+            <div>
+                <i class="fas fa-robot me-2"></i>
+                <span>AI Travel Assistant</span>
+            </div>
+            <button class="chatbot-close" onclick="toggleChatbot()">&times;</button>
+        </div>
+        <div class="chatbot-messages" id="chatMessages">
+            <div class="bot-message">
+                <div class="message-bubble">Hello! I'm your AI travel assistant. Ask me anything about Pakistan travel! 🇵🇰</div>
+            </div>
+        </div>
+        <div class="chatbot-input">
+            <input type="text" id="chatInput" placeholder="Ask me something..." onkeypress="if(event.keyCode==13) sendMessage()">
+            <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
@@ -513,74 +515,81 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 
     <script>
+        // Navbar scroll effect
         window.addEventListener('scroll', function() {
-            if (window.scrollY > 50) {
-                document.getElementById('mainNav').classList.add('navbar-scrolled');
-            } else {
-                document.getElementById('mainNav').classList.remove('navbar-scrolled');
-            }
+        if (window.scrollY > 50) {
+        document.getElementById('mainNav').classList.add('navbar-scrolled');
+        } else {
+        document.getElementById('mainNav').classList.remove('navbar-scrolled');
+        }
         });
 
         // Add hover animation for icon
         var brandLink = document.querySelector('.navbar-brand');
         if (brandLink) {
-            brandLink.addEventListener('mouseenter', function() {
-                this.querySelector('i').style.transform = 'rotate(-5deg) scale(1.1)';
-            });
-            brandLink.addEventListener('mouseleave', function() {
-                this.querySelector('i').style.transform = 'rotate(0deg) scale(1)';
-            });
+        brandLink.addEventListener('mouseenter', function() {
+        this.querySelector('i').style.transform = 'rotate(-5deg) scale(1.1)';
+        });
+        brandLink.addEventListener('mouseleave', function() {
+        this.querySelector('i').style.transform = 'rotate(0deg) scale(1)';
+        });
         }
-                function toggleChatbot() {
-                var modal = document.getElementById('chatbotModal');
-                if (modal.style.display === 'flex') {
-                modal.style.display = 'none';
-                } else {
-                modal.style.display = 'flex';
-                }
-                }
 
-                async function sendMessage() {
-                var input = document.getElementById('chatInput');
-                var message = input.value.trim();
-                if (!message) return;
+        // =========================================================
+        // AI CHATBOT FUNCTIONS
+        // =========================================================
+        function toggleChatbot() {
+        var modal = document.getElementById('chatbotModal');
+        if (modal.style.display === 'flex') {
+        modal.style.display = 'none';
+        } else {
+        modal.style.display = 'flex';
+        }
+        }
 
-                var messagesDiv = document.getElementById('chatMessages');
+        async function sendMessage() {
+        var input = document.getElementById('chatInput');
+        var message = input.value.trim();
+        if (!message) return;
 
-                // Add user message
-                messagesDiv.innerHTML += '<div class="user-message"><div class="message-bubble">' + escapeHtml(message) + '</div></div>';
-                input.value = '';
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        var messagesDiv = document.getElementById('chatMessages');
 
-                // Add typing indicator
-                messagesDiv.innerHTML += '<div class="bot-message" id="typingIndicator"><div class="message-bubble">Typing<span>.</span><span>.</span><span>.</span></div></div>';
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        // Add user message
+        messagesDiv.innerHTML += '<div class="user-message"><div class="message-bubble">' + escapeHtml(message) + '</div></div>';
+        input.value = '';
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-                try {
-                var response = await fetch('/api/ai/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(message)
-                });
-                var data = await response.json();
+        // Add typing indicator
+        messagesDiv.innerHTML += '<div class="bot-message" id="typingIndicator"><div class="message-bubble">Typing<span>.</span><span>.</span><span>.</span></div></div>';
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-                // Remove typing indicator
-                document.getElementById('typingIndicator')?.remove();
+        try {
+        var response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(message)
+        });
+        var data = await response.json();
 
-                // Add bot response
-                messagesDiv.innerHTML += '<div class="bot-message"><div class="message-bubble">' + escapeHtml(data.answer) + '</div></div>';
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                } catch (error) {
-                document.getElementById('typingIndicator')?.remove();
-                messagesDiv.innerHTML += '<div class="bot-message"><div class="message-bubble">Sorry, I encountered an error. Please try again.</div></div>';
-                }
-                }
+        // Remove typing indicator
+        var typingIndicator = document.getElementById('typingIndicator');
+        if (typingIndicator) typingIndicator.remove();
 
-                function escapeHtml(text) {
-                var div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-                }
+        // Add bot response
+        messagesDiv.innerHTML += '<div class="bot-message"><div class="message-bubble">' + escapeHtml(data.answer) + '</div></div>';
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        } catch (error) {
+        var typingIndicator = document.getElementById('typingIndicator');
+        if (typingIndicator) typingIndicator.remove();
+        messagesDiv.innerHTML += '<div class="bot-message"><div class="message-bubble">Sorry, I encountered an error. Please try again.</div></div>';
+        }
+        }
+
+        function escapeHtml(text) {
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+        }
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)
