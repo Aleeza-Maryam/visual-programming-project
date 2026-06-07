@@ -41,8 +41,12 @@ namespace AITourismPlanner.Controllers
     ViewBag.SelectedType = type;
     ViewBag.SelectedSort = sort;
     ViewBag.PackageTypes = new[] { "Budget", "Standard", "Premium", "Honeymoon", "Family" };
-
-    return View(packages);
+            ViewBag.DestinationsList = await _context.packages
+            .Where(p => p.is_active)
+            .Select(p => p.destination_name)
+            .Distinct()
+            .ToListAsync();
+            return View(packages);
 }
         // =========================================================
         // PACKAGE DETAILS

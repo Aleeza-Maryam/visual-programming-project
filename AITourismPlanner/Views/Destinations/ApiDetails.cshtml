@@ -13,7 +13,7 @@
          style="height:300px;
         background: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),
         url('@(Model.DestinationInfo?.ImageUrl ??
-                             "https://images.unsplash.com/photo-1586500036706-41963de24d8b?w=1200")')
+                                      "https://images.unsplash.com/photo-1586500036706-41963de24d8b?w=1200")')
         center/cover no-repeat;">
         <div class="container h-100 d-flex align-items-center">
             <div class="text-white">
@@ -26,9 +26,37 @@
                         <span>@Model.CurrentWeather.Temperature.ToString("0")°C</span>
                     </div>
                 }
-                <!-- ========================================================= -->
-                <!-- WISHLIST BUTTON ADDED HERE -->
-                <!-- ========================================================= -->
+
+                <!-- Quick Info Sidebar with AI Button -->
+                <div class="mt-3">
+                    <!-- Weather Info Card -->
+                    <div class="bg-white bg-opacity-25 rounded-4 p-3 mb-2 d-inline-block">
+                        <div class="d-flex align-items-center gap-3">
+                            @if (Model.CurrentWeather != null)
+                            {
+                                <div>
+                                    <i class="fas fa-cloud-sun me-1"></i>
+                                    <span>@Model.CurrentWeather.Condition</span>
+                                </div>
+                                <div>
+                                    <i class="fas fa-tint me-1"></i>
+                                    <span>@Model.CurrentWeather.Humidity%</span>
+                                </div>
+                                <div>
+                                    <i class="fas fa-wind me-1"></i>
+                                    <span>@Model.CurrentWeather.WindSpeed km/h</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- AI Itinerary Generator Button -->
+                    <button class="btn btn-info w-100 mt-2" onclick="generateAIItinerary('@Model.CityName')" style="max-width: 250px;">
+                        <i class="fas fa-magic me-2"></i> Generate AI Itinerary
+                    </button>
+                </div>
+
+                <!-- Wishlist Button -->
                 @if (userId.HasValue)
                 {
                     <button class="btn btn-outline-light mt-3" onclick="addToWishlist()" id="wishlistBtn">
@@ -52,9 +80,7 @@
 
         <div class="tab-content">
 
-            <!-- ========================================================= -->
-            <!-- STEP 1: HOTELS TAB -->
-            <!-- ========================================================= -->
+            <!-- Hotels Tab -->
             <div class="tab-pane fade show active" id="hotels">
                 <h3 class="fw-bold mb-4"><i class="fas fa-hotel text-primary me-2"></i>Step 1: Select Hotel (Optional)</h3>
 
@@ -102,9 +128,7 @@
                 </div>
             </div>
 
-            <!-- ========================================================= -->
-            <!-- WEATHER TAB -->
-            <!-- ========================================================= -->
+            <!-- Weather Tab -->
             <div class="tab-pane fade" id="weather">
                 <h3 class="fw-bold mb-4"><i class="fas fa-cloud-sun text-primary me-2"></i>Weather in @Model.CityName</h3>
 
@@ -159,9 +183,7 @@
                 }
             </div>
 
-            <!-- ========================================================= -->
-            <!-- STEP 2: TRANSPORT TAB -->
-            <!-- ========================================================= -->
+            <!-- Transport Tab -->
             <div class="tab-pane fade" id="transport">
                 <h3 class="fw-bold mb-4"><i class="fas fa-bus text-primary me-2"></i>Step 2: Select Transport (Required)</h3>
 
@@ -202,17 +224,13 @@
                 }
             </div>
 
-            <!-- ========================================================= -->
-            <!-- MAP TAB -->
-            <!-- ========================================================= -->
+            <!-- Map Tab -->
             <div class="tab-pane fade" id="map">
                 <h3 class="fw-bold mb-4"><i class="fas fa-map text-primary me-2"></i>Location Map</h3>
                 <div id="mainMap" style="height:400px; border-radius:16px;"></div>
             </div>
 
-            <!-- ========================================================= -->
-            <!-- REVIEWS TAB -->
-            <!-- ========================================================= -->
+            <!-- Reviews Tab -->
             <div class="tab-pane fade" id="reviews">
                 <h3 class="fw-bold mb-4"><i class="fas fa-star text-primary me-2"></i>Reviews (@Model.TotalReviews)</h3>
                 @if (userId.HasValue)
@@ -267,7 +285,7 @@
     </div>
 </div>
 
-<!-- STEP 3: DETAILED BOOKING MODAL -->
+<!-- Booking Modal -->
 <div class="modal fade" id="bookingModal" tabindex="-1" data-bs-backdrop="static">
     <div class="modal-dialog modal-lg">
         <div class="modal-content rounded-4">
@@ -388,6 +406,32 @@
     </div>
 </div>
 
+<!-- AI Itinerary Modal -->
+<div class="modal fade" id="itineraryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content rounded-4">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h5 class="modal-title text-white fw-bold">
+                    <i class="fas fa-robot me-2"></i>AI Generated Itinerary
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" id="itineraryContent">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-3">AI is planning your perfect trip...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="downloadItinerary()">
+                    <i class="fas fa-download me-2"></i>Download Itinerary
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 
 @section Scripts {
@@ -468,16 +512,101 @@
         });
         }
 
-        function submitReview(destName) {
+        // =========================================================
+        // SUBMIT REVIEW WITH SENTIMENT ANALYSIS (UPDATED)
+        // =========================================================
+        async function submitReview(destName) {
         var rating = document.getElementById('selectedRating').value;
         var comment = document.getElementById('reviewComment').value;
-        if (rating == 0) { alert('Please select a rating'); return; }
-        if (!comment.trim()) { alert('Please write a review'); return; }
-        fetch('@Url.Action("AddReview", "Destinations")', {
+
+        if (rating == 0) {
+        alert('Please select a rating');
+        return;
+        }
+        if (!comment.trim()) {
+        alert('Please write a review');
+        return;
+        }
+
+        // Show loading state on button
+        var submitBtn = document.querySelector('.btn-primary[onclick*="submitReview"]');
+        var originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Analyzing sentiment...';
+        submitBtn.disabled = true;
+
+        // Analyze sentiment first
+        var sentiment = 'Neutral';
+        var sentimentConfidence = 0;
+        try {
+        var sentimentResponse = await fetch('/api/ai/analyze-sentiment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: comment })
+        });
+        var sentimentData = await sentimentResponse.json();
+        sentiment = sentimentData.sentiment || 'Neutral';
+        sentimentConfidence = sentimentData.confidence || 0;
+        } catch (error) {
+        console.log('Sentiment analysis error:', error);
+        }
+
+        // Show sentiment notification
+        var sentimentEmoji = sentiment === 'Positive' ? '😊' : sentiment === 'Negative' ? '😞' : '😐';
+        var sentimentColor = sentiment === 'Positive' ? '#28a745' : sentiment === 'Negative' ? '#dc3545' : '#ffc107';
+
+        // Create temporary toast notification
+        var toastHtml = `
+        <div style="position: fixed; top: 20px; right: 20px; z-index: 9999; background: white; border-left: 4px solid ${sentimentColor}; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <strong>🧠 AI Sentiment Analysis</strong><br>
+        Your review was detected as <strong style="color: ${sentimentColor}">${sentiment}</strong> ${sentimentEmoji}
+        ${sentimentConfidence > 0 ? `<br><small>Confidence: ${Math.round(sentimentConfidence * 100)}%</small>` : ''}
+        </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', toastHtml);
+        setTimeout(() => {
+        var toast = document.querySelector('div[style*="position: fixed; top: 20px;"]');
+        if (toast) toast.remove();
+        }, 4000);
+
+        // Update button text
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting review...';
+
+        // Submit review with sentiment data
+        try {
+        var response = await fetch('@Url.Action("AddReview", "Destinations")', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `destinationName=${encodeURIComponent(destName)}&rating=${rating}&comment=${encodeURIComponent(comment)}`
-        }).then(r => r.json()).then(data => { if (data.success) location.reload(); else alert(data.message); });
+        body: `destinationName=${encodeURIComponent(destName)}&rating=${rating}&comment=${encodeURIComponent(comment)}&sentiment=${encodeURIComponent(sentiment)}`
+        });
+        var data = await response.json();
+
+        if (data.success) {
+        // Show success message with sentiment badge
+        var successHtml = `
+        <div style="position: fixed; top: 20px; right: 20px; z-index: 9999; background: #d4edda; border-left: 4px solid #28a745; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        ✅ Review submitted successfully!<br>
+        <small>Sentiment: ${sentiment} ${sentimentEmoji}</small>
+        </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', successHtml);
+        setTimeout(() => {
+        var msg = document.querySelector('div[style*="position: fixed; top: 20px;"]');
+        if (msg) msg.remove();
+        }, 3000);
+
+        // Reload after short delay
+        setTimeout(() => location.reload(), 1500);
+        } else {
+        alert(data.message || 'Failed to submit review');
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        }
+        } catch (error) {
+        console.error('Submit error:', error);
+        alert('An error occurred. Please try again.');
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        }
         }
 
         // =========================================================
@@ -662,6 +791,45 @@
         console.error('Error:', error);
         alert('An error occurred. Please try again.');
         });
+        }
+
+        // =========================================================
+        // AI ITINERARY FUNCTIONS
+        // =========================================================
+        async function generateAIItinerary(destination) {
+        var modal = new bootstrap.Modal(document.getElementById('itineraryModal'));
+        modal.show();
+
+        var contentDiv = document.getElementById('itineraryContent');
+        contentDiv.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-3">AI is planning your perfect trip...</p></div>';
+
+        try {
+        var response = await fetch('/api/ai/generate-itinerary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ destination: destination, days: 3, budget: 'Medium' })
+        });
+        var data = await response.json();
+        contentDiv.innerHTML = '<pre style="white-space: pre-wrap; font-family: inherit;">' + escapeHtml(data.itinerary) + '</pre>';
+        } catch (error) {
+        contentDiv.innerHTML = '<div class="alert alert-danger">Failed to generate itinerary. Please try again.</div>';
+        }
+        }
+
+        function downloadItinerary() {
+        var content = document.getElementById('itineraryContent').innerText;
+        var blob = new Blob([content], { type: 'text/plain' });
+        var link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'itinerary.txt';
+        link.click();
+        URL.revokeObjectURL(link.href);
+        }
+
+        function escapeHtml(text) {
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
         }
     </script>
 }

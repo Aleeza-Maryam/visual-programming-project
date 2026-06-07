@@ -176,6 +176,129 @@
                 margin-top: 65px;
             }
         }
+
+            .chatbot-button {
+                position: fixed;
+                bottom: 30px;
+                right: 30px;
+                width: 60px;
+                height: 60px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                z-index: 999;
+                transition: transform 0.3s ease;
+            }
+
+                .chatbot-button:hover {
+                    transform: scale(1.1);
+                }
+
+                .chatbot-button i {
+                    color: white;
+                }
+
+            .chatbot-modal {
+                position: fixed;
+                bottom: 100px;
+                right: 30px;
+                width: 350px;
+                height: 500px;
+                background: white;
+                border-radius: 15px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+                z-index: 1000;
+                display: none;
+                flex-direction: column;
+                overflow: hidden;
+                border: 1px solid #eee;
+            }
+
+            .chatbot-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 15px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-weight: bold;
+            }
+
+            .chatbot-close {
+                background: none;
+                border: none;
+                color: white;
+                font-size: 24px;
+                cursor: pointer;
+            }
+
+            .chatbot-messages {
+                flex: 1;
+                padding: 15px;
+                overflow-y: auto;
+                background: #f8f9fa;
+            }
+
+            .bot-message, .user-message {
+                display: flex;
+                margin-bottom: 15px;
+            }
+
+            .bot-message {
+                justify-content: flex-start;
+            }
+
+            .user-message {
+                justify-content: flex-end;
+            }
+
+            .message-bubble {
+                max-width: 80%;
+                padding: 10px 15px;
+                border-radius: 18px;
+                font-size: 14px;
+            }
+
+            .bot-message .message-bubble {
+                background: white;
+                color: #333;
+                border: 1px solid #eee;
+            }
+
+            .user-message .message-bubble {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+
+            .chatbot-input {
+                display: flex;
+                padding: 15px;
+                background: white;
+                border-top: 1px solid #eee;
+            }
+
+                .chatbot-input input {
+                    flex: 1;
+                    padding: 10px;
+                    border: 1px solid #ddd;
+                    border-radius: 25px;
+                    outline: none;
+                }
+
+                .chatbot-input button {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    border: none;
+                    color: white;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    margin-left: 10px;
+                    cursor: pointer;
+                }
     </style>
 
     @await RenderSectionAsync("Styles", required: false)
@@ -359,6 +482,29 @@
                 <p class="mb-0">&copy; 2025 TravelMate. All rights reserved. Powered by Artificial Intelligence.</p>
             </div>
         </div>
+                <div id="chatbotBtn" class="chatbot-button" onclick="toggleChatbot()">
+                    <i class="fas fa-robot fa-2x"></i>
+                </div>
+
+                <!-- AI Chatbot Modal -->
+                <div id="chatbotModal" class="chatbot-modal">
+                    <div class="chatbot-header">
+                        <div>
+                            <i class="fas fa-robot me-2"></i>
+                            <span>AI Travel Assistant</span>
+                        </div>
+                        <button class="chatbot-close" onclick="toggleChatbot()">&times;</button>
+                    </div>
+                    <div class="chatbot-messages" id="chatMessages">
+                        <div class="bot-message">
+                            <div class="message-bubble">Hello! I'm your AI travel assistant. Ask me anything about Pakistan travel! 🇵🇰</div>
+                        </div>
+                    </div>
+                    <div class="chatbot-input">
+                        <input type="text" id="chatInput" placeholder="Ask me something..." onkeypress="if(event.keyCode==13) sendMessage()">
+                        <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
     </footer>
 
     <!-- Scripts -->
@@ -385,6 +531,56 @@
                 this.querySelector('i').style.transform = 'rotate(0deg) scale(1)';
             });
         }
+                function toggleChatbot() {
+                var modal = document.getElementById('chatbotModal');
+                if (modal.style.display === 'flex') {
+                modal.style.display = 'none';
+                } else {
+                modal.style.display = 'flex';
+                }
+                }
+
+                async function sendMessage() {
+                var input = document.getElementById('chatInput');
+                var message = input.value.trim();
+                if (!message) return;
+
+                var messagesDiv = document.getElementById('chatMessages');
+
+                // Add user message
+                messagesDiv.innerHTML += '<div class="user-message"><div class="message-bubble">' + escapeHtml(message) + '</div></div>';
+                input.value = '';
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+                // Add typing indicator
+                messagesDiv.innerHTML += '<div class="bot-message" id="typingIndicator"><div class="message-bubble">Typing<span>.</span><span>.</span><span>.</span></div></div>';
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+                try {
+                var response = await fetch('/api/ai/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(message)
+                });
+                var data = await response.json();
+
+                // Remove typing indicator
+                document.getElementById('typingIndicator')?.remove();
+
+                // Add bot response
+                messagesDiv.innerHTML += '<div class="bot-message"><div class="message-bubble">' + escapeHtml(data.answer) + '</div></div>';
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                } catch (error) {
+                document.getElementById('typingIndicator')?.remove();
+                messagesDiv.innerHTML += '<div class="bot-message"><div class="message-bubble">Sorry, I encountered an error. Please try again.</div></div>';
+                }
+                }
+
+                function escapeHtml(text) {
+                var div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+                }
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

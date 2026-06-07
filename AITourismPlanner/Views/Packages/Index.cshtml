@@ -45,7 +45,82 @@
             </div>
         </div>
     </div>
+    <!-- AI Budget Comparison Tool -->
+    <div class="card border-0 shadow-sm rounded-4 mb-5">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-3">
+                <i class="fas fa-chart-line text-primary"></i> AI Budget Comparison
+            </h5>
+            <div class="row g-3">
+                <div class="col-md-5">
+                    <select id="compareDest1" class="form-select">
+                        <option value="">Select Destination 1</option>
+                        @foreach (var dest in ViewBag.DestinationsList as List<string> ?? new List<string>())
+                        {
+                            <option value="@dest">@dest</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <select id="compareDest2" class="form-select">
+                        <option value="">Select Destination 2</option>
+                        @foreach (var dest in ViewBag.DestinationsList as List<string> ?? new List<string>())
+                        {
+                            <option value="@dest">@dest</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100" onclick="compareBudget()">
+                        <i class="fas fa-chart-simple me-1"></i> Compare
+                    </button>
+                </div>
+            </div>
+            <div id="comparisonResult" class="mt-3" style="display: none;"></div>
+        </div>
+    </div>
 
+    <script>
+            async function compareBudget() {
+                var dest1 = document.getElementById('compareDest1').value;
+                var dest2 = document.getElementById('compareDest2').value;
+                var resultDiv = document.getElementById('comparisonResult');
+
+                if (!dest1 || !dest2) {
+                    alert('Please select both destinations');
+                    return;
+                }
+
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"></div><p>AI is comparing budgets...</p></div>';
+
+                try {
+                    var response = await fetch('/api/ai/compare-budget?dest1=' + encodeURIComponent(dest1) + '&dest2=' + encodeURIComponent(dest2) + '&days=3');
+                    var data = await response.json();
+
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-info">
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <h5>${data.destination1}</h5>
+                                    <p class="text-primary fw-bold fs-3">PKR ${data.cost1.toLocaleString()}</p>
+                                </div>
+                                <div class="col-6">
+                                    <h5>${data.destination2}</h5>
+                                    <p class="text-primary fw-bold fs-3">PKR ${data.cost2.toLocaleString()}</p>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="text-center">
+                                <strong class="text-success">AI Recommendation:</strong> ${data.recommendation} is cheaper by PKR ${data.savings.toLocaleString()}!
+                            </div>
+                        </div>
+                    `;
+                } catch (error) {
+                    resultDiv.innerHTML = '<div class="alert alert-danger">Failed to compare. Please try again.</div>';
+                }
+            }
+    </script>
     <!-- Packages Grid -->
     <div class="row g-4">
         @foreach (var pkg in Model)

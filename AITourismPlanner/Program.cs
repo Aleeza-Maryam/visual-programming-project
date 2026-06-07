@@ -42,7 +42,9 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<IDestinationApiService, DestinationApiService>();
 builder.Services.AddScoped<IWeatherService, WeatherService>();
 builder.Services.AddHttpClient();
-
+builder.Services.AddScoped<IAITourismService, AITourismService>();
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
