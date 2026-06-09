@@ -1,4 +1,4 @@
-﻿@model List<AITourismPlanner.Models.Review>
+﻿@model List<AITourismPlanner.Models.DestinationReview>
 @{
     ViewData["Title"] = "Manage Reviews";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -31,7 +31,7 @@
                             <tr>
                                 <td>@review.review_id</td>
                                 <td>@(review.User?.full_name ?? "Anonymous")</td>
-                                <td>@(review.Destination?.name ?? "N/A")</td>
+                                <td>@review.destination_name</td>
                                 <td>
                                     <div class="text-warning">
                                         @for (int i = 1; i <= (review.rating ?? 0); i++)
@@ -44,8 +44,8 @@
                                         }
                                     </div>
                                 </td>
-                                <td>@(review.review_text?.Length > 50 ? review.review_text.Substring(0, 50) + "..." : review.review_text)</td>
-                                <td>@review.review_date.ToString("dd MMM yyyy")</td>
+                                <td>@(review.comment?.Length > 50 ? review.comment.Substring(0, 50) + "..." : review.comment)</td>
+                                <td>@review.created_at.ToString("dd MMM yyyy")</td>
                                 <td>
                                     <button class="btn btn-danger btn-sm" onclick="deleteReview(@review.review_id)">
                                         <i class="fas fa-trash"></i> Delete

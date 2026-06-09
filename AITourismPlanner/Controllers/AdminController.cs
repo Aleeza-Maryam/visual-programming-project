@@ -68,7 +68,7 @@ namespace AITourismPlanner.Controllers
                 .Where(b => b.booking_status == "Confirmed")
                 .SumAsync(b => b.final_price);
 
-            var totalRevenue = (await _context.bookings.SumAsync(b => b.total_price ?? 0)) + packageRevenue;
+            var totalRevenue = await _context.bookings.SumAsync(b => b.total_price ?? 0);
 
             var viewModel = new AdminDashboardViewModel
             {
@@ -369,16 +369,15 @@ namespace AITourismPlanner.Controllers
         }
 
         // =========================================================
-        // MANAGE REVIEWS
+        // MANAGE REVIEWS (Destination Reviews)
         // =========================================================
         public async Task<IActionResult> Reviews()
         {
             if (!IsAdmin()) return RedirectToAction("Login", "Account");
 
-            var reviews = await _context.reviews
+            var reviews = await _context.destination_reviews
                 .Include(r => r.User)
-                .Include(r => r.Destination)
-                .OrderByDescending(r => r.review_date)
+                .OrderByDescending(r => r.created_at)
                 .ToListAsync();
 
             return View(reviews);
@@ -389,16 +388,15 @@ namespace AITourismPlanner.Controllers
         {
             if (!IsAdmin()) return Json(new { success = false });
 
-            var review = await _context.reviews.FindAsync(id);
+            var review = await _context.destination_reviews.FindAsync(id);
             if (review != null)
             {
-                _context.reviews.Remove(review);
+                _context.destination_reviews.Remove(review);
                 await _context.SaveChangesAsync();
                 return Json(new { success = true });
             }
             return Json(new { success = false });
         }
-
         // =========================================================
         // PACKAGE BOOKINGS (for packages)
         // =========================================================
