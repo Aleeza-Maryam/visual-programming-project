@@ -4,7 +4,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     var adminName = ViewBag.AdminName ?? "Admin";
 }
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
 <div class="container-fluid py-4">
     <!-- Welcome Header -->
     <div class="row mb-4">
@@ -20,45 +20,20 @@
         </div>
     </div>
 
-    <!-- Stats Cards -->
+    <!-- Statistics Cards -->
     <div class="row g-4 mb-4">
         <div class="col-md-3">
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-4">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted">Total Users</h6>
-                            <h2 class="fw-bold">@Model.TotalUsers</h2>
-                            <small>@Model.TotalCustomers Customers</small>
+                            <h6 class="text-muted mb-1">Total Users</h6>
+                            <h2 class="mb-0 fw-bold">@Model.TotalUsers</h2>
+                            <small class="text-success">@Model.TotalCustomers Customers</small>
                         </div>
-                        <i class="fas fa-users fa-3x text-primary opacity-50"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Revenue Charts Section -->
-        <div class="row g-4 mb-4">
-            <div class="col-lg-6">
-                <div class="card border-0 shadow-sm rounded-4">
-                    <div class="card-header bg-white border-0 pt-4">
-                        <h5 class="fw-bold mb-0">
-                            <i class="fas fa-chart-bar text-primary me-2"></i> Monthly Revenue (Bar Chart)
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="revenueBarChart" style="height: 300px; width: 100%;"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="card border-0 shadow-sm rounded-4">
-                    <div class="card-header bg-white border-0 pt-4">
-                        <h5 class="fw-bold mb-0">
-                            <i class="fas fa-chart-line text-primary me-2"></i> Revenue Trend (Line Chart)
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="revenueLineChart" style="height: 300px; width: 100%;"></canvas>
+                        <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                            <i class="fas fa-users text-primary fa-2x"></i>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -66,13 +41,15 @@
         <div class="col-md-3">
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-4">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted">Total Bookings</h6>
-                            <h2 class="fw-bold">@Model.TotalBookings</h2>
+                            <h6 class="text-muted mb-1">Total Bookings</h6>
+                            <h2 class="mb-0 fw-bold">@Model.TotalBookings</h2>
                             <small class="text-warning">@Model.PendingBookings Pending</small>
                         </div>
-                        <i class="fas fa-hotel fa-3x text-primary opacity-50"></i>
+                        <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                            <i class="fas fa-hotel text-success fa-2x"></i>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -80,13 +57,15 @@
         <div class="col-md-3">
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-4">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted">Destinations</h6>
-                            <h2 class="fw-bold">@Model.TotalDestinations</h2>
-                            <small>+@Model.TotalHotels Hotels</small>
+                            <h6 class="text-muted mb-1">Destinations</h6>
+                            <h2 class="mb-0 fw-bold">@Model.TotalDestinations</h2>
+                            <small class="text-muted">+@Model.TotalHotels Hotels</small>
                         </div>
-                        <i class="fas fa-map-marked-alt fa-3x text-primary opacity-50"></i>
+                        <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                            <i class="fas fa-map-marked-alt text-warning fa-2x"></i>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -94,79 +73,151 @@
         <div class="col-md-3">
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-4">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted">Total Revenue</h6>
-                            <h2 class="fw-bold fs-4">PKR @Model.TotalRevenue.ToString("N0")</h2>
+                            <h6 class="text-muted mb-1">Total Revenue</h6>
+                            <h2 class="mb-0 fw-bold fs-3">PKR @Model.TotalRevenue.ToString("N0")</h2>
+                            <small class="text-info">Lifetime earnings</small>
                         </div>
-                        <i class="fas fa-rupee-sign fa-3x text-primary opacity-50"></i>
+                        <div class="bg-info bg-opacity-10 rounded-circle p-3">
+                            <i class="fas fa-rupee-sign text-info fa-2x"></i>
+                        </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Charts Section -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-chart-bar text-primary me-2"></i> Monthly Revenue (Bar Chart)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="revenueBarChart" style="height: 300px; width: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-chart-line text-primary me-2"></i> Revenue Trend (Line Chart)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="revenueLineChart" style="height: 300px; width: 100%;"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Recent Bookings Table -->
-    <div class="card border-0 shadow-sm rounded-4 mb-4">
-        <div class="card-header bg-white border-0 pt-4">
-            <h5 class="fw-bold mb-0"><i class="fas fa-clock text-primary me-2"></i>Recent Bookings</h5>
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-clock text-primary me-2"></i> Recent Bookings
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Destination</th>
+                                    <th>Hotel</th>
+                                    <th>Check In</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var booking in Model.RecentBookings)
+                                {
+                                    <tr>
+                                        <td>@(booking.User?.full_name ?? "N/A")</td>
+                                        <td>@booking.destination_name</td>
+                                        <td>@(booking.hotel_name ?? "N/A")</td>
+                                        <td>@booking.check_in_date.ToString("dd MMM")</td>
+                                        <td>PKR @booking.total_price?.ToString("N0")</td>
+                                        <td>
+                                            <span class="badge @(booking.booking_status == "Confirmed" ? "bg-success" : booking.booking_status == "Pending" ? "bg-warning" : "bg-danger")">
+                                                @booking.booking_status
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Destination</th>
-                            <th>Check In</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var booking in Model.RecentBookings)
-                        {
-                            <tr>
-                                <td>@(booking.User?.full_name ?? "N/A")</td>
-                                <td>@booking.destination_name</td>
-                                <td>@booking.check_in_date.ToString("dd MMM")</td>
-                                <td>PKR @booking.total_price?.ToString("N0")</td>
-                                <td>
-                                    <span class="badge @(booking.booking_status == "Confirmed" ? "bg-success" : booking.booking_status == "Pending" ? "bg-warning" : "bg-danger")">
-                                        @booking.booking_status
-                                    </span>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+
+        <!-- Popular Destinations Card -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-fire text-primary me-2"></i> Popular Destinations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @foreach (var dest in ViewBag.PopularDestinations as List<AITourismPlanner.Models.Destination> ?? new List<AITourismPlanner.Models.Destination>())
+                    {
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h6 class="mb-0">@dest.name</h6>
+                                <small class="text-muted">@dest.city</small>
+                            </div>
+                            <div class="text-warning">
+                                @for (int i = 1; i <= (int)dest.rating_average; i++)
+                                {
+                                    <i class="fas fa-star small"></i>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Quick Actions -->
-    <!-- Quick Actions -->
-    <div class="card border-0 shadow-sm rounded-4">
-        <div class="card-header bg-white border-0 pt-4">
-            <h5 class="fw-bold mb-0"><i class="fas fa-bolt text-primary me-2"></i>Quick Actions</h5>
-        </div>
-        <div class="card-body">
-            <div class="d-flex gap-3 flex-wrap">
-                <a href="@Url.Action("Users", "Admin")" class="btn btn-primary">
-                    <i class="fas fa-users me-2"></i>Manage Users
-                </a>
-                <a href="@Url.Action("Bookings", "Admin")" class="btn btn-success">
-                    <i class="fas fa-hotel me-2"></i>Manage Bookings
-                </a>
-                <a href="@Url.Action("Packages", "Admin")" class="btn btn-info">
-                    <i class="fas fa-box me-2"></i>Manage Packages
-                </a>
-                <a href="@Url.Action("Transport", "Admin")" class="btn btn-warning">
-                    <i class="fas fa-bus me-2"></i>Manage Transport
-                </a>
-                <a href="@Url.Action("Reviews", "Admin")" class="btn btn-dark">
-                    <i class="fas fa-star me-2"></i>Manage Reviews
-                </a>
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-bolt text-primary me-2"></i> Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex gap-3 flex-wrap">
+                        <a href="@Url.Action("Users", "Admin")" class="btn btn-primary">
+                            <i class="fas fa-users me-2"></i>Manage Users
+                        </a>
+                        <a href="@Url.Action("Bookings", "Admin")" class="btn btn-success">
+                            <i class="fas fa-hotel me-2"></i>Manage Bookings
+                        </a>
+                        <a href="@Url.Action("Packages", "Admin")" class="btn btn-info">
+                            <i class="fas fa-box me-2"></i>Manage Packages
+                        </a>
+                        <a href="@Url.Action("Transport", "Admin")" class="btn btn-warning">
+                            <i class="fas fa-bus me-2"></i>Manage Transport
+                        </a>
+                        <a href="@Url.Action("Reviews", "Admin")" class="btn btn-dark">
+                            <i class="fas fa-star me-2"></i>Manage Reviews
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -176,4 +227,121 @@
     .bg-gradient-primary {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
+
+    .card {
+        transition: transform 0.2s ease;
+    }
+
+        .card:hover {
+            transform: translateY(-3px);
+        }
 </style>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        // =========================================================
+        // BAR CHART - Monthly Revenue
+        // =========================================================
+        var barCtx = document.getElementById('revenueBarChart').getContext('2d');
+        var barChart = new Chart(barCtx, {
+        type: 'bar',
+        data: {
+        labels: [@Html.Raw(string.Join(",", Model.MonthlyRevenue.Keys.Select(k => $"'{k}'")))],
+        datasets: [{
+        label: 'Revenue (PKR)',
+        data: [@string.Join(",", Model.MonthlyRevenue.Values)],
+        backgroundColor: [
+        'rgba(102, 126, 234, 0.7)',
+        'rgba(118, 75, 162, 0.7)',
+        'rgba(79, 172, 254, 0.7)',
+        'rgba(0, 242, 254, 0.7)',
+        'rgba(240, 147, 251, 0.7)',
+        'rgba(245, 87, 108, 0.7)',
+        'rgba(102, 126, 234, 0.7)',
+        'rgba(118, 75, 162, 0.7)',
+        'rgba(79, 172, 254, 0.7)',
+        'rgba(0, 242, 254, 0.7)',
+        'rgba(240, 147, 251, 0.7)',
+        'rgba(245, 87, 108, 0.7)'
+        ],
+        borderColor: '#667eea',
+        borderWidth: 1,
+        borderRadius: 8
+        }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+        legend: { position: 'top' },
+        tooltip: {
+        callbacks: {
+        label: function(context) {
+        return 'PKR ' + context.raw.toLocaleString();
+        }
+        }
+        }
+        },
+        scales: {
+        y: {
+        beginAtZero: true,
+        ticks: {
+        callback: function(value) {
+        return 'PKR ' + value.toLocaleString();
+        }
+        }
+        }
+        }
+        }
+        });
+
+        // =========================================================
+        // LINE CHART - Revenue Trend
+        // =========================================================
+        var lineCtx = document.getElementById('revenueLineChart').getContext('2d');
+        var lineChart = new Chart(lineCtx, {
+        type: 'line',
+        data: {
+        labels: [@Html.Raw(string.Join(",", Model.RevenueTrend.Keys.Select(k => $"'{k}'")))],
+        datasets: [{
+        label: 'Revenue Trend (PKR)',
+        data: [@string.Join(",", Model.RevenueTrend.Values)],
+        borderColor: '#667eea',
+        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+        borderWidth: 3,
+        pointRadius: 5,
+        pointBackgroundColor: '#764ba2',
+        pointBorderColor: 'white',
+        pointBorderWidth: 2,
+        fill: true,
+        tension: 0.4
+        }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+        legend: { position: 'top' },
+        tooltip: {
+        callbacks: {
+        label: function(context) {
+        return 'PKR ' + context.raw.toLocaleString();
+        }
+        }
+        }
+        },
+        scales: {
+        y: {
+        beginAtZero: true,
+        ticks: {
+        callback: function(value) {
+        return 'PKR ' + value.toLocaleString();
+        }
+        }
+        }
+        }
+        }
+        });
+    </script>
+}
