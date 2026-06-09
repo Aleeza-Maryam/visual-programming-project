@@ -1,127 +1,313 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using AITourismPlanner.Data;
 using AITourismPlanner.Models;
-using AITourismPlanner.ViewModels;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace AITourismPlanner.Controllers
 {
-    // Admin Authorization Filter
-
-    public class AdminAuthorizeAttribute : Attribute, IAuthorizationFilter
-    {
-        public void OnAuthorization(AuthorizationFilterContext context)
-        {
-            var userRole = context.HttpContext.Session.GetString("UserRole");
-            var userRoleId = context.HttpContext.Session.GetInt32("UserRoleId");
-
-            if (string.IsNullOrEmpty(userRole) || (userRole != "Admin" && userRoleId != 1))
-            {
-                context.Result = new RedirectResult("/Account/Login?returnUrl=/Admin/Dashboard");
-            }
-        }
-    }
-
-    [AdminAuthorize]  // Only Admin can access this controller
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _env;
 
-        public AdminController(ApplicationDbContext context)
+        public AdminController(ApplicationDbContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
         // =========================================================
-        // ADMIN DASHBOARD
+        // CHECK IF USER IS ADMIN
+        // =========================================================
+        private bool IsAdmin()
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            return role == "Admin";
+        }
+
+        // =========================================================
+        // DASHBOARD
         // =========================================================
         public async Task<IActionResult> Dashboard()
         {
-            var adminName = HttpContext.Session.GetString("UserName");
-            ViewBag.AdminName = adminName;
+            if (!IsAdmin()) return RedirectToAction("Login", "Account");
 
-            var stats = new AdminDashboardViewModel
+            // Get monthly revenue data
+            var monthlyRevenue = new Dictionary<string, decimal>();
+            var months = Enumerable.Range(1, 12).Select(m => new DateTime(DateTime.Now.Year, m, 1));
+
+            foreach (var month in months)
+            {
+                var revenue = await _context.bookings
+                    .Where(b => b.created_at.Year == DateTime.Now.Year && b.created_at.Month == month.Month)
+                    .SumAsync(b => b.total_price ?? 0);
+
+                monthlyRevenue[month.ToString("MMM")] = revenue;
+            }
+
+            // Get last 6 months trend data
+            var last6Months = new List<DateTime>();
+            for (int i = 5; i >= 0; i--)
+            {
+                last6Months.Add(DateTime.Now.AddMonths(-i));
+            }
+
+            var trendData = new Dictionary<string, decimal>();
+            foreach (var month in last6Months)
+            {
+                var revenue = await _context.bookings
+                    .Where(b => b.created_at.Year == month.Year && b.created_at.Month == month.Month)
+                    .SumAsync(b => b.total_price ?? 0);
+                trendData[month.ToString("MMM yyyy")] = revenue;
+            }
+
+            // Get package bookings revenue as well
+            var packageRevenue = await _context.package_bookings
+                .Where(b => b.booking_status == "Confirmed")
+                .SumAsync(b => b.final_price);
+
+            var totalRevenue = (await _context.bookings.SumAsync(b => b.total_price ?? 0)) + packageRevenue;
+
+            var viewModel = new AdminDashboardViewModel
             {
                 TotalUsers = await _context.users.CountAsync(),
-                TotalCustomers = await _context.users.CountAsync(u => u.role_id == 2),
-                TotalAgents = await _context.users.CountAsync(u => u.role_id == 3),
+                TotalCustomers = await _context.users.Where(u => u.role_id == 2).CountAsync(),
+                TotalBookings = await _context.bookings.CountAsync() + await _context.package_bookings.CountAsync(),
+                PendingBookings = await _context.bookings.Where(b => b.booking_status == "Pending").CountAsync(),
+                TotalRevenue = totalRevenue,
                 TotalDestinations = await _context.destinations.CountAsync(),
                 TotalHotels = await _context.hotels.CountAsync(),
-                TotalBookings = await _context.hotel_bookings.CountAsync(),
-                TotalRevenue = await _context.hotel_bookings
-                    .Where(b => b.total_amount.HasValue && b.booking_status == "Confirmed")
-                    .SumAsync(b => b.total_amount ?? 0),
-                PendingBookings = await _context.hotel_bookings.CountAsync(b => b.booking_status == "Pending"),
-
-                RecentUsers = await _context.users
-                    .Include(u => u.Role)
-                    .OrderByDescending(u => u.created_at)
-                    .Take(10)
-                    .ToListAsync(),
-
-                RecentBookings = await _context.hotel_bookings
+                RecentBookings = await _context.bookings
                     .Include(b => b.User)
-                    .Include(b => b.Hotel)
-                    .OrderByDescending(b => b.booking_date)
-                    .Take(10)
-                    .ToListAsync(),
-
-                PopularDestinations = await _context.destinations
-                    .OrderByDescending(d => d.rating_average)
+                    .OrderByDescending(b => b.created_at)
                     .Take(5)
                     .ToListAsync(),
-
-                RecentFeedbacks = await _context.reviews
-                    .Include(r => r.User)
-                    .Include(r => r.Destination)
-                    .OrderByDescending(r => r.review_date)
-                    .Take(5)
-                    .ToListAsync(),
-
-                MonthlyStats = await GetMonthlyStats()
+                MonthlyRevenue = monthlyRevenue,
+                RevenueTrend = trendData
             };
 
-            return View(stats);
+            ViewBag.AdminName = HttpContext.Session.GetString("UserName") ?? "Admin";
+            return View(viewModel);
+        }
+        // =========================================================
+        // MANAGE TRANSPORT
+        // =========================================================
+        public async Task<IActionResult> Transport()
+        {
+            if (!IsAdmin()) return RedirectToAction("Login", "Account");
+
+            var transports = await _context.transports
+                .OrderByDescending(t => t.transport_id)
+                .ToListAsync();
+
+            return View(transports);
         }
 
+        [HttpGet]
+        public IActionResult AddTransport()
+        {
+            if (!IsAdmin()) return RedirectToAction("Login", "Account");
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddTransport(Transport model)
+        {
+            if (!IsAdmin()) return RedirectToAction("Login", "Account");
+
+            if (ModelState.IsValid)
+            {
+                model.created_at = DateTime.Now;
+                _context.transports.Add(model);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Transport added successfully!";
+                return RedirectToAction("Transport");
+            }
+            return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditTransport(int id)
+        {
+            if (!IsAdmin()) return RedirectToAction("Login", "Account");
+
+            var transport = await _context.transports.FindAsync(id);
+            if (transport == null) return NotFound();
+            return View(transport);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditTransport(int id, Transport model)
+        {
+            if (!IsAdmin()) return RedirectToAction("Login", "Account");
+
+            if (id != model.transport_id) return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                _context.Update(model);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Transport updated successfully!";
+                return RedirectToAction("Transport");
+            }
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteTransport(int id)
+        {
+            if (!IsAdmin()) return Json(new { success = false });
+
+            var transport = await _context.transports.FindAsync(id);
+            if (transport != null)
+            {
+                _context.transports.Remove(transport);
+                await _context.SaveChangesAsync();
+                return Json(new { success = true });
+            }
+            return Json(new { success = false });
+        }
         // =========================================================
         // MANAGE USERS
         // =========================================================
         public async Task<IActionResult> Users()
         {
+            if (!IsAdmin()) return RedirectToAction("Login", "Account");
+
             var users = await _context.users
                 .Include(u => u.Role)
-                .OrderByDescending(u => u.created_at)
+                .OrderByDescending(u => u.user_id)
                 .ToListAsync();
+
             return View(users);
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateUserStatus(int userId, string status)
+        public async Task<IActionResult> DeleteUser(int id)
         {
-            var user = await _context.users.FindAsync(userId);
-            if (user != null)
-            {
-                user.status = status;
-                await _context.SaveChangesAsync();
+            if (!IsAdmin()) return Json(new { success = false });
 
-                // Log admin action
-                await LogAdminAction($"Updated user {user.email} status to {status}");
+            var user = await _context.users.FindAsync(id);
+            if (user != null && user.email != "admin@aitourism.com")
+            {
+                _context.users.Remove(user);
+                await _context.SaveChangesAsync();
+                return Json(new { success = true });
+            }
+            return Json(new { success = false, message = "Cannot delete admin user" });
+        }
+
+        // =========================================================
+        // MANAGE BOOKINGS
+        // =========================================================
+        public async Task<IActionResult> Bookings()
+        {
+            if (!IsAdmin()) return RedirectToAction("Login", "Account");
+
+            var bookings = await _context.bookings
+                .Include(b => b.User)
+                .Include(b => b.Transport)
+               .OrderByDescending(b => b.created_at)
+                .ToListAsync();
+
+            return View(bookings);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateBookingStatus(int id, string status)
+        {
+            if (!IsAdmin()) return Json(new { success = false });
+
+            var booking = await _context.bookings.FindAsync(id);
+            if (booking != null)
+            {
+                booking.booking_status = status;
+                await _context.SaveChangesAsync();
                 return Json(new { success = true });
             }
             return Json(new { success = false });
         }
 
-        [HttpPost]
-        public async Task<IActionResult> DeleteUser(int userId)
+        // =========================================================
+        // MANAGE PACKAGES
+        // =========================================================
+        public async Task<IActionResult> Packages()
         {
-            var user = await _context.users.FindAsync(userId);
-            if (user != null && user.role_id != 1) // Cannot delete admin
+            if (!IsAdmin()) return RedirectToAction("Login", "Account");
+
+            var packages = await _context.packages
+                .OrderByDescending(p => p.package_id)
+                .ToListAsync();
+
+            return View(packages);
+        }
+
+        [HttpGet]
+        public IActionResult AddPackage()
+        {
+            if (!IsAdmin()) return RedirectToAction("Login", "Account");
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddPackage(Package model)
+        {
+            if (!IsAdmin()) return RedirectToAction("Login", "Account");
+
+            if (ModelState.IsValid)
             {
-                _context.users.Remove(user);
+                model.created_at = DateTime.Now;
+                _context.packages.Add(model);
                 await _context.SaveChangesAsync();
-                await LogAdminAction($"Deleted user {user.email}");
+                TempData["Success"] = "Package added successfully!";
+                return RedirectToAction("Packages");
+            }
+            return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditPackage(int id)
+        {
+            if (!IsAdmin()) return RedirectToAction("Login", "Account");
+
+            var package = await _context.packages.FindAsync(id);
+            if (package == null) return NotFound();
+            return View(package);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditPackage(int id, Package model)
+        {
+            if (!IsAdmin()) return RedirectToAction("Login", "Account");
+
+            if (id != model.package_id) return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                _context.Update(model);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Package updated successfully!";
+                return RedirectToAction("Packages");
+            }
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeletePackage(int id)
+        {
+            if (!IsAdmin()) return Json(new { success = false });
+
+            var package = await _context.packages.FindAsync(id);
+            if (package != null)
+            {
+                _context.packages.Remove(package);
+                await _context.SaveChangesAsync();
                 return Json(new { success = true });
             }
             return Json(new { success = false });
@@ -132,62 +318,39 @@ namespace AITourismPlanner.Controllers
         // =========================================================
         public async Task<IActionResult> Destinations()
         {
+            if (!IsAdmin()) return RedirectToAction("Login", "Account");
+
             var destinations = await _context.destinations
                 .Include(d => d.Category)
-                .OrderByDescending(d => d.created_at)
+                .OrderByDescending(d => d.destination_id)
                 .ToListAsync();
+
             return View(destinations);
         }
 
         [HttpGet]
-        public IActionResult AddDestination()
+        public async Task<IActionResult> AddDestination()
         {
-            ViewBag.Categories = _context.categories.ToList();
+            if (!IsAdmin()) return RedirectToAction("Login", "Account");
+            ViewBag.Categories = await _context.categories.ToListAsync();
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddDestination(Destination destination, IFormFile image)
+        public async Task<IActionResult> AddDestination(Destination model)
         {
+            if (!IsAdmin()) return RedirectToAction("Login", "Account");
+
             if (ModelState.IsValid)
             {
-                if (image != null && image.Length > 0)
-                {
-                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
-                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/destinations", fileName);
-
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await image.CopyToAsync(stream);
-                    }
-                    destination.thumbnail = "/images/destinations/" + fileName;
-                }
-
-                destination.created_at = DateTime.Now;
-                _context.destinations.Add(destination);
+                _context.destinations.Add(model);
                 await _context.SaveChangesAsync();
-
-                await LogAdminAction($"Added new destination: {destination.name}");
                 TempData["Success"] = "Destination added successfully!";
                 return RedirectToAction("Destinations");
             }
-            ViewBag.Categories = _context.categories.ToList();
-            return View(destination);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> DeleteDestination(int id)
-        {
-            var destination = await _context.destinations.FindAsync(id);
-            if (destination != null)
-            {
-                _context.destinations.Remove(destination);
-                await _context.SaveChangesAsync();
-                await LogAdminAction($"Deleted destination: {destination.name}");
-                return Json(new { success = true });
-            }
-            return Json(new { success = false });
+            ViewBag.Categories = await _context.categories.ToListAsync();
+            return View(model);
         }
 
         // =========================================================
@@ -195,212 +358,75 @@ namespace AITourismPlanner.Controllers
         // =========================================================
         public async Task<IActionResult> Hotels()
         {
+            if (!IsAdmin()) return RedirectToAction("Login", "Account");
+
             var hotels = await _context.hotels
                 .Include(h => h.Destination)
                 .OrderByDescending(h => h.hotel_id)
                 .ToListAsync();
+
             return View(hotels);
         }
 
-        [HttpGet]
-        public IActionResult AddHotel()
-        {
-            ViewBag.Destinations = _context.destinations.ToList();
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddHotel(Hotel hotel, IFormFile image)
-        {
-            if (ModelState.IsValid)
-            {
-                if (image != null && image.Length > 0)
-                {
-                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
-                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/hotels", fileName);
-
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await image.CopyToAsync(stream);
-                    }
-                    hotel.image = "/images/hotels/" + fileName;
-                }
-
-                _context.hotels.Add(hotel);
-                await _context.SaveChangesAsync();
-
-                await LogAdminAction($"Added new hotel: {hotel.hotel_name}");
-                TempData["Success"] = "Hotel added successfully!";
-                return RedirectToAction("Hotels");
-            }
-            ViewBag.Destinations = _context.destinations.ToList();
-            return View(hotel);
-        }
-
         // =========================================================
-        // MANAGE BOOKINGS
+        // MANAGE REVIEWS
         // =========================================================
-        public async Task<IActionResult> Bookings()
+        public async Task<IActionResult> Reviews()
         {
-            var bookings = await _context.hotel_bookings
-                .Include(b => b.User)
-                .Include(b => b.Hotel)
-                .OrderByDescending(b => b.booking_date)
+            if (!IsAdmin()) return RedirectToAction("Login", "Account");
+
+            var reviews = await _context.reviews
+                .Include(r => r.User)
+                .Include(r => r.Destination)
+                .OrderByDescending(r => r.review_date)
                 .ToListAsync();
-            return View(bookings);
+
+            return View(reviews);
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateBookingStatus(int bookingId, string status)
+        public async Task<IActionResult> DeleteReview(int id)
         {
-            var booking = await _context.hotel_bookings.FindAsync(bookingId);
-            if (booking != null)
-            {
-                booking.booking_status = status;
-                await _context.SaveChangesAsync();
+            if (!IsAdmin()) return Json(new { success = false });
 
-                await LogAdminAction($"Updated booking {bookingId} status to {status}");
+            var review = await _context.reviews.FindAsync(id);
+            if (review != null)
+            {
+                _context.reviews.Remove(review);
+                await _context.SaveChangesAsync();
                 return Json(new { success = true });
             }
             return Json(new { success = false });
         }
 
         // =========================================================
-        // REPORTS & ANALYTICS
+        // PACKAGE BOOKINGS (for packages)
         // =========================================================
-        public async Task<IActionResult> Reports()
+        public async Task<IActionResult> PackageBookings()
         {
-            var reports = new AdminReportsViewModel
-            {
-                TotalRevenue = await _context.payments.SumAsync(p => p.amount ?? 0),
-                MonthlyRevenue = await GetMonthlyRevenue(),
-                TopDestinations = await _context.destinations
-                    .OrderByDescending(d => d.rating_average)
-                    .Take(10)
-                    .ToListAsync(),
-                BookingStats = await GetBookingStats()
-            };
-            return View(reports);
-        }
+            if (!IsAdmin()) return RedirectToAction("Login", "Account");
 
-        // =========================================================
-        // ADMIN LOGS
-        // =========================================================
-        public async Task<IActionResult> Logs()
-        {
-            var logs = await _context.admin_logs
-                .Include(l => l.Admin)
-                .OrderByDescending(l => l.created_at)
-                .Take(100)
+            var bookings = await _context.package_bookings
+                .Include(b => b.User)
+                .Include(b => b.Package)
+                .OrderByDescending(b => b.booking_date)
                 .ToListAsync();
-            return View(logs);
-        }
 
-        // =========================================================
-        // HELPER METHODS
-        // =========================================================
-        private async Task LogAdminAction(string action)
-        {
-            var adminId = HttpContext.Session.GetInt32("UserId");
-            if (adminId.HasValue)
-            {
-                var log = new AdminLog
-                {
-                    admin_id = adminId.Value,
-                    action = action,
-                    created_at = DateTime.Now
-                };
-                _context.admin_logs.Add(log);
-                await _context.SaveChangesAsync();
-            }
-        }
-
-        private async Task<List<MonthlyStat>> GetMonthlyStats()
-        {
-            var stats = new List<MonthlyStat>();
-            for (int i = 5; i >= 0; i--)
-            {
-                var month = DateTime.Now.AddMonths(-i);
-                var bookings = await _context.hotel_bookings
-                    .Where(b => b.booking_date.Month == month.Month && b.booking_date.Year == month.Year)
-                    .CountAsync();
-
-                stats.Add(new MonthlyStat
-                {
-                    Month = month.ToString("MMM"),
-                    Bookings = bookings,
-                    Revenue = await _context.hotel_bookings
-                        .Where(b => b.booking_date.Month == month.Month && b.booking_date.Year == month.Year)
-                        .SumAsync(b => b.total_amount ?? 0)
-                });
-            }
-            return stats;
-        }
-
-        private async Task<decimal[]> GetMonthlyRevenue()
-        {
-            var revenue = new decimal[12];
-            for (int i = 0; i < 12; i++)
-            {
-                var month = DateTime.Now.AddMonths(-i);
-                revenue[i] = await _context.payments
-                    .Where(p => p.payment_date.Month == month.Month && p.payment_date.Year == month.Year)
-                    .SumAsync(p => p.amount ?? 0);
-            }
-            return revenue;
-        }
-
-        private async Task<BookingStatsViewModel> GetBookingStats()
-        {
-            return new BookingStatsViewModel
-            {
-                Total = await _context.hotel_bookings.CountAsync(),
-                Pending = await _context.hotel_bookings.CountAsync(b => b.booking_status == "Pending"),
-                Confirmed = await _context.hotel_bookings.CountAsync(b => b.booking_status == "Confirmed"),
-                Cancelled = await _context.hotel_bookings.CountAsync(b => b.booking_status == "Cancelled")
-            };
+            return View(bookings);
         }
     }
 
-    // ViewModels for Admin
     public class AdminDashboardViewModel
     {
         public int TotalUsers { get; set; }
         public int TotalCustomers { get; set; }
-        public int TotalAgents { get; set; }
+        public int TotalBookings { get; set; }
+        public int PendingBookings { get; set; }
+        public decimal TotalRevenue { get; set; }
         public int TotalDestinations { get; set; }
         public int TotalHotels { get; set; }
-        public int TotalBookings { get; set; }
-        public decimal TotalRevenue { get; set; }
-        public int PendingBookings { get; set; }
-        public List<User> RecentUsers { get; set; }
-        public List<HotelBooking> RecentBookings { get; set; }
-        public List<Destination> PopularDestinations { get; set; }
-        public List<Review> RecentFeedbacks { get; set; }
-        public List<MonthlyStat> MonthlyStats { get; set; }
-    }
-
-    public class MonthlyStat
-    {
-        public string Month { get; set; }
-        public int Bookings { get; set; }
-        public decimal Revenue { get; set; }
-    }
-
-    public class AdminReportsViewModel
-    {
-        public decimal TotalRevenue { get; set; }
-        public decimal[] MonthlyRevenue { get; set; }
-        public List<Destination> TopDestinations { get; set; }
-        public BookingStatsViewModel BookingStats { get; set; }
-    }
-
-    public class BookingStatsViewModel
-    {
-        public int Total { get; set; }
-        public int Pending { get; set; }
-        public int Confirmed { get; set; }
-        public int Cancelled { get; set; }
+        public List<Booking> RecentBookings { get; set; } = new();
+        public Dictionary<string, decimal> MonthlyRevenue { get; set; } = new();  // ✅ Add this
+        public Dictionary<string, decimal> RevenueTrend { get; set; } = new();     // ✅ Add this
     }
 }

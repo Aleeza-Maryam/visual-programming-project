@@ -1,0 +1,75 @@
+﻿@model List<AITourismPlanner.Models.Package>
+@{
+    ViewData["Title"] = "Manage Packages";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="fas fa-box text-primary me-2"></i>Manage Packages</h2>
+        <div>
+            <a href="@Url.Action("AddPackage", "Admin")" class="btn btn-success me-2">
+                <i class="fas fa-plus"></i> Add Package
+            </a>
+            <a href="@Url.Action("Dashboard", "Admin")" class="btn btn-secondary">Back</a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Destination</th>
+                            <th>Type</th>
+                            <th>Duration</th>
+                            <th>Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var pkg in Model)
+                        {
+                            <tr>
+                                <td>@pkg.package_id</td>
+                                <td>@pkg.package_name</td>
+                                <td>@pkg.destination_name</td>
+                                <td>@pkg.package_type</td>
+                                <td>@pkg.duration_days D / @pkg.duration_nights N</td>
+                                <td>PKR @pkg.price_per_person.ToString("N0")</td>
+                                <td>
+                                    <a href="@Url.Action("EditPackage", new { id = pkg.package_id })" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <button class="btn btn-sm btn-danger" onclick="deletePackage(@pkg.package_id)">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function deletePackage(id) {
+        if (confirm("Delete this package?")) {
+            fetch('@Url.Action("DeletePackage", "Admin")', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `id=${id}`
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) location.reload();
+                else alert("Cannot delete this package");
+            });
+        }
+    }
+</script>

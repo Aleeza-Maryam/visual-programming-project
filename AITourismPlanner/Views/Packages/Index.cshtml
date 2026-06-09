@@ -77,82 +77,7 @@
             </div>
         </div>
     </div>
-    <!-- AI Budget Comparison Tool -->
-    <div class="card border-0 shadow-sm rounded-4 mb-5">
-        <div class="card-body p-4">
-            <h5 class="fw-bold mb-3">
-                <i class="fas fa-chart-line text-primary"></i> AI Budget Comparison
-            </h5>
-            <div class="row g-3">
-                <div class="col-md-5">
-                    <select id="compareDest1" class="form-select">
-                        <option value="">Select Destination 1</option>
-                        @foreach (var dest in ViewBag.DestinationsList as List<string> ?? new List<string>())
-                        {
-                            <option value="@dest">@dest</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-5">
-                    <select id="compareDest2" class="form-select">
-                        <option value="">Select Destination 2</option>
-                        @foreach (var dest in ViewBag.DestinationsList as List<string> ?? new List<string>())
-                        {
-                            <option value="@dest">@dest</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button class="btn btn-primary w-100" onclick="compareBudget()">
-                        <i class="fas fa-chart-simple me-1"></i> Compare
-                    </button>
-                </div>
-            </div>
-            <div id="comparisonResult" class="mt-3" style="display: none;"></div>
-        </div>
-    </div>
 
-    <script>
-            async function compareBudget() {
-                var dest1 = document.getElementById('compareDest1').value;
-                var dest2 = document.getElementById('compareDest2').value;
-                var resultDiv = document.getElementById('comparisonResult');
-
-                if (!dest1 || !dest2) {
-                    alert('Please select both destinations');
-                    return;
-                }
-
-                resultDiv.style.display = 'block';
-                resultDiv.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"></div><p>AI is comparing budgets...</p></div>';
-
-                try {
-                    var response = await fetch('/api/ai/compare-budget?dest1=' + encodeURIComponent(dest1) + '&dest2=' + encodeURIComponent(dest2) + '&days=3');
-                    var data = await response.json();
-
-                    resultDiv.innerHTML = `
-                        <div class="alert alert-info">
-                            <div class="row text-center">
-                                <div class="col-6">
-                                    <h5>${data.destination1}</h5>
-                                    <p class="text-primary fw-bold fs-3">PKR ${data.cost1.toLocaleString()}</p>
-                                </div>
-                                <div class="col-6">
-                                    <h5>${data.destination2}</h5>
-                                    <p class="text-primary fw-bold fs-3">PKR ${data.cost2.toLocaleString()}</p>
-                                </div>
-                            </div>
-                            <hr>
-                            <div class="text-center">
-                                <strong class="text-success">AI Recommendation:</strong> ${data.recommendation} is cheaper by PKR ${data.savings.toLocaleString()}!
-                            </div>
-                        </div>
-                    `;
-                } catch (error) {
-                    resultDiv.innerHTML = '<div class="alert alert-danger">Failed to compare. Please try again.</div>';
-                }
-            }
-    </script>
     <!-- Packages Grid -->
     @if (Model.Any())
     {
@@ -162,7 +87,7 @@
                 <div class="col-md-6 col-lg-4">
                     <div class="card package-card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
                         <div class="position-relative">
-                            <img src="@pkg.cover_image" style="height:200px; width:100%; object-fit:cover;" alt="@pkg.package_name">
+                            <img src="@pkg.cover_image" style="height:200px; width:100%; object-fit:cover;" alt="@pkg.package_name" onerror="this.src='https://images.unsplash.com/photo-1586500036706-41963de24d8b?w=600'">
                             <span class="position-absolute top-0 end-0 m-3 badge @(pkg.package_type == "Budget" ? "bg-success" : pkg.package_type == "Premium" ? "bg-danger" : "bg-primary") p-2">
                                 @pkg.package_type
                             </span>
@@ -170,22 +95,22 @@
                         <div class="card-body p-4">
                             <h5 class="fw-bold">@pkg.package_name</h5>
                             <p class="text-muted small"><i class="fas fa-map-marker-alt me-1"></i>@pkg.destination_name</p>
-                            
+
                             <div class="d-flex justify-content-between mb-2">
                                 <span><i class="fas fa-clock me-1"></i>@pkg.duration_days Days / @pkg.duration_nights Nights</span>
                                 <span><i class="fas fa-hotel me-1"></i>@(pkg.hotel_stars)⭐ Hotel</span>
                             </div>
-                            
+
                             <div class="d-flex justify-content-between mb-2">
                                 <span><i class="fas fa-bus me-1"></i>@pkg.transport_type</span>
                                 <span><i class="fas fa-utensils me-1"></i>@pkg.meals_included</span>
                             </div>
-                            
+
                             @if (pkg.group_discount_percent > 0)
                             {
                                 <span class="badge bg-info text-dark mb-2"><i class="fas fa-users"></i> @pkg.group_discount_percent% off for 4+ people</span>
                             }
-                            
+
                             <div class="mt-3">
                                 <span class="text-primary fw-bold fs-4">PKR @pkg.price_per_person.ToString("N0")</span>
                                 <span class="text-muted">/person</span>
@@ -213,9 +138,11 @@
     .package-card {
         transition: transform 0.3s ease;
     }
-    .package-card:hover {
-        transform: translateY(-5px);
-    }
+
+        .package-card:hover {
+            transform: translateY(-5px);
+        }
+
     .btn-primary {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         border: none;
@@ -244,19 +171,21 @@
         var dest1 = document.getElementById('compareDest1').value;
         var dest2 = document.getElementById('compareDest2').value;
         var resultDiv = document.getElementById('comparisonResult');
-        
+
         if (!dest1 || !dest2) {
             alert('Please select both destinations');
             return;
         }
-        
+
         resultDiv.style.display = 'block';
         resultDiv.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"></div><p>AI is comparing budgets...</p></div>';
-        
+
         try {
             var response = await fetch('/api/ai/compare-budget?dest1=' + encodeURIComponent(dest1) + '&dest2=' + encodeURIComponent(dest2) + '&days=3');
             var data = await response.json();
-            
+
+            var savings = Math.abs(data.cost1 - data.cost2);
+
             resultDiv.innerHTML = `
                 <div class="alert alert-info">
                     <div class="row text-center">
@@ -271,7 +200,7 @@
                     </div>
                     <hr>
                     <div class="text-center">
-                        <strong class="text-success">AI Recommendation:</strong> ${data.recommendation} is cheaper by PKR ${data.savings.toLocaleString()}!
+                        <strong class="text-success">AI Recommendation:</strong> ${data.recommendation} is cheaper by PKR ${savings.toLocaleString()}!
                     </div>
                 </div>
             `;

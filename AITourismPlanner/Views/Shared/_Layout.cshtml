@@ -402,6 +402,34 @@
                                 <li><a class="dropdown-item" href="@Url.Action("MyTrips", "Trips")"><i class="fas fa-plane"></i> My Trips</a></li>
                                 <li><a class="dropdown-item" href="@Url.Action("MyBookings", "Bookings")"><i class="fas fa-ticket-alt"></i> My Bookings</a></li>
                                 <li><a class="dropdown-item" href="@Url.Action("Wishlist", "Account")"><i class="fas fa-heart"></i> Favorites</a></li>
+
+                                <!-- 🔽 ADMIN PANEL LINKS (SIRF ADMIN KO DIKHENGE) 🔽 -->
+                                @if (Context.Session.GetString("UserRole") == "Admin")
+                                {
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item" href="@Url.Action("Dashboard", "Admin")">
+                                            <i class="fas fa-crown text-warning"></i> Admin Dashboard
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="@Url.Action("Transport", "Admin")">
+                                            <i class="fas fa-bus"></i> Manage Transport
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="@Url.Action("Packages", "Admin")">
+                                            <i class="fas fa-box"></i> Manage Packages
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="@Url.Action("Users", "Admin")">
+                                            <i class="fas fa-users"></i> Manage Users
+                                        </a>
+                                    </li>
+                                }
+                                <!-- 🔼 ADMIN PANEL LINKS END 🔼 -->
+
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="@Url.Action("Logout", "Account")"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                             </ul>

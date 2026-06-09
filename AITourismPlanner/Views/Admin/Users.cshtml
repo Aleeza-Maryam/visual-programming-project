@@ -1,0 +1,84 @@
+﻿@model List<AITourismPlanner.Models.User>
+@{
+    ViewData["Title"] = "Manage Users";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="fas fa-users text-primary me-2"></i>Manage Users</h2>
+        <a href="@Url.Action("Dashboard", "Admin")" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model)
+                        {
+                            <tr>
+                                <td>@user.user_id</td>
+                                <td>@user.full_name</td>
+                                <td>@user.email</td>
+                                <td>@user.phone</td>
+                                <td>
+                                    <span class="badge @(user.role_id == 1 ? "bg-danger" : "bg-primary")">
+                                        @(user.Role?.role_name ?? "Customer")
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge @(user.status == "Active" ? "bg-success" : "bg-secondary")">
+                                        @user.status
+                                    </span>
+                                </td>
+                                <td>@user.created_at.ToString("dd MMM yyyy")</td>
+                                <td>
+                                    @if (user.email != "admin@aitourism.com")
+                                    {
+                                        <button class="btn btn-danger btn-sm" onclick="deleteUser(@user.user_id)">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Admin</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function deleteUser(id) {
+        if (confirm("Are you sure you want to delete this user?")) {
+            fetch('@Url.Action("DeleteUser", "Admin")', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `id=${id}`
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) location.reload();
+                else alert(data.message || "Cannot delete this user");
+            });
+        }
+    }
+</script>

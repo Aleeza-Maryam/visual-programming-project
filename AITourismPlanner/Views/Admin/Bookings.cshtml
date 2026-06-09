@@ -1,0 +1,103 @@
+﻿@model List<AITourismPlanner.Models.Booking>
+@{
+    ViewData["Title"] = "Manage Bookings";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="fas fa-hotel text-primary me-2"></i>Manage Bookings</h2>
+        <a href="@Url.Action("Dashboard", "Admin")" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Destination</th>
+                            <th>Hotel</th>
+                            <th>Check In</th>
+                            <th>Check Out</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var booking in Model)
+                        {
+                            <tr>
+                                <td>@booking.booking_id</td>
+                                <td>@(booking.User?.full_name ?? "N/A")</td>
+                                <td>@booking.destination_name</td>
+                                <td>@(booking.hotel_name ?? "N/A")</td>
+                                <td>@booking.check_in_date.ToString("dd MMM yyyy")</td>
+                                <td>@booking.check_out_date.ToString("dd MMM yyyy")</td>
+                                <td>PKR @booking.total_price?.ToString("N0")</td>
+                                <td>
+                                    <select class="form-select form-select-sm status-select" data-id="@booking.booking_id" style="width: 120px;">
+                                        @if (booking.booking_status == "Pending")
+                                        {
+                                            <option value="Pending" selected>Pending</option>
+                                            <option value="Confirmed">Confirmed</option>
+                                            <option value="Completed">Completed</option>
+                                            <option value="Cancelled">Cancelled</option>
+                                        }
+                                        else if (booking.booking_status == "Confirmed")
+                                        {
+                                            <option value="Pending">Pending</option>
+                                            <option value="Confirmed" selected>Confirmed</option>
+                                            <option value="Completed">Completed</option>
+                                            <option value="Cancelled">Cancelled</option>
+                                        }
+                                        else if (booking.booking_status == "Completed")
+                                        {
+                                            <option value="Pending">Pending</option>
+                                            <option value="Confirmed">Confirmed</option>
+                                            <option value="Completed" selected>Completed</option>
+                                            <option value="Cancelled">Cancelled</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="Pending">Pending</option>
+                                            <option value="Confirmed">Confirmed</option>
+                                            <option value="Completed">Completed</option>
+                                            <option value="Cancelled" selected>Cancelled</option>
+                                        }
+                                    </select>
+                                </td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm" onclick="updateStatus(@booking.booking_id)">
+                                        Update
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateStatus(bookingId) {
+        var select = document.querySelector(`.status-select[data-id='${bookingId}']`);
+        var status = select.value;
+
+        fetch('@Url.Action("UpdateBookingStatus", "Admin")', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `id=${bookingId}&status=${status}`
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) location.reload();
+            else alert("Failed to update status");
+        });
+    }
+</script>

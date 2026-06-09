@@ -43,6 +43,27 @@
             </div>
         </div>
     </div>
+    <!-- AI Personalized Recommendations Section -->
+    @if (User.Identity.IsAuthenticated)
+    {
+        <section class="recommendations-section py-5 bg-light">
+            <div class="container">
+                <div class="text-center mb-4">
+                    <h2 class="display-5 fw-bold">
+                        <i class="fas fa-robot text-primary"></i> Recommended For You
+                    </h2>
+                    <p class="lead text-muted">Based on your travel preferences and past bookings</p>
+                </div>
+                <div id="aiRecommendations" class="row g-4">
+                    <div class="col-12 text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading recommendations...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    }
 </section>
 
 <script>
@@ -718,5 +739,61 @@
                     loadRecommendations();
                 </text>
         }
+            async function loadRecommendations() {
+            try {
+                var response = await fetch('/api/ai/recommendations');
+                var data = await response.json();
+                var container = document.getElementById('aiRecommendations');
+
+                if (container && data.recommendations && data.recommendations.length > 0) {
+                    container.innerHTML = '';
+
+                    data.recommendations.forEach(function(pkg) {
+                        container.innerHTML += `
+                            <div class="col-md-4 col-lg-3">
+                                <div class="card h-100 shadow-sm border-0 rounded-4">
+                                    <img src="${pkg.cover_image || '/images/default-package.jpg'}"
+                                         class="card-img-top rounded-top-4"
+                                         style="height: 160px; object-fit: cover;"
+                                         alt="${pkg.package_name}">
+                                    <div class="card-body">
+                                        <span class="badge bg-primary mb-2">${pkg.package_type || 'Standard'}</span>
+                                        <h6 class="fw-bold">${pkg.package_name}</h6>
+                                        <p class="text-muted small">
+                                            <i class="fas fa-map-marker-alt me-1"></i> ${pkg.destination_name}
+                                        </p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-primary fw-bold">PKR ${pkg.price_per_person?.toLocaleString()}</span>
+                                            <span class="text-muted small">/person</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer bg-transparent border-0 pb-3">
+                                        <a href="/Packages/Details/${pkg.package_id}" class="btn btn-primary w-100 btn-sm">
+                                            View Package <i class="fas fa-arrow-right ms-1"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else if (container) {
+                    container.innerHTML = `
+                        <div class="col-12 text-center py-5">
+                            <i class="fas fa-heart fa-3x text-muted mb-3"></i>
+                            <h5>No recommendations yet</h5>
+                            <p class="text-muted">Start exploring packages to get personalized recommendations!</p>
+                            <a href="/Packages" class="btn btn-primary">Explore Packages</a>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.log('Recommendations error:', error);
+            }
+        }
+
+        // Load recommendations when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRecommendations();
+        });
     </script>
 }

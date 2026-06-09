@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using AITourismPlanner.Services;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http; // Session handling ke liye zaroori hai
 
 namespace AITourismPlanner.Controllers
 {
@@ -9,10 +10,13 @@ namespace AITourismPlanner.Controllers
     public class AIController : ControllerBase
     {
         private readonly IAITourismService _aiService;
+        private readonly IRecommendationService _recommendationService; // 🌟 Fixed: Added missing service field
 
-        public AIController(IAITourismService aiService)
+        // 🌟 Fixed: Updated Constructor to inject both services
+        public AIController(IAITourismService aiService, IRecommendationService recommendationService)
         {
             _aiService = aiService;
+            _recommendationService = recommendationService;
         }
 
         [HttpGet("smart-search")]
@@ -36,15 +40,21 @@ namespace AITourismPlanner.Controllers
             return Ok(comparison);
         }
 
+        // =========================================================
+        // PERSONALIZED RECOMMENDATIONS (🌟 Fixed: Merged Duplicate Methods)
+        // =========================================================
         [HttpGet("recommendations")]
         public async Task<IActionResult> Recommendations()
         {
             var userId = HttpContext.Session.GetInt32("UserId");
-            if (!userId.HasValue)
-                return Unauthorized(new { error = "Please login first" });
 
-            var recommendations = await _aiService.PersonalizedRecommendations(userId.Value);
-            return Ok(new { count = recommendations.Count, recommendations });
+            // Agar aap chahain to strictly un-authorize kar saktay hain:
+            // if (!userId.HasValue) return Unauthorized(new { error = "Please login first" });
+
+            // Python ML Model/Recommendation system se fetch karne ke liye (default 1 agar login na ho):
+            var recs = await _recommendationService.GetPersonalizedRecommendations(userId ?? 1, 6);
+
+            return Ok(new { recommendations = recs });
         }
 
         [HttpPost("generate-itinerary")]
@@ -66,6 +76,14 @@ namespace AITourismPlanner.Controllers
             var userId = HttpContext.Session.GetInt32("UserId");
             var answer = await _aiService.ChatbotResponse(question, userId);
             return Ok(new { question, answer });
+        }
+
+        [HttpGet("similar-packages/{packageId}")]
+        public async Task<IActionResult> SimilarPackages(int packageId)
+        {
+            // 🌟 Fixed: _recommendationService will now resolve successfully
+            var similar = await _recommendationService.GetSimilarPackages(packageId, 4);
+            return Ok(similar);
         }
     }
 

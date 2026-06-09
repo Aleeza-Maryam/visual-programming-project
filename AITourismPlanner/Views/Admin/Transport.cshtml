@@ -1,0 +1,85 @@
+﻿@model List<AITourismPlanner.Models.Transport>
+@{
+    ViewData["Title"] = "Manage Transport";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="fas fa-bus text-primary me-2"></i>Manage Transport</h2>
+        <div>
+            <a href="@Url.Action("AddTransport", "Admin")" class="btn btn-success me-2">
+                <i class="fas fa-plus"></i> Add Transport
+            </a>
+            <a href="@Url.Action("Dashboard", "Admin")" class="btn btn-secondary">Back</a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Type</th>
+                            <th>Company</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Departure</th>
+                            <th>Duration</th>
+                            <th>Fare (PKR)</th>
+                            <th>Seats</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var t in Model)
+                        {
+                            <tr>
+                                <td>@t.transport_id</td>
+                                <td>
+                                    <span class="badge @(t.transport_type == "Flight" ? "bg-info" : t.transport_type == "Train" ? "bg-success" : "bg-warning")">
+                                        @t.transport_type
+                                    </span>
+                                </td>
+                                <td>@t.company_name</td>
+                                <td>@t.departure_city</td>
+                                <td>@t.arrival_city</td>
+                                <td>@t.departure_time</td>
+                                <td>@t.duration</td>
+                                <td>PKR @t.fare?.ToString("N0")</td>
+                                <td>@t.available_seats</td>
+                                <td>
+                                    <a href="@Url.Action("EditTransport", new { id = t.transport_id })" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteTransport(@t.transport_id)">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function deleteTransport(id) {
+        if (confirm("Delete this transport option?")) {
+            fetch('@Url.Action("DeleteTransport", "Admin")', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `id=${id}`
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) location.reload();
+                else alert("Cannot delete this transport");
+            });
+        }
+    }
+</script>

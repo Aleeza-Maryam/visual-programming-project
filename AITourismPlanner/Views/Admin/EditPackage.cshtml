@@ -1,0 +1,94 @@
+﻿@model AITourismPlanner.Models.Package
+@{
+    ViewData["Title"] = "Edit Package";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4">
+                    <h4 class="fw-bold"><i class="fas fa-edit text-primary me-2"></i>Edit Package</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="EditPackage" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="package_id">
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="package_name" class="form-label">Package Name</label>
+                                <input asp-for="package_name" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="destination_name" class="form-label">Destination</label>
+                                <input asp-for="destination_name" class="form-control" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="package_type" class="form-label">Package Type</label>
+                                <select asp-for="package_type" class="form-select">
+                                    <option>Budget</option>
+                                    <option>Standard</option>
+                                    <option>Premium</option>
+                                    <option>Honeymoon</option>
+                                    <option>Family</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="duration_days" class="form-label">Duration (Days)</label>
+                                <input asp-for="duration_days" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="duration_nights" class="form-label">Duration (Nights)</label>
+                                <input asp-for="duration_nights" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="price_per_person" class="form-label">Price per Person (PKR)</label>
+                                <input asp-for="price_per_person" class="form-control" type="number">
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="hotel_name" class="form-label">Hotel Name</label>
+                                <input asp-for="hotel_name" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="hotel_stars" class="form-label">Hotel Stars</label>
+                                <select asp-for="hotel_stars" class="form-select">
+                                    <option value="3">3 Star</option>
+                                    <option value="4">4 Star</option>
+                                    <option value="5">5 Star</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="transport_type" class="form-label">Transport Type</label>
+                                <select asp-for="transport_type" class="form-select">
+                                    <option>Bus</option>
+                                    <option>AC Bus</option>
+                                    <option>Private Car</option>
+                                    <option>Flight</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="meals_included" class="form-label">Meals Included</label>
+                                <input asp-for="meals_included" class="form-control">
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="inclusions" class="form-label">Inclusions</label>
+                                <textarea asp-for="inclusions" class="form-control" rows="2"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="cover_image" class="form-label">Cover Image URL</label>
+                                <input asp-for="cover_image" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary px-4">Update Package</button>
+                            <a href="@Url.Action("Packages", "Admin")" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

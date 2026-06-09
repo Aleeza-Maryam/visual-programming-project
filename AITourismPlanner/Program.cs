@@ -48,6 +48,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<IAITourismService, AITourismService>();
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient();
+builder.Services.AddScoped<IRecommendationService, RecommendationService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
