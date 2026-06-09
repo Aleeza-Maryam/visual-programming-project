@@ -252,7 +252,6 @@ namespace AITourismPlanner.Controllers
             if (!IsAdmin()) return RedirectToAction("Login", "Account");
             return View();
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddPackage(Package model)
@@ -261,7 +260,17 @@ namespace AITourismPlanner.Controllers
 
             if (ModelState.IsValid)
             {
+                // Set default values for all nullable fields
+                model.cancellation_policy = string.IsNullOrEmpty(model.cancellation_policy) ? "Free cancellation up to 7 days before travel" : model.cancellation_policy;
+                model.daily_itinerary = string.IsNullOrEmpty(model.daily_itinerary) ? "Day 1: Arrival\nDay 2: Sightseeing\nDay 3: Departure" : model.daily_itinerary;
+                model.special_features = string.IsNullOrEmpty(model.special_features) ? "Best value package" : model.special_features;
+                model.inclusions = string.IsNullOrEmpty(model.inclusions) ? "Hotel accommodation, Transport, Breakfast" : model.inclusions;
+                model.exclusions = string.IsNullOrEmpty(model.exclusions) ? "Lunch, Dinner, Personal expenses" : model.exclusions;
+                model.gallery_images = string.IsNullOrEmpty(model.gallery_images) ? "" : model.gallery_images;
+                model.hotel_room_type = string.IsNullOrEmpty(model.hotel_room_type) ? "Standard Room" : model.hotel_room_type;
+                model.transport_company = string.IsNullOrEmpty(model.transport_company) ? "Standard Transport" : model.transport_company;
                 model.created_at = DateTime.Now;
+
                 _context.packages.Add(model);
                 await _context.SaveChangesAsync();
                 TempData["Success"] = "Package added successfully!";
@@ -269,7 +278,6 @@ namespace AITourismPlanner.Controllers
             }
             return View(model);
         }
-
         [HttpGet]
         public async Task<IActionResult> EditPackage(int id)
         {

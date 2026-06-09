@@ -85,6 +85,15 @@
                             <button type="submit" class="btn btn-primary px-4">Save Package</button>
                             <a href="@Url.Action("Packages", "Admin")" class="btn btn-secondary">Cancel</a>
                         </div>
+                        <!-- Hidden fields for optional values -->
+                        <input type="hidden" name="hotel_room_type" value="Standard Room" />
+                        <input type="hidden" name="transport_company" value="Standard Transport" />
+                        <input type="hidden" name="gallery_images" value="" />
+                        <input type="hidden" name="daily_itinerary" value="Day 1: Arrival&#10;Day 2: Sightseeing&#10;Day 3: Departure" />
+                        <input type="hidden" name="cancellation_policy" value="Free cancellation up to 7 days before travel" />
+                        <input type="hidden" name="special_features" value="Best value package" />
+                        <input type="hidden" name="inclusions" value="Hotel accommodation, Transport, Breakfast" />
+                        <input type="hidden" name="exclusions" value="Lunch, Dinner, Personal expenses" />
                     </form>
                 </div>
             </div>
