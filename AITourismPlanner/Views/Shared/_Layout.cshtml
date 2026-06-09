@@ -5,22 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - TravelMate</title>
 
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Animate.css -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 
-    <!-- Custom CSS -->
     <style>
             * {
                 font-family: 'Poppins', sans-serif;
@@ -145,6 +139,31 @@
                 font-weight: bold;
                 color: #667eea;
                 background: #f8f9fa;
+            }
+
+            /* --- Fix Sign Up button wrapping and text overlap --- */
+            .btn-gradient, .navbar-nav .btn {
+                white-space: nowrap !important;
+                display: inline-flex !important;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* --- Adaptive layout adjustments for multi-item navbar --- */
+            @@media (min-width: 992px) and (max-width: 1300px) {
+                .nav-link {
+                    font-size: 0.82rem !important;
+                    padding: 0.4rem 0.45rem !important;
+                }
+
+                .navbar-brand span {
+                    font-size: 1.3rem !important;
+                }
+
+                .navbar .btn {
+                    padding: 5px 12px !important;
+                    font-size: 0.82rem !important;
+                }
             }
 
             @@media (max-width: 991px) {
@@ -322,7 +341,6 @@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-    <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
         <div class="container">
             <a class="navbar-brand fw-bold fs-3" href="@Url.Action("Index", "Home")" style="text-decoration: none;">
@@ -344,14 +362,14 @@
                             <i class="fas fa-map-marked-alt"></i> Destinations
                         </a>
                     </li>
-                   
+
                     <li class="nav-item">
                         <a class="nav-link" href="@Url.Action("Index", "Weather")">
                             <i class="fas fa-cloud-sun"></i> Weather
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Search", "Transport")">
+                        <a class="nav-link" href="@Url.Action("Index", "Transport")">
                             <i class="fas fa-bus"></i> Transport
                         </a>
                     </li>
@@ -385,7 +403,6 @@
                                 <i class="fas fa-user-circle"></i> @userName
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <!-- User Menu -->
                                 <li>
                                     <a class="dropdown-item" href="@Url.Action("Dashboard", "Account")">
                                         <i class="fas fa-tachometer-alt"></i> Dashboard
@@ -402,7 +419,6 @@
                                     </a>
                                 </li>
 
-                                <!-- Admin Menu (only for Admin) -->
                                 @if (userRole == "Admin")
                                 {
                                     <li><hr class="dropdown-divider"></li>
@@ -468,12 +484,10 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
     <main>
         @RenderBody()
     </main>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="row">
@@ -524,7 +538,6 @@
         </div>
     </footer>
 
-    <!-- AI Chatbot -->
     <div id="chatbotBtn" class="chatbot-button" onclick="toggleChatbot()">
         <i class="fas fa-robot fa-2x"></i>
     </div>
@@ -548,7 +561,6 @@
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>

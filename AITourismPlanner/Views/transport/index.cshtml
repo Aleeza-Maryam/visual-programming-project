@@ -1,0 +1,461 @@
+﻿@model List<AITourismPlanner.Models.Transport>
+@{
+    ViewData["Title"] = "Transport Services";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Hero Section -->
+<section class="transport-hero position-relative text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 80px 0;">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-3 fw-bold mb-3">
+                    <i class="fas fa-bus me-3"></i> Transport Services
+                </h1>
+                <p class="fs-4 mb-0 opacity-90">Find the best transport options across Pakistan. Book buses, trains, and flights easily.</p>
+            </div>
+            <div class="col-lg-4 text-center mt-4 mt-lg-0">
+                <i class="fas fa-plane-departure fa-4x opacity-25"></i>
+                <i class="fas fa-bus fa-4x opacity-25 ms-3"></i>
+                <i class="fas fa-train fa-4x opacity-25 ms-3"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container py-5">
+    <!-- Filter Section -->
+    <div class="card border-0 shadow-lg rounded-4 mb-5">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-3">
+                <i class="fas fa-sliders-h text-primary me-2"></i> Filter Transport Options
+            </h5>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="fas fa-map-marker-alt text-primary"></i>
+                        </span>
+                        <input type="text" id="filterFrom" class="form-control border-start-0 ps-0" placeholder="From City">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="fas fa-flag-checkered text-primary"></i>
+                        </span>
+                        <input type="text" id="filterTo" class="form-control border-start-0 ps-0" placeholder="To City">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select id="filterType" class="form-select">
+                        <option value="all">🚌 All Transport</option>
+                        <option value="Bus">🚌 Bus</option>
+                        <option value="Train">🚂 Train</option>
+                        <option value="Flight">✈️ Flight</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-primary w-100 py-2" onclick="filterTransports()">
+                        <i class="fas fa-filter me-2"></i> Apply Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card border-0 bg-light rounded-4 text-center p-3">
+                <i class="fas fa-bus fa-2x text-primary mb-2"></i>
+                <h3 class="fw-bold mb-0">@Model.Count(t => t.transport_type == "Bus")</h3>
+                <small class="text-muted">Bus Services</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 bg-light rounded-4 text-center p-3">
+                <i class="fas fa-train fa-2x text-primary mb-2"></i>
+                <h3 class="fw-bold mb-0">@Model.Count(t => t.transport_type == "Train")</h3>
+                <small class="text-muted">Train Services</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 bg-light rounded-4 text-center p-3">
+                <i class="fas fa-plane fa-2x text-primary mb-2"></i>
+                <h3 class="fw-bold mb-0">@Model.Count(t => t.transport_type == "Flight")</h3>
+                <small class="text-muted">Flight Services</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transport Cards Grid -->
+    @if (Model.Any())
+    {
+        <div class="row g-4" id="transportGrid">
+            @foreach (var transport in Model)
+            {
+                <div class="col-md-6 col-xl-4 transport-card-item"
+                     data-from="@transport.departure_city"
+                     data-to="@transport.arrival_city"
+                     data-type="@transport.transport_type">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden transport-card">
+                        <!-- Type Badge -->
+                        <div class="card-badge position-absolute top-0 end-0 m-3">
+                            <span class="badge @(transport.transport_type == "Flight" ? "bg-info" : transport.transport_type == "Train" ? "bg-success" : "bg-primary") px-3 py-2 rounded-pill shadow-sm">
+                                <i class="fas @(transport.transport_type == "Flight" ? "fa-plane" : transport.transport_type == "Train" ? "fa-train" : "fa-bus") me-1"></i>
+                                @transport.transport_type
+                            </span>
+                        </div>
+
+                        <!-- Icon Background -->
+                        <div class="card-icon-bg text-center pt-4">
+                            <i class="fas @(transport.transport_type == "Flight" ? "fa-plane" : transport.transport_type == "Train" ? "fa-train" : "fa-bus") fa-4x text-primary opacity-25"></i>
+                        </div>
+
+                        <div class="card-body p-4">
+                            <!-- Company Name -->
+                            <h4 class="fw-bold mb-2 text-center">@transport.company_name</h4>
+
+                            <!-- Route -->
+                            <div class="route-container d-flex align-items-center justify-content-between my-4">
+                                <div class="text-center">
+                                    <div class="city-code fw-bold fs-5">@transport.departure_city</div>
+                                    <small class="text-muted">Departure</small>
+                                </div>
+                                <div class="route-line flex-grow-1 mx-3 position-relative">
+                                    <hr class="border-primary opacity-50">
+                                    <i class="fas fa-arrow-right text-primary position-absolute top-50 start-50 translate-middle bg-white px-2"></i>
+                                </div>
+                                <div class="text-center">
+                                    <div class="city-code fw-bold fs-5">@transport.arrival_city</div>
+                                    <small class="text-muted">Arrival</small>
+                                </div>
+                            </div>
+
+                            <!-- Schedule Details -->
+                            <div class="schedule-details bg-light rounded-3 p-3 mb-3">
+                                <div class="row text-center">
+                                    <div class="col-6 border-end">
+                                        <i class="fas fa-clock text-primary mb-1"></i>
+                                        <p class="fw-bold mb-0">@transport.departure_time</p>
+                                        <small class="text-muted">Departure Time</small>
+                                    </div>
+                                    <div class="col-6">
+                                        <i class="fas fa-hourglass-half text-primary mb-1"></i>
+                                        <p class="fw-bold mb-0">@transport.duration</p>
+                                        <small class="text-muted">Duration</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Price and Seats -->
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div>
+                                    <span class="text-primary fw-bold fs-4">PKR @transport.fare?.ToString("N0")</span>
+                                    <span class="text-primary fw-bold fs-3 ms-2">PKR @transport.fare?.ToString("N0")</span>
+                                    <span class="text-muted">/person</span>
+                                </div>
+                                <div>
+                                    @if (transport.available_seats > 10)
+                                    {
+                                        <span class="badge bg-success rounded-pill px-3 py-2">
+                                            <i class="fas fa-chair me-1"></i> @transport.available_seats seats
+                                        </span>
+                                    }
+                                    else if (transport.available_seats > 0)
+                                    {
+                                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+                                            <i class="fas fa-chair me-1"></i> Only @transport.available_seats left!
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger rounded-pill px-3 py-2">
+                                            <i class="fas fa-ban me-1"></i> Sold Out
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Book Button -->
+                        <div class="card-footer bg-transparent border-0 pb-4 px-4">
+                            @if (transport.available_seats > 0)
+                            {
+                                <button class="btn btn-gradient w-100 py-2 fw-bold" onclick="bookTransport(@transport.transport_id, '@transport.company_name', @transport.fare)">
+                                    <i class="fas fa-ticket-alt me-2"></i> Book Now
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-secondary w-100 py-2 fw-bold" disabled>
+                                    <i class="fas fa-ban me-2"></i> Sold Out
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <div class="bg-light rounded-4 p-5">
+                <i class="fas fa-bus fa-5x text-muted mb-4"></i>
+                <h3 class="fw-bold">No Transport Options Available</h3>
+                <p class="text-muted">Please check back later for updates or try different filters.</p>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Booking Modal -->
+<div class="modal fade" id="bookingModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header bg-gradient-primary text-white border-0 rounded-top-4" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-ticket-alt me-2"></i> Book Transport
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div id="bookingForm">
+                    <div class="booking-summary bg-light rounded-3 p-3 mb-4">
+                        <div class="row">
+                            <div class="col-6">
+                                <small class="text-muted">Transport</small>
+                                <p class="fw-bold mb-0" id="modalTransportName">-</p>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Base Fare</small>
+                                <p class="fw-bold mb-0 text-primary" id="modalFareDisplay">-</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Number of Seats</label>
+                        <div class="input-group">
+                            <button class="btn btn-outline-secondary" type="button" onclick="decrementSeats()">-</button>
+                            <input type="number" id="modalSeats" class="form-control text-center" value="1" min="1" max="10" readonly>
+                            <button class="btn btn-outline-secondary" type="button" onclick="incrementSeats()">+</button>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Travel Date</label>
+                        <input type="date" id="modalTravelDate" class="form-control" min="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")">
+                    </div>
+                    <div class="price-breakdown bg-primary bg-opacity-10 rounded-3 p-3 mt-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal:</span>
+                            <span id="subtotalPrice">PKR 0</span>
+                        </div>
+                        <div class="d-flex justify-content-between fw-bold fs-5">
+                            <span>Total Amount:</span>
+                            <span class="text-primary" id="modalTotalPrice">PKR 0</span>
+                        </div>
+                    </div>
+                    <input type="hidden" id="modalTransportId">
+                    <input type="hidden" id="modalFare">
+                </div>
+            </div>
+            <div class="modal-footer border-0 pb-4 px-4">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-gradient px-4 fw-bold" onclick="confirmBooking()">
+                    <i class="fas fa-check-circle me-2"></i> Confirm Booking
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-body p-5 text-center">
+                <div class="success-animation">
+                    <i class="fas fa-check-circle fa-5x text-success mb-3"></i>
+                </div>
+                <h3 class="fw-bold mb-2">Booking Confirmed!</h3>
+                <p class="text-muted">Your booking reference is:</p>
+                <h4 class="text-primary fw-bold mb-4" id="bookingRef"></h4>
+                <div class="d-flex gap-3 justify-content-center">
+                    <a href="@Url.Action("MyBookings", "Bookings")" class="btn btn-gradient px-4">
+                        <i class="fas fa-eye me-2"></i> View My Bookings
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .transport-card {
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        cursor: pointer;
+    }
+
+        .transport-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15) !important;
+        }
+
+    .btn-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102,126,234,0.4);
+            color: white;
+        }
+
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .route-line {
+        position: relative;
+        height: 2px;
+    }
+
+    .transport-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .city-code {
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    .input-group-text {
+        background-color: white;
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        opacity: 0;
+    }
+</style>
+
+<script>
+    var selectedTransportId = 0;
+    var selectedFare = 0;
+    var selectedName = '';
+
+    function bookTransport(id, name, fare) {
+        selectedTransportId = id;
+        selectedFare = fare;
+        selectedName = name;
+
+        document.getElementById('modalTransportId').value = id;
+        document.getElementById('modalTransportName').innerText = name;
+        document.getElementById('modalFare').value = fare;
+        document.getElementById('modalFareDisplay').innerHTML = 'PKR ' + fare.toLocaleString();
+
+        var tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        document.getElementById('modalTravelDate').value = tomorrow.toISOString().split('T')[0];
+        document.getElementById('modalSeats').value = 1;
+
+        updateTotalPrice();
+
+        var modal = new bootstrap.Modal(document.getElementById('bookingModal'));
+        modal.show();
+    }
+
+    function incrementSeats() {
+        var seats = document.getElementById('modalSeats');
+        if (parseInt(seats.value) < 10) {
+            seats.value = parseInt(seats.value) + 1;
+            updateTotalPrice();
+        }
+    }
+
+    function decrementSeats() {
+        var seats = document.getElementById('modalSeats');
+        if (parseInt(seats.value) > 1) {
+            seats.value = parseInt(seats.value) - 1;
+            updateTotalPrice();
+        }
+    }
+
+    function updateTotalPrice() {
+        var seats = document.getElementById('modalSeats').value;
+        var subtotal = selectedFare * seats;
+        var total = subtotal;
+
+        document.getElementById('subtotalPrice').innerText = 'PKR ' + subtotal.toLocaleString();
+        document.getElementById('modalTotalPrice').innerHTML = 'PKR ' + total.toLocaleString();
+    }
+
+    function confirmBooking() {
+        var seats = document.getElementById('modalSeats').value;
+        var travelDate = document.getElementById('modalTravelDate').value;
+        var total = selectedFare * seats;
+
+        fetch('@Url.Action("CreateTransportBooking", "Transport")', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `transportId=${selectedTransportId}&seats=${seats}&travelDate=${travelDate}&totalPrice=${total}`
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                bootstrap.Modal.getInstance(document.getElementById('bookingModal')).hide();
+                document.getElementById('bookingRef').innerText = data.reference;
+                new bootstrap.Modal(document.getElementById('successModal')).show();
+            } else {
+                alert(data.message || 'Booking failed');
+            }
+        })
+        .catch(error => {
+            alert('An error occurred. Please try again.');
+        });
+    }
+
+    function filterTransports() {
+        var fromFilter = document.getElementById('filterFrom').value.toLowerCase();
+        var toFilter = document.getElementById('filterTo').value.toLowerCase();
+        var typeFilter = document.getElementById('filterType').value;
+
+        var cards = document.querySelectorAll('.transport-card-item');
+        var visibleCount = 0;
+
+        cards.forEach(card => {
+            var from = card.getAttribute('data-from').toLowerCase();
+            var to = card.getAttribute('data-to').toLowerCase();
+            var type = card.getAttribute('data-type');
+
+            var fromMatch = fromFilter === '' || from.includes(fromFilter);
+            var toMatch = toFilter === '' || to.includes(toFilter);
+            var typeMatch = typeFilter === 'all' || type === typeFilter;
+
+            if (fromMatch && toMatch && typeMatch) {
+                card.style.display = 'block';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        // Show no results message if needed
+        var grid = document.getElementById('transportGrid');
+        var existingMsg = document.getElementById('noResultsMsg');
+        if (existingMsg) existingMsg.remove();
+
+        if (visibleCount === 0 && cards.length > 0) {
+            grid.insertAdjacentHTML('beforeend', '<div id="noResultsMsg" class="col-12 text-center py-5"><div class="bg-light rounded-4 p-5"><i class="fas fa-search fa-4x text-muted mb-3"></i><h4 class="fw-bold">No matching transports found</h4><p class="text-muted">Try adjusting your filters</p></div></div>');
+        }
+    }
+</script>

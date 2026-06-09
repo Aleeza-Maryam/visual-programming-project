@@ -2,16 +2,20 @@
 using Microsoft.EntityFrameworkCore;
 using AITourismPlanner.Data;
 using AITourismPlanner.Models;
+using AITourismPlanner.Services;   // ✅ Add this
 
 namespace AITourismPlanner.Controllers
 {
     public class PackagesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IPexelsImageService _pexelsService;   // ✅ Add this
 
-        public PackagesController(ApplicationDbContext context)
+        // ✅ Updated constructor
+        public PackagesController(ApplicationDbContext context, IPexelsImageService pexelsService)
         {
             _context = context;
+            _pexelsService = pexelsService;
         }
 
         // =========================================================
@@ -21,13 +25,11 @@ namespace AITourismPlanner.Controllers
         {
             var query = _context.packages.Where(p => p.is_active).AsQueryable();
 
-            // Filter by package type
             if (type != "all")
             {
                 query = query.Where(p => p.package_type != null && p.package_type == type);
             }
 
-            // Sorting with null check
             query = sort switch
             {
                 "price_desc" => query.OrderByDescending(p => p.price_per_person),
@@ -38,9 +40,6 @@ namespace AITourismPlanner.Controllers
 
             var packages = await query.ToListAsync();
 
-            // =========================================================
-            // ✅ ADD THIS LINE - Get destinations list for dropdown (AI Budget Comparison)
-            // =========================================================
             ViewBag.DestinationsList = await _context.packages
                 .Where(p => p.is_active)
                 .Select(p => p.destination_name)
@@ -67,7 +66,6 @@ namespace AITourismPlanner.Controllers
             if (package == null)
                 return NotFound();
 
-            // Calculate average rating
             double avgRating = 0;
             if (package.PackageReviews != null && package.PackageReviews.Any())
             {
@@ -94,7 +92,6 @@ namespace AITourismPlanner.Controllers
             if (package == null)
                 return NotFound();
 
-            // Calculate group discount
             var viewModel = new PackageBookingViewModel
             {
                 Package = package,
@@ -125,11 +122,9 @@ namespace AITourismPlanner.Controllers
                 if (package == null)
                     return NotFound();
 
-                // Calculate total price
                 int totalPersons = model.NumberOfAdults + model.NumberOfChildren;
                 decimal baseTotal = package.price_per_person * totalPersons;
 
-                // Apply group discount (if 4+ people)
                 decimal discount = 0;
                 if (totalPersons >= 4 && package.group_discount_percent > 0)
                 {
@@ -138,7 +133,6 @@ namespace AITourismPlanner.Controllers
 
                 decimal finalTotal = baseTotal - discount;
 
-                // Generate booking reference
                 var reference = "PKG" + DateTime.Now.ToString("yyyyMMddHHmmss") + new Random().Next(100, 999);
 
                 var booking = new PackageBooking
@@ -180,7 +174,6 @@ namespace AITourismPlanner.Controllers
             if (!userId.HasValue)
                 return RedirectToAction("Login", "Account");
 
-            // Check if table exists
             try
             {
                 var bookings = await _context.package_bookings
@@ -193,7 +186,6 @@ namespace AITourismPlanner.Controllers
             }
             catch (Exception ex)
             {
-                // Table doesn't exist or has issues - return empty list
                 Console.WriteLine($"Error: {ex.Message}");
                 TempData["Error"] = "Bookings feature is being set up. Please try again later.";
                 return View(new List<PackageBooking>());
@@ -286,7 +278,6 @@ namespace AITourismPlanner.Controllers
             if (booking == null)
                 return NotFound();
 
-            // Create HTML voucher
             var html = $@"
     <!DOCTYPE html>
     <html>
@@ -339,7 +330,6 @@ namespace AITourismPlanner.Controllers
             <button onclick='window.print();'>🖨️ Print / Save as PDF</button>
         </div>
         <script>
-            // Auto trigger print
             setTimeout(function() {{ window.print(); }}, 500);
         </script>
     </body>
@@ -388,6 +378,40 @@ namespace AITourismPlanner.Controllers
             await _context.SaveChangesAsync();
 
             return Json(new { success = true, message = "Booking cancelled successfully!" });
+        }
+
+        // =========================================================
+        // ✅ NEW ACTION: Refresh all package images from Pexels
+        // Run this once: https://localhost:7178/Packages/RefreshPackageImages
+        // =========================================================
+        [HttpGet]
+        public async Task<IActionResult> RefreshPackageImages()
+        {
+            var packages = await _context.packages.Where(p => p.is_active).ToListAsync();
+            int updated = 0;
+
+            foreach (var pkg in packages)
+            {
+                try
+                {
+                    string imageUrl = await _pexelsService.GetImageForDestinationAsync(pkg.destination_name);
+
+                    if (!string.IsNullOrEmpty(imageUrl) && pkg.cover_image != imageUrl)
+                    {
+                        pkg.cover_image = imageUrl;
+                        updated++;
+                    }
+
+                    await Task.Delay(200); // Respect rate limit
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error updating {pkg.package_name}: {ex.Message}");
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return Content($"✅ Updated {updated} out of {packages.Count} packages with Pexels images.");
         }
     }
 
