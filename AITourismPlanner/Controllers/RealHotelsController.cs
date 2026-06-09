@@ -41,7 +41,7 @@ namespace AITourismPlanner.Controllers
             string city, string checkIn, string checkOut, int guests)
         {
             var hotels = new List<HotelResult>();
-            var apiKey = "35f85c261fmsh0b3fdef51d3d998p1de5fajsn410ef6c10768";
+            var apiKey = "37f114a3dbmsha62c37e62f00a93p1f9370jsnc2502473403f";
             var host = "booking-com15.p.rapidapi.com";
 
             try
@@ -182,7 +182,7 @@ namespace AITourismPlanner.Controllers
                     "?name=Islamabad"),
                 Headers =
         {
-            { "X-RapidAPI-Key", "35f85c261fmsh0b3fdef51d3d998p1g5fajsn410ef6c10768" },
+            { "X-RapidAPI-Key", "37f114a3dbmsha62c37e62f00a93p1f9370jsnc2502473403f" },
             { "X-RapidAPI-Host", "opentripmap-places-v1.p.rapidapi.com" },
         },
             };
@@ -202,7 +202,7 @@ namespace AITourismPlanner.Controllers
                 RequestUri = new Uri("https://booking-com15.p.rapidapi.com/api/v1/hotels/searchDestination?query=Islamabad"),
                 Headers =
         {
-            { "X-RapidAPI-Key", "35f85c261fmsh0b3fdef51d3d998p1g5fajsn410ef6c10768" },
+            { "X-RapidAPI-Key", "37f114a3dbmsha62c37e62f00a93p1f9370jsnc2502473403f" },
             { "X-RapidAPI-Host", "booking-com15.p.rapidapi.com" }
         },
             };
@@ -245,7 +245,7 @@ namespace AITourismPlanner.Controllers
                     "&limit=10"),
                 Headers =
         {
-            { "X-RapidAPI-Key", "35f85c261fmsh0b3fdef51d3d998p1g5fajsn410ef6c10768" },
+            { "X-RapidAPI-Key", "37f114a3dbmsha62c37e62f00a93p1f9370jsnc2502473403f" },
             { "X-RapidAPI-Host", "opentripmap-places-v1.p.rapidapi.com" },
         },
             };

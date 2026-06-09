@@ -133,13 +133,20 @@
                     background: #5a67d8;
                 }
 
-            /* Fix main content margin to account for navbar */
             main {
                 margin-top: 70px;
                 min-height: calc(100vh - 70px);
             }
 
-            /* Responsive fixes */
+            /* Admin Dropdown Header */
+            .admin-dropdown-header {
+                padding: 8px 15px;
+                font-size: 12px;
+                font-weight: bold;
+                color: #667eea;
+                background: #f8f9fa;
+            }
+
             @@media (max-width: 991px) {
                 .navbar {
                     padding: 0.5rem 0;
@@ -337,20 +344,12 @@
                             <i class="fas fa-map-marked-alt"></i> Destinations
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("PlanTrip", "Trips")">
-                            <i class="fas fa-robot"></i> AI Trip Planner
-                        </a>
-                    </li>
-
-                    <!-- Weather Link -->
+                   
                     <li class="nav-item">
                         <a class="nav-link" href="@Url.Action("Index", "Weather")">
                             <i class="fas fa-cloud-sun"></i> Weather
                         </a>
                     </li>
-
-                    <!-- Transport Link -->
                     <li class="nav-item">
                         <a class="nav-link" href="@Url.Action("Search", "Transport")">
                             <i class="fas fa-bus"></i> Transport
@@ -361,23 +360,10 @@
                             <i class="fas fa-box"></i> Packages
                         </a>
                     </li>
-
-                    <!-- Real Hotels Link -->
                     <li class="nav-item">
                         <a class="nav-link" href="@Url.Action("Search", "RealHotels")">
                             <i class="fas fa-globe"></i> Real Hotels
                         </a>
-                    </li>
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-briefcase"></i> Services
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="@Url.Action("Search", "RealHotels")"><i class="fas fa-globe"></i> Hotels</a></li>
-                            <li><a class="dropdown-item" href="@Url.Action("Search", "Transport")"><i class="fas fa-bus"></i> Transport</a></li>
-                            <li><a class="dropdown-item" href="@Url.Action("Index", "Chatbot")"><i class="fas fa-comment-dots"></i> AI Chatbot</a></li>
-                        </ul>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="@Url.Action("About", "Home")">
@@ -390,6 +376,7 @@
                     @{
                         var userId = Context.Session.GetInt32("UserId");
                         var userName = Context.Session.GetString("UserName");
+                        var userRole = Context.Session.GetString("UserRole");
                     }
                     @if (userId.HasValue)
                     {
@@ -398,23 +385,33 @@
                                 <i class="fas fa-user-circle"></i> @userName
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="@Url.Action("Dashboard", "Account")"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                                <li><a class="dropdown-item" href="@Url.Action("MyTrips", "Trips")"><i class="fas fa-plane"></i> My Trips</a></li>
-                                <li><a class="dropdown-item" href="@Url.Action("MyBookings", "Bookings")"><i class="fas fa-ticket-alt"></i> My Bookings</a></li>
-                                <li><a class="dropdown-item" href="@Url.Action("Wishlist", "Account")"><i class="fas fa-heart"></i> Favorites</a></li>
+                                <!-- User Menu -->
+                                <li>
+                                    <a class="dropdown-item" href="@Url.Action("Dashboard", "Account")">
+                                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="@Url.Action("MyBookings", "Bookings")">
+                                        <i class="fas fa-ticket-alt"></i> My Bookings
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="@Url.Action("Wishlist", "Account")">
+                                        <i class="fas fa-heart"></i> Wishlist
+                                    </a>
+                                </li>
 
-                                <!-- 🔽 ADMIN PANEL LINKS (SIRF ADMIN KO DIKHENGE) 🔽 -->
-                                @if (Context.Session.GetString("UserRole") == "Admin")
+                                <!-- Admin Menu (only for Admin) -->
+                                @if (userRole == "Admin")
                                 {
                                     <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <a class="dropdown-item" href="@Url.Action("Dashboard", "Admin")">
-                                            <i class="fas fa-crown text-warning"></i> Admin Dashboard
-                                        </a>
+                                    <li class="admin-dropdown-header">
+                                        <i class="fas fa-crown me-2"></i> Admin Panel
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="@Url.Action("Transport", "Admin")">
-                                            <i class="fas fa-bus"></i> Manage Transport
+                                        <a class="dropdown-item" href="@Url.Action("Dashboard", "Admin")">
+                                            <i class="fas fa-chart-line"></i> Dashboard
                                         </a>
                                     </li>
                                     <li>
@@ -423,15 +420,33 @@
                                         </a>
                                     </li>
                                     <li>
+                                        <a class="dropdown-item" href="@Url.Action("Transport", "Admin")">
+                                            <i class="fas fa-bus"></i> Manage Transport
+                                        </a>
+                                    </li>
+                                    <li>
                                         <a class="dropdown-item" href="@Url.Action("Users", "Admin")">
                                             <i class="fas fa-users"></i> Manage Users
                                         </a>
                                     </li>
+                                    <li>
+                                        <a class="dropdown-item" href="@Url.Action("Bookings", "Admin")">
+                                            <i class="fas fa-hotel"></i> Manage Bookings
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="@Url.Action("Reviews", "Admin")">
+                                            <i class="fas fa-star"></i> Manage Reviews
+                                        </a>
+                                    </li>
                                 }
-                                <!-- 🔼 ADMIN PANEL LINKS END 🔼 -->
 
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="@Url.Action("Logout", "Account")"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                                <li>
+                                    <a class="dropdown-item" href="@Url.Action("Logout", "Account")">
+                                        <i class="fas fa-sign-out-alt"></i> Logout
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                     }
@@ -443,8 +458,8 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-gradient ms-2" href="@Url.Action("Register", "Account")">
-                                <i class="fas fa-user-plus"></i> Sign Up
+                            <a class="btn btn-primary ms-2" href="@Url.Action("Register", "Account")" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 8px; padding: 6px 18px;">
+                                <i class="fas fa-user-plus me-1"></i> Sign Up
                             </a>
                         </li>
                     }
@@ -509,15 +524,11 @@
         </div>
     </footer>
 
-    <!-- ========================================================= -->
-    <!-- AI CHATBOT FLOATING BUTTON & MODAL -->
-    <!-- ========================================================= -->
-    <!-- Chatbot Button -->
+    <!-- AI Chatbot -->
     <div id="chatbotBtn" class="chatbot-button" onclick="toggleChatbot()">
         <i class="fas fa-robot fa-2x"></i>
     </div>
 
-    <!-- Chatbot Modal -->
     <div id="chatbotModal" class="chatbot-modal">
         <div class="chatbot-header">
             <div>
@@ -545,14 +556,15 @@
     <script>
         // Navbar scroll effect
         window.addEventListener('scroll', function() {
+        var nav = document.getElementById('mainNav');
         if (window.scrollY > 50) {
-        document.getElementById('mainNav').classList.add('navbar-scrolled');
+        nav.classList.add('navbar-scrolled');
         } else {
-        document.getElementById('mainNav').classList.remove('navbar-scrolled');
+        nav.classList.remove('navbar-scrolled');
         }
         });
 
-        // Add hover animation for icon
+        // Brand icon hover animation
         var brandLink = document.querySelector('.navbar-brand');
         if (brandLink) {
         brandLink.addEventListener('mouseenter', function() {
@@ -563,16 +575,10 @@
         });
         }
 
-        // =========================================================
-        // AI CHATBOT FUNCTIONS
-        // =========================================================
+        // AI Chatbot Functions
         function toggleChatbot() {
         var modal = document.getElementById('chatbotModal');
-        if (modal.style.display === 'flex') {
-        modal.style.display = 'none';
-        } else {
-        modal.style.display = 'flex';
-        }
+        modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
         }
 
         async function sendMessage() {
@@ -582,13 +588,11 @@
 
         var messagesDiv = document.getElementById('chatMessages');
 
-        // Add user message
         messagesDiv.innerHTML += '<div class="user-message"><div class="message-bubble">' + escapeHtml(message) + '</div></div>';
         input.value = '';
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-        // Add typing indicator
-        messagesDiv.innerHTML += '<div class="bot-message" id="typingIndicator"><div class="message-bubble">Typing<span>.</span><span>.</span><span>.</span></div></div>';
+        messagesDiv.innerHTML += '<div class="bot-message" id="typingIndicator"><div class="message-bubble">Typing...</div></div>';
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
         try {
@@ -600,8 +604,6 @@
         var data = await response.json();
         var typingIndicator = document.getElementById('typingIndicator');
         if (typingIndicator) typingIndicator.remove();
-
-        // Add bot response
         messagesDiv.innerHTML += '<div class="bot-message"><div class="message-bubble">' + escapeHtml(data.answer) + '</div></div>';
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
         } catch (error) {

@@ -37,9 +37,7 @@
                 <a href="@Url.Action("Index", "Destinations")" class="btn btn-primary btn-lg mx-2 px-4 py-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
                     <i class="fas fa-search me-2"></i> Explore Destinations
                 </a>
-                <a href="@Url.Action("PlanTrip", "Trips")" class="btn btn-outline-light btn-lg mx-2 px-4 py-3">
-                    <i class="fas fa-robot me-2"></i> AI Trip Planner
-                </a>
+                
             </div>
         </div>
     </div>
@@ -142,42 +140,6 @@
     </div>
 </section>
 
-<!-- Search Bar Section -->
-<section class="search-section py-4 bg-white shadow-sm">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-10">
-                <form asp-action="Search" asp-controller="Destinations" method="get" class="row g-2">
-                    <div class="col-md-4">
-                        <input type="text" id="searchInput" name="searchTerm" class="form-control form-control-lg" placeholder="Where to?" autocomplete="off">
-                    </div>
-                    <div class="col-md-3">
-                        <select name="category" class="form-select form-select-lg">
-                            <option value="">All Categories</option>
-                            @if (Model.Categories != null && Model.Categories.Any())
-                            {
-                                foreach (var cat in Model.Categories)
-                                {
-                                    <option value="@cat.category_name">@cat.category_name</option>
-                                }
-                            }
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <input type="number" name="budget" class="form-control form-control-lg" placeholder="Max Budget (PKR)">
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary btn-lg w-100">
-                            <i class="fas fa-search"></i> Search
-                        </button>
-                    </div>
-                </form>
-                <!-- Autocomplete Dropdown -->
-                <div id="autocompleteResults" class="autocomplete-dropdown" style="display: none;"></div>
-            </div>
-        </div>
-    </div>
-</section>
 
 <!-- ========================================================= -->
 <!-- AI PERSONALIZED RECOMMENDATIONS (Only for logged-in users) -->
@@ -308,9 +270,7 @@
                     <li><i class="fas fa-check-circle me-2"></i> Budget optimization</li>
                     <li><i class="fas fa-check-circle me-2"></i> Real-time weather updates</li>
                 </ul>
-                <a href="@Url.Action("PlanTrip", "Trips")" class="btn btn-light btn-lg mt-4 px-5 py-3 fw-bold">
-                    <i class="fas fa-magic"></i> Start AI Planning
-                </a>
+               
             </div>
             <div class="col-md-5 text-center">
                 <img src="/images/ai-illustration.svg" alt="AI Planning" class="img-fluid" style="max-height: 350px;" onerror="this.style.display='none'">
@@ -582,126 +542,126 @@
     <script type="text/javascript">
         // Counter Animation
         function isElementInViewport(el) {
-            var rect = el.getBoundingClientRect();
-            var buffer = 100;
-            return rect.top <= (window.innerHeight + buffer) && rect.bottom >= 0;
+        var rect = el.getBoundingClientRect();
+        var buffer = 100;
+        return rect.top <= (window.innerHeight + buffer) && rect.bottom >= 0;
         }
 
         function animateCounter(element, start, end, duration, isDecimal) {
-            var startTime = null;
+        var startTime = null;
 
-            function updateCounter(currentTime) {
-                if (startTime === null) startTime = currentTime;
-                var progress = Math.min(1, (currentTime - startTime) / duration);
-                var value = start + (end - start) * progress;
+        function updateCounter(currentTime) {
+        if (startTime === null) startTime = currentTime;
+        var progress = Math.min(1, (currentTime - startTime) / duration);
+        var value = start + (end - start) * progress;
 
-                var numberText = isDecimal ? value.toFixed(1) : Math.floor(value).toLocaleString();
-                element.childNodes[0].nodeValue = numberText;
+        var numberText = isDecimal ? value.toFixed(1) : Math.floor(value).toLocaleString();
+        element.childNodes[0].nodeValue = numberText;
 
-                if (progress < 1) {
-                    requestAnimationFrame(updateCounter);
-                } else {
-                    element.childNodes[0].nodeValue = isDecimal ? end.toFixed(1) : end.toLocaleString();
-                }
-            }
-            requestAnimationFrame(updateCounter);
+        if (progress < 1) {
+        requestAnimationFrame(updateCounter);
+        } else {
+        element.childNodes[0].nodeValue = isDecimal ? end.toFixed(1) : end.toLocaleString();
+        }
+        }
+        requestAnimationFrame(updateCounter);
         }
 
         var countersAnimated = false;
 
         window.addEventListener('scroll', function() {
-            var counters = document.querySelectorAll('.counter');
-            var statsSection = document.querySelector('.stats-section');
+        var counters = document.querySelectorAll('.counter');
+        var statsSection = document.querySelector('.stats-section');
 
-            if (statsSection && isElementInViewport(statsSection) && !countersAnimated) {
-                countersAnimated = true;
-                counters.forEach(function(counter) {
-                    var target = parseFloat(counter.getAttribute('data-target'));
-                    var isDecimal = counter.getAttribute('data-decimal') === '1';
-                    animateCounter(counter, 0, target, 2000, isDecimal);
-                });
-            }
+        if (statsSection && isElementInViewport(statsSection) && !countersAnimated) {
+        countersAnimated = true;
+        counters.forEach(function(counter) {
+        var target = parseFloat(counter.getAttribute('data-target'));
+        var isDecimal = counter.getAttribute('data-decimal') === '1';
+        animateCounter(counter, 0, target, 2000, isDecimal);
+        });
+        }
         });
 
         document.addEventListener('DOMContentLoaded', function() {
-            var counters = document.querySelectorAll('.counter');
-            var statsSection = document.querySelector('.stats-section');
-            if (statsSection && isElementInViewport(statsSection)) {
-                countersAnimated = true;
-                counters.forEach(function(counter) {
-                    var target = parseFloat(counter.getAttribute('data-target'));
-                    var isDecimal = counter.getAttribute('data-decimal') === '1';
-                    if (isDecimal) {
-                        counter.childNodes[0].nodeValue = target.toFixed(1);
-                    } else {
-                        counter.childNodes[0].nodeValue = target.toLocaleString();
-                    }
-                });
-            }
+        var counters = document.querySelectorAll('.counter');
+        var statsSection = document.querySelector('.stats-section');
+        if (statsSection && isElementInViewport(statsSection)) {
+        countersAnimated = true;
+        counters.forEach(function(counter) {
+        var target = parseFloat(counter.getAttribute('data-target'));
+        var isDecimal = counter.getAttribute('data-decimal') === '1';
+        if (isDecimal) {
+        counter.childNodes[0].nodeValue = target.toFixed(1);
+        } else {
+        counter.childNodes[0].nodeValue = target.toLocaleString();
+        }
+        });
+        }
         });
 
         // =========================================================
         // AI SMART SEARCH SUGGESTIONS
         // =========================================================
         function showAISuggestions(packages) {
-            var dropdown = document.getElementById('autocompleteResults');
-            if (!dropdown) return;
-            dropdown.innerHTML = '';
-            dropdown.style.display = 'block';
+        var dropdown = document.getElementById('autocompleteResults');
+        if (!dropdown) return;
+        dropdown.innerHTML = '';
+        dropdown.style.display = 'block';
 
-            var header = document.createElement('div');
-            header.className = 'autocomplete-header bg-primary text-white p-2';
-            header.innerHTML = '<i class="fas fa-robot me-2"></i> AI Recommended Packages';
-            dropdown.appendChild(header);
+        var header = document.createElement('div');
+        header.className = 'autocomplete-header bg-primary text-white p-2';
+        header.innerHTML = '<i class="fas fa-robot me-2"></i> AI Recommended Packages';
+        dropdown.appendChild(header);
 
-            packages.forEach(function(pkg) {
-                var item = document.createElement('div');
-                item.className = 'autocomplete-item';
-                item.innerHTML = '<strong>' + pkg.package_name + '</strong><br>' +
-                    '<small class="text-muted">' + pkg.destination_name + ' | PKR ' + pkg.price_per_person.toLocaleString() + '</small>';
-                item.onclick = function() { selectPackage(pkg.package_id); };
-                dropdown.appendChild(item);
-            });
+        packages.forEach(function(pkg) {
+        var item = document.createElement('div');
+        item.className = 'autocomplete-item';
+        item.innerHTML = '<strong>' + pkg.package_name + '</strong><br>' +
+        '<small class="text-muted">' + pkg.destination_name + ' | PKR ' + pkg.price_per_person.toLocaleString() + '</small>';
+        item.onclick = function() { selectPackage(pkg.package_id); };
+        dropdown.appendChild(item);
+        });
         }
 
         function selectPackage(id) {
-            window.location.href = '/Packages/Details/' + id;
+        window.location.href = '/Packages/Details/' + id;
         }
 
         // Hide dropdown when clicking outside
         document.addEventListener('click', function(e) {
-            var dropdown = document.getElementById('autocompleteResults');
-            var searchInput = document.getElementById('searchInput');
-            if (dropdown && searchInput && !dropdown.contains(e.target) && e.target !== searchInput) {
-                dropdown.style.display = 'none';
-            }
+        var dropdown = document.getElementById('autocompleteResults');
+        var searchInput = document.getElementById('searchInput');
+        if (dropdown && searchInput && !dropdown.contains(e.target) && e.target !== searchInput) {
+        dropdown.style.display = 'none';
+        }
         });
 
         // AI Smart Search on Input
         var searchInput = document.getElementById('searchInput');
         if (searchInput) {
-            searchInput.addEventListener('input', async function() {
-                var term = this.value;
-                if (term.length > 2) {
-                    try {
-                        var response = await fetch('/api/ai/smart-search?q=' + encodeURIComponent(term));
-                        var data = await response.json();
-                        if (data.results && data.results.length > 0) {
-                            showAISuggestions(data.results);
-                        } else {
-                            var dropdown = document.getElementById('autocompleteResults');
-                            if (dropdown) dropdown.style.display = 'none';
-                        }
-                    } catch (error) {
-                        console.log('AI Search error:', error);
-                        var dropdown = document.getElementById('autocompleteResults');
-                        if (dropdown) dropdown.style.display = 'none';
-                    }
-                } else {
-                    var dropdown = document.getElementById('autocompleteResults');
-                    if (dropdown) dropdown.style.display = 'none';
-                }
-            });
+        searchInput.addEventListener('input', async function() {
+        var term = this.value;
+        if (term.length > 2) {
+        try {
+        var response = await fetch('/api/ai/smart-search?q=' + encodeURIComponent(term));
+        var data = await response.json();
+        if (data.results && data.results.length > 0) {
+        showAISuggestions(data.results);
+        } else {
+        var dropdown = document.getElementById('autocompleteResults');
+        if (dropdown) dropdown.style.display = 'none';
+        }
+        } catch (error) {
+        console.log('AI Search error:', error);
+        var dropdown = document.getElementById('autocompleteResults');
+        if (dropdown) dropdown.style.display = 'none';
+        }
+        } else {
+        var dropdown = document.getElementById('autocompleteResults');
+        if (dropdown) dropdown.style.display = 'none';
+        }
+        });
         }
 
         // =========================================================
@@ -709,91 +669,91 @@
         // =========================================================
         @if (userId.HasValue)
         {
-                <text>
-                    async function loadRecommendations() {
-                        try {
-                            var response = await fetch('/api/ai/recommendations');
-                            var data = await response.json();
-                            var container = document.getElementById('aiRecommendations');
-                            if (container && data.recommendations && data.recommendations.length > 0) {
-                                container.innerHTML = '';
-                                data.recommendations.forEach(function(pkg) {
-                                    container.innerHTML += `
-                                        <div class="col-md-3">
-                                                <div class="card h-100 shadow-sm border-0 rounded-4">
-                                                        <img src="${pkg.cover_image}" class="card-img-top" style="height: 150px; object-fit: cover;">
-                                                        <div class="card-body">
-                                                                <h6 class="fw-bold">${pkg.package_name}</h6>
-                                                                <p class="text-primary fw-bold">PKR ${pkg.price_per_person.toLocaleString()}</p>
-                                                                <a href="/Packages/Details/${pkg.package_id}" class="btn btn-sm btn-outline-primary w-100">View Package</a>
-                                                        </div>
-                                                </div>
-                                        </div>
-                                    `;
-                                });
-                            }
-                        } catch (error) {
-                            console.log('Recommendations error:', error);
-                        }
-                    }
-                    loadRecommendations();
-                </text>
-        }
-            async function loadRecommendations() {
-            try {
+            <text>
+                async function loadRecommendations() {
+                try {
                 var response = await fetch('/api/ai/recommendations');
                 var data = await response.json();
                 var container = document.getElementById('aiRecommendations');
-
                 if (container && data.recommendations && data.recommendations.length > 0) {
-                    container.innerHTML = '';
-
-                    data.recommendations.forEach(function(pkg) {
-                        container.innerHTML += `
-                            <div class="col-md-4 col-lg-3">
-                                <div class="card h-100 shadow-sm border-0 rounded-4">
-                                    <img src="${pkg.cover_image || '/images/default-package.jpg'}"
-                                         class="card-img-top rounded-top-4"
-                                         style="height: 160px; object-fit: cover;"
-                                         alt="${pkg.package_name}">
-                                    <div class="card-body">
-                                        <span class="badge bg-primary mb-2">${pkg.package_type || 'Standard'}</span>
-                                        <h6 class="fw-bold">${pkg.package_name}</h6>
-                                        <p class="text-muted small">
-                                            <i class="fas fa-map-marker-alt me-1"></i> ${pkg.destination_name}
-                                        </p>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span class="text-primary fw-bold">PKR ${pkg.price_per_person?.toLocaleString()}</span>
-                                            <span class="text-muted small">/person</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-footer bg-transparent border-0 pb-3">
-                                        <a href="/Packages/Details/${pkg.package_id}" class="btn btn-primary w-100 btn-sm">
-                                            View Package <i class="fas fa-arrow-right ms-1"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    });
-                } else if (container) {
-                    container.innerHTML = `
-                        <div class="col-12 text-center py-5">
-                            <i class="fas fa-heart fa-3x text-muted mb-3"></i>
-                            <h5>No recommendations yet</h5>
-                            <p class="text-muted">Start exploring packages to get personalized recommendations!</p>
-                            <a href="/Packages" class="btn btn-primary">Explore Packages</a>
+                container.innerHTML = '';
+                data.recommendations.forEach(function(pkg) {
+                container.innerHTML += `
+                <div class="col-md-3">
+                    <div class="card h-100 shadow-sm border-0 rounded-4">
+                        <img src="${pkg.cover_image}" class="card-img-top" style="height: 150px; object-fit: cover;">
+                        <div class="card-body">
+                            <h6 class="fw-bold">${pkg.package_name}</h6>
+                            <p class="text-primary fw-bold">PKR ${pkg.price_per_person.toLocaleString()}</p>
+                            <a href="/Packages/Details/${pkg.package_id}" class="btn btn-sm btn-outline-primary w-100">View Package</a>
                         </div>
-                    `;
+                    </div>
+                </div>
+                `;
+                });
                 }
-            } catch (error) {
+                } catch (error) {
                 console.log('Recommendations error:', error);
-            }
+                }
+                }
+                loadRecommendations();
+            </text>
+        }
+        async function loadRecommendations() {
+        try {
+        var response = await fetch('/api/ai/recommendations');
+        var data = await response.json();
+        var container = document.getElementById('aiRecommendations');
+
+        if (container && data.recommendations && data.recommendations.length > 0) {
+        container.innerHTML = '';
+
+        data.recommendations.forEach(function(pkg) {
+        container.innerHTML += `
+        <div class="col-md-4 col-lg-3">
+        <div class="card h-100 shadow-sm border-0 rounded-4">
+        <img src="${pkg.cover_image || '/images/default-package.jpg'}"
+        class="card-img-top rounded-top-4"
+        style="height: 160px; object-fit: cover;"
+        alt="${pkg.package_name}">
+        <div class="card-body">
+        <span class="badge bg-primary mb-2">${pkg.package_type || 'Standard'}</span>
+        <h6 class="fw-bold">${pkg.package_name}</h6>
+        <p class="text-muted small">
+        <i class="fas fa-map-marker-alt me-1"></i> ${pkg.destination_name}
+        </p>
+        <div class="d-flex justify-content-between align-items-center">
+        <span class="text-primary fw-bold">PKR ${pkg.price_per_person?.toLocaleString()}</span>
+        <span class="text-muted small">/person</span>
+        </div>
+        </div>
+        <div class="card-footer bg-transparent border-0 pb-3">
+        <a href="/Packages/Details/${pkg.package_id}" class="btn btn-primary w-100 btn-sm">
+        View Package <i class="fas fa-arrow-right ms-1"></i>
+        </a>
+        </div>
+        </div>
+        </div>
+        `;
+        });
+        } else if (container) {
+        container.innerHTML = `
+        <div class="col-12 text-center py-5">
+        <i class="fas fa-heart fa-3x text-muted mb-3"></i>
+        <h5>No recommendations yet</h5>
+        <p class="text-muted">Start exploring packages to get personalized recommendations!</p>
+        <a href="/Packages" class="btn btn-primary">Explore Packages</a>
+        </div>
+        `;
+        }
+        } catch (error) {
+        console.log('Recommendations error:', error);
+        }
         }
 
         // Load recommendations when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            loadRecommendations();
+        loadRecommendations();
         });
     </script>
 }
